@@ -1,6 +1,7 @@
 #include "gdllama.h"
 #include "common/common.h"
 #include "llama.h"
+#include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <iostream>
 #include <ostream>
@@ -10,7 +11,7 @@ namespace godot {
     void GDLlama::_bind_methods() {
     	ClassDB::bind_method(D_METHOD("get_model_path"), &GDLlama::get_model_path);
     	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path"), "set_model_path", "get_model_path");
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
     }
 
     GDLlama::GDLlama() {
