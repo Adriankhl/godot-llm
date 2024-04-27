@@ -17,7 +17,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 add_subdirectory(godot-cpp)
+add_subdirectory(dependencies/llama.cpp)
 
 add_library(libgdexample.windows.template_debug.x86_64 SHARED ${src_files})
 
-target_link_libraries(libgdexample.windows.template_debug.x86_64 PUBLIC godot-cpp)
+target_link_libraries(libgdexample.windows.template_debug.x86_64 PUBLIC godot-cpp llama)
