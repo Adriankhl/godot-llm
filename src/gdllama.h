@@ -27,12 +27,18 @@ namespace godot {
         public:
             GDLlama();
             ~GDLlama();
+
             String get_model_path() const;
             void set_model_path(const String p_model_path);
+
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
+
             bool get_escape() const;
             void set_escape(const bool p_escape);
+
+            int32_t get_n_predict() const;
+            void set_n_predict(const int32_t p_n_predict);
     };
 }
 

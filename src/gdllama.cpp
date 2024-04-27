@@ -21,6 +21,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("get_escape"), &GDLlama::get_escape);
     	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlama::set_escape);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
+
+    	ClassDB::bind_method(D_METHOD("get_n_predict"), &GDLlama::get_n_predict);
+    	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlama::set_n_predict);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
     }
 
     GDLlama::GDLlama() {
@@ -55,5 +59,13 @@ namespace godot {
 
     void GDLlama::set_escape(const bool p_escape) {
         params->escape = p_escape;
+    }
+
+    int32_t GDLlama::get_n_predict() const {
+        return params->n_predict;
+    }
+
+    void GDLlama::set_n_predict(const int32_t p_n_predict) {
+        params->n_predict = p_n_predict;
     }
 }
