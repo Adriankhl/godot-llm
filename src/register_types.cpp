@@ -1,8 +1,10 @@
 #include "register_types.h"
 
 #include "gdexample.h"
+#include "gdllama.h"
 
 #include <gdextension_interface.h>
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
@@ -14,6 +16,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	}
 
 	ClassDB::register_class<GDExample>();
+	ClassDB::register_class<GDLlama>();
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {

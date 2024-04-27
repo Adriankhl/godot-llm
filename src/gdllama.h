@@ -26,8 +26,8 @@ namespace godot {
         public:
             GDLlama();
             ~GDLlama();
-            std::string get_model_path() const;
-            void set_model_path(const std::string model_path);
+            String get_model_path() const;
+            void set_model_path(const String model_path);
     };
 }
 
