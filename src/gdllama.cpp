@@ -25,6 +25,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("get_n_predict"), &GDLlama::get_n_predict);
     	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlama::set_n_predict);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
+
+    	ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
+    	ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
     }
 
     GDLlama::GDLlama() {
@@ -67,5 +71,13 @@ namespace godot {
 
     void GDLlama::set_n_predict(const int32_t p_n_predict) {
         params->n_predict = p_n_predict;
+    }
+
+    int32_t GDLlama::get_n_threads() const {
+        return params->n_threads;
+    }
+
+    void GDLlama::set_n_threads(const int32_t p_n_threads) {
+        params->n_threads = p_n_threads;
     }
 }

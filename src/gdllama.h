@@ -39,6 +39,9 @@ namespace godot {
 
             int32_t get_n_predict() const;
             void set_n_predict(const int32_t p_n_predict);
+
+            int32_t get_n_threads() const;
+            void set_n_threads(const int32_t n_threads);
     };
 }
 
