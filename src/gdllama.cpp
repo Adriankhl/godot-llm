@@ -18,6 +18,9 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
 
+    	ClassDB::bind_method(D_METHOD("get_escape"), &GDLlama::get_escape);
+    	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlama::set_escape);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
     }
 
     GDLlama::GDLlama() {
@@ -44,5 +47,13 @@ namespace godot {
 
     void GDLlama::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
         params->n_gpu_layers = p_n_gpu_layers;
+    }
+
+    bool GDLlama::get_escape() const {
+        return params->escape;
+    }
+
+    void GDLlama::set_escape(const bool p_escape) {
+        params->escape = p_escape;
     }
 }
