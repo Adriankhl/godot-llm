@@ -1,4 +1,5 @@
 #include "gdllama.h"
+#include "common/common.h"
 #include "llama.h"
 #include <godot_cpp/variant/string.hpp>
 #include <iostream>
@@ -14,6 +15,7 @@ namespace godot {
 
     GDLlama::GDLlama() {
         llama_backend_init();
+        params = new gpt_params();
         //llama_numa_init(g_params->numa);
     }
 
@@ -22,8 +24,7 @@ namespace godot {
     }
 
     String GDLlama::get_model_path() const {
-        const char* p = params->model.c_str();
-        return String(p);
+        return String(params->model.c_str());
     }
 
     void GDLlama::set_model_path(const String p_model_path) {

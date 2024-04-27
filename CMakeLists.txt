@@ -25,4 +25,4 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
 
-target_link_libraries(${LIB_NAME} PUBLIC godot-cpp llama)
+target_link_libraries(${LIB_NAME} PUBLIC godot-cpp common llama)
