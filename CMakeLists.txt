@@ -19,6 +19,10 @@ endif()
 add_subdirectory(godot-cpp)
 add_subdirectory(dependencies/llama.cpp)
 
-add_library(libgdexample.windows.template_debug.x86_64 SHARED ${src_files})
+set(LIB_NAME libgodot_llm.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${CMAKE_SYSTEM_PROCESSOR})
 
-target_link_libraries(libgdexample.windows.template_debug.x86_64 PUBLIC godot-cpp llama)
+string(TOLOWER ${LIB_NAME} LIB_NAME)
+
+add_library(${LIB_NAME} SHARED ${src_files})
+
+target_link_libraries(${LIB_NAME} PUBLIC godot-cpp llama)
