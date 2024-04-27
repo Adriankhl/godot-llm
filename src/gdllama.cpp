@@ -1,6 +1,7 @@
 #include "gdllama.h"
 #include "common/common.h"
 #include "llama.h"
+#include <cstdint>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <iostream>
@@ -12,6 +13,11 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("get_model_path"), &GDLlama::get_model_path);
     	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
+
+    	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDLlama::get_n_gpu_layer);
+    	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
+
     }
 
     GDLlama::GDLlama() {
@@ -30,5 +36,13 @@ namespace godot {
 
     void GDLlama::set_model_path(const String p_model_path) {
         params->model = std::string(p_model_path.utf8().get_data());
+    }
+
+    int32_t GDLlama::get_n_gpu_layer() const {
+        return params->n_gpu_layers;
+    }
+
+    void GDLlama::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
+        params->n_gpu_layers = p_n_gpu_layers;
     }
 }
