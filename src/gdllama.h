@@ -12,13 +12,7 @@ namespace godot {
         GDCLASS(GDLlama, Node)
 
         private:
-            llama_context            * ctx;
-            llama_model              * model;
             gpt_params               * params;
-            std::vector<llama_token> * input_tokens;
-            std::ostringstream       * output_ss;
-            std::vector<llama_token> * output_tokens;
-            bool is_interacting = false;
 
 
         protected:

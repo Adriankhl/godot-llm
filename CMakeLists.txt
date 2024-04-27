@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(gdextension)
+project(gdllama)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -26,3 +26,12 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 add_library(${LIB_NAME} SHARED ${src_files})
 
 target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
+
+file(GLOB test_files
+	"test/src/*.h"
+	"test/src/*.cpp"
+)
+
+add_executable(base_test ${test_files} ${src_files})
+
+target_link_libraries(base_test PRIVATE godot-cpp common llama)

@@ -166,5 +166,7 @@ namespace godot {
         }
 
         struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
+
+        return String("");
     }
 }
