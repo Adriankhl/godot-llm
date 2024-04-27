@@ -42,6 +42,8 @@ namespace godot {
 
             int32_t get_n_threads() const;
             void set_n_threads(const int32_t n_threads);
+
+            String generate_text(String prompt);
     };
 }
 
