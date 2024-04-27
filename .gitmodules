@@ -2,3 +2,6 @@
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp
 	branch = 4.2
+[submodule "dependencies/llama.cpp"]
+	path = dependencies/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git
