@@ -1,9 +1,10 @@
 #include "gdllama.h"
 #include "common/common.h"
-#include "llama_functions.h"
+#include "llama_runner.h"
 #include <cstdint>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/string.hpp>
+#include <memory>
 #include <string>
 
 namespace godot {
@@ -79,7 +80,9 @@ namespace godot {
     }
 
     String GDLlama::generate_text(String prompt) {
-        std::string text = llama_generate_text(
+        std::unique_ptr<LlamaRunner> lr(new LlamaRunner());
+
+        std::string text = lr->llama_generate_text(
             std::string(prompt.utf8().get_data()),
                 params,
                 [](std::string s) {}

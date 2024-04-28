@@ -1,3 +1,4 @@
+#include "llama_runner.h"
 #include <common.h>
 #include <fstream>
 #include <cstddef>
@@ -14,25 +15,33 @@
 #include <windows.h>
 #endif
 
-static bool file_exists(const std::string &path) {
+LlamaRunner::LlamaRunner() {
+
+}
+
+LlamaRunner::~LlamaRunner() {
+
+}
+
+bool LlamaRunner::file_exists(const std::string &path) {
     std::ifstream f(path.c_str());
     return f.good();
 }
 
-static bool file_is_empty(const std::string &path) {
+bool LlamaRunner::file_is_empty(const std::string &path) {
     std::ifstream f;
     f.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     f.open(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
     return f.tellg() == 0;
 }
 
-static void llama_log_callback_logTee(ggml_log_level level, const char * text, void * user_data) {
+void LlamaRunner::llama_log_callback_logTee(ggml_log_level level, const char * text, void * user_data) {
     (void) level;
     (void) user_data;
     LOG_TEE("%s", text);
 }
 
-std::string llama_generate_text(std::string prompt, gpt_params* p_params, std::function<void(std::string)> emit_signal){
+std::string LlamaRunner::llama_generate_text(std::string prompt, gpt_params* p_params, std::function<void(std::string)> emit_signal){
     gpt_params params = *p_params;
 
     params.prompt = prompt;
