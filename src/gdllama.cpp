@@ -1,12 +1,9 @@
 #include "gdllama.h"
 #include "common/common.h"
-#include "llama.h"
 #include "llama_functions.h"
 #include <cstdint>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/variant/string.hpp>
-#include <iostream>
-#include <ostream>
 #include <string>
 
 namespace godot {
