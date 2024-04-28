@@ -1,5 +1,6 @@
 #include "common.h"
 #include <functional>
+#include <string>
 
 std::string llama_generate_text(std::string prompt, gpt_params* params, std::function<void(std::string)> emit_signal){
     params->prompt = prompt;
@@ -87,4 +88,12 @@ std::string llama_generate_text(std::string prompt, gpt_params* params, std::fun
     }
 
     struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
+
+    llama_free(ctx);
+    llama_free_model(model);
+
+    llama_sampling_free(ctx_sampling);
+    llama_backend_free();
+
+    return std::string("value");
 }
