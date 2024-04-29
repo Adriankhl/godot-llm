@@ -41,7 +41,10 @@ void LlamaRunner::llama_log_callback_logTee(ggml_log_level level, const char * t
     LOG_TEE("%s", text);
 }
 
-std::string LlamaRunner::llama_generate_text(std::string prompt, gpt_params params, std::function<void(std::string)> emit_signal){
+std::string LlamaRunner::llama_generate_text(
+    std::string prompt, gpt_params params,
+    std::function<void(std::string)> emit_signal
+){
     std::string generated_text = "";
 
     params.prompt = prompt;
@@ -654,6 +657,7 @@ std::string LlamaRunner::llama_generate_text(std::string prompt, gpt_params para
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
                 generated_text.append(token_str);
+                emit_signal(token_str);
                 printf("%s", token_str.c_str());
 
                 if (embd.size() > 1) {

@@ -31,6 +31,8 @@ namespace godot {
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
+
+        ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
     }
 
     GDLlama::GDLlama() : params {gpt_params()} {}
@@ -83,7 +85,10 @@ namespace godot {
         std::string text = lr->llama_generate_text(
             std::string(prompt.utf8().get_data()),
                 params,
-                [this](std::string s) {}
+                [this](std::string s) {
+                    String new_text {s.c_str()};
+                    call_deferred("emit_signal", "generate_text_updated", new_text);
+                }
         );
 
         return String(text.c_str());
