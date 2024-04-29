@@ -4,6 +4,7 @@ entry_symbol = "example_library_init"
 compatibility_minimum = "4.2"
 
 [libraries]
+# Debug build is really slow, using release build in godot project debug mode
 
 #windows.debug.x86_64 = "bin/libgodot_llm.windows.debug.amd64.dll"
 windows.debug.x86_64 = "bin/libgodot_llm.windows.release.amd64.dll"
