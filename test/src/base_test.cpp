@@ -12,19 +12,19 @@ int main(int argc, char ** argv) {
 
     std::cout << "Start testing: " << std::endl;
 
-    std::unique_ptr<LlamaRunner> lr(new LlamaRunner());
+    std::unique_ptr<LlamaRunner> lr {new LlamaRunner()};
     std::cout << "Created llama runner" << std::endl;
 
     std::string prompt = "Tell me about vulkan: ";
     std::cout << "Prompt: " << prompt << std::endl;
 
-    gpt_params params1 = gpt_params();
+    gpt_params params1 {gpt_params()};
     std::cout << "Model: " << params1.model << std::endl;
 
     std::string text1 = lr->llama_generate_text(prompt, params1, [](auto a) { return; });
     std::cout << "Generated text: " << text1 << std::endl;
 
-    gpt_params params2 = gpt_params();
+    gpt_params params2 {gpt_params()};
     params2.model = "../../models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf";
     std::cout << "Model: " << params2.model << std::endl;
     params2.n_predict = 10;

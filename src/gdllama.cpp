@@ -33,13 +33,9 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
     }
 
-    GDLlama::GDLlama() {
-        params = gpt_params();
-        //llama_numa_init(g_params->numa);
-    }
+    GDLlama::GDLlama() : params {gpt_params()} {}
 
-    GDLlama::~GDLlama() {
-    }
+    GDLlama::~GDLlama() {}
 
     String GDLlama::get_model_path() const {
         return String(params.model.c_str());
@@ -82,12 +78,12 @@ namespace godot {
     }
 
     String GDLlama::generate_text(String prompt) {
-        std::unique_ptr<LlamaRunner> lr(new LlamaRunner());
+        std::unique_ptr<LlamaRunner> lr {new LlamaRunner()};
 
         std::string text = lr->llama_generate_text(
             std::string(prompt.utf8().get_data()),
                 params,
-                [](std::string s) {}
+                [this](std::string s) {}
         );
 
         return String(text.c_str());
