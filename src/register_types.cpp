@@ -1,6 +1,5 @@
 #include "register_types.h"
 
-#include "gdexample.h"
 #include "gdllama.h"
 
 #include <gdextension_interface.h>
@@ -14,7 +13,6 @@ namespace godot {
 			return;
 		}
 
-		ClassDB::register_class<GDExample>();
 		ClassDB::register_class<GDLlama>();
 	}
 
