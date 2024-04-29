@@ -43,6 +43,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	endif()
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-fPIC)
+endif()
+
 add_subdirectory(godot-cpp)
 add_subdirectory(llama.cpp)
 
@@ -56,10 +60,17 @@ target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 
-install(TARGETS ${LIB_NAME}
-	RUNTIME
-	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/bin
-)
+if (WIN32)
+  install(TARGETS ${LIB_NAME}
+  	RUNTIME
+  	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/bin
+  )
+else()
+  install(TARGETS ${LIB_NAME}
+    LIBRARY
+  	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/bin
+  )
+endif()
 
 install(FILES "godot_llm.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/)
 
