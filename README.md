@@ -3,7 +3,7 @@ Isn't it cool to utilize large language model (LLM) to generate contents for you
 I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
 
 # How to use
-1. Download the zip file, and unzip it to place it in the `addons` folder in your godot project
+1. Download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
 2. Download an LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
 3. Now you should be about to add the `GdLlama` node, set the variables (you must point the `Model Path` to the GGUF file) and call function `generate_text(prompt: String) -> String` to generate some texts
 
