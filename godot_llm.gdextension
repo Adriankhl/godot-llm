@@ -9,3 +9,7 @@ compatibility_minimum = "4.2"
 #windows.debug.x86_64 = "bin/libgodot_llm.windows.debug.amd64.dll"
 windows.debug.x86_64 = "bin/libgodot_llm.windows.release.amd64.dll"
 windows.release.x86_64 = "bin/libgodot_llm.windows.release.amd64.dll"
+
+#linux.debug.x86_64 = "bin/libgodot_llm.linux.debug.x86_64.so"
+linux.debug.x86_64 = "bin/libgodot_llm.linux.release.x86_64.so"
+linux.release.x86_64 = "bin/libgodot_llm.linux.release.x86_64.so"

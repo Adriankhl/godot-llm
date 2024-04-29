@@ -52,6 +52,9 @@ add_subdirectory(llama.cpp)
 
 set(LIB_NAME libgodot_llm.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${CMAKE_SYSTEM_PROCESSOR})
 
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+
 string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
