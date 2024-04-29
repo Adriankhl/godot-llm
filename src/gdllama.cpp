@@ -3,6 +3,7 @@
 #include "llama_runner.h"
 #include <cstdint>
 #include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <memory>
 #include <string>
@@ -28,6 +29,8 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
     	ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
+
+        ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
     }
 
     GDLlama::GDLlama() {
@@ -43,7 +46,7 @@ namespace godot {
     }
 
     void GDLlama::set_model_path(const String p_model_path) {
-        params.model = std::string(p_model_path.utf8().get_data());
+        params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
     }
 
     int32_t GDLlama::get_n_gpu_layer() const {
