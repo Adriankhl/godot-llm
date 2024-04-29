@@ -15,7 +15,7 @@
 #include <windows.h>
 #endif
 
-LlamaRunner::LlamaRunner() {
+LlamaRunner::LlamaRunner() : should_stop_generation(false) {
 
 }
 
@@ -443,7 +443,7 @@ std::string LlamaRunner::llama_generate_text(
 
     struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
 
-    while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
+    while (!should_stop_generation && ((n_remain != 0 && !is_antiprompt) || params.interactive)) {
         // predict
         if (!embd.empty()) {
             // Note: (n_ctx - 4) here is to match the logic for commandline prompt handling via
@@ -877,4 +877,8 @@ std::string LlamaRunner::llama_generate_text(
 #endif // LOG_DISABLE_LOGS
 
     return generated_text;
+}
+
+void LlamaRunner::llama_stop_generate_text() {
+    should_stop_generation = true;
 }

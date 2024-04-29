@@ -1,10 +1,13 @@
 #ifndef GDLLAMA_H
 #define GDLLAMA_H
 
+#include "llama_runner.h"
 #include <cstdint>
 #include <godot_cpp/classes/node.hpp>
 #include <common/common.h>
 #include <llama.h>
+#include <memory>
+#include <mutex>
 
 namespace godot {
     class GDLlama : public Node {
@@ -12,6 +15,8 @@ namespace godot {
 
         private:
             gpt_params params;
+            std::mutex generate_text_mutex;
+            std::unique_ptr<LlamaRunner> llama_runner;
 
 
         protected:
@@ -46,6 +51,7 @@ namespace godot {
             void set_n_threads(const int32_t n_threads);
 
             String generate_text(String prompt);
+            void stop_generate_text();
     };
 }
 

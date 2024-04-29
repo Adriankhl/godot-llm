@@ -6,6 +6,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace godot {
@@ -43,11 +44,15 @@ namespace godot {
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
+        ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
+
 
         ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
     }
 
-    GDLlama::GDLlama() : params {gpt_params()} {}
+    GDLlama::GDLlama() : params {gpt_params()},
+        llama_runner {new LlamaRunner()}
+    {}
 
     GDLlama::~GDLlama() {}
 
@@ -116,9 +121,11 @@ namespace godot {
     }
 
     String GDLlama::generate_text(String prompt) {
-        std::unique_ptr<LlamaRunner> lr {new LlamaRunner()};
+        std::lock_guard<std::mutex> guard(generate_text_mutex);
 
-        std::string text = lr->llama_generate_text(
+        llama_runner.reset(new LlamaRunner());
+
+        std::string text = llama_runner->llama_generate_text(
             std::string(prompt.utf8().get_data()),
                 params,
                 [this](std::string s) {
@@ -128,5 +135,9 @@ namespace godot {
         );
 
         return String(text.c_str());
+    }
+
+    void GDLlama::stop_generate_text() {
+        llama_runner->llama_stop_generate_text();
     }
 }
