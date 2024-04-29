@@ -44,7 +44,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 add_subdirectory(godot-cpp)
-add_subdirectory(dependencies/llama.cpp)
+add_subdirectory(llama.cpp)
 
 set(LIB_NAME libgodot_llm.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${CMAKE_SYSTEM_PROCESSOR})
 
