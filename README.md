@@ -5,7 +5,7 @@ I want to experiment LLM on Godot but I couldn't find any good library, so I dec
 # How to use
 1. Download the zip file, and unzip it to place it in the `addons` folder in your godot project
 2. Download an LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
-3. Now you should be about to add the `GdLlama` node, set the variables (you must point the `Model Path` to the GGUF file) and call function `generate_text(prompt: String) -> String` to generate some text
+3. Now you should be about to add the `GdLlama` node, set the variables (you must point the `Model Path` to the GGUF file) and call function `generate_text(prompt: String) -> String` to generate some texts
 
 # Demo
 See [godot-llm-template](https://github.com/Adriankhl/godot-llm-template)
@@ -14,7 +14,7 @@ See [godot-llm-template](https://github.com/Adriankhl/godot-llm-template)
 * `GdLlama` node
   - function `generate_text(prompt: String) -> String`: generate text from prommpt, note that this function takes a long time to run so it is best to use this with `Thread`
   - function `stop_generate_text()`: stop text generation from the above function
-  - signal `generate_text_updated(new_text: String)`: instead of waiting the full generated text from `generate_text(prompt: String) -> String`, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of string
+  - signal `generate_text_updated(new_text: String)`: instead of waiting the full generated text from `generate_text(prompt: String) -> String`, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of strings
   - Inspector variables
     * `Model Path`: location of your gguf model
     * `Context Size`: number of tokens the model can process at a time
