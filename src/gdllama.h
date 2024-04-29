@@ -5,7 +5,6 @@
 #include <godot_cpp/classes/node.hpp>
 #include <common/common.h>
 #include <llama.h>
-#include <string>
 
 namespace godot {
     class GDLlama : public Node {
