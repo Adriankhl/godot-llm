@@ -1,6 +1,6 @@
 # Godot LLM
 Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU.
-I want to experiment LLM on Godot but I couldn't find any good library, so I decided to create one here.
+I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
 
 # How to use
 1. Download the zip file, and unzip it to place it in the `addons` folder in your godot project
