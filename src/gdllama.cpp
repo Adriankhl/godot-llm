@@ -14,6 +14,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
+       	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
+    	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
+
     	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDLlama::get_n_gpu_layer);
     	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
@@ -45,6 +49,14 @@ namespace godot {
 
     void GDLlama::set_model_path(const String p_model_path) {
         params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    }
+
+    int32_t GDLlama::get_n_ctx() const {
+        return params.n_ctx;
+    }
+
+    void GDLlama::set_n_ctx(const int32_t p_n_ctx) {
+        params.n_ctx = p_n_ctx;
     }
 
     int32_t GDLlama::get_n_gpu_layer() const {

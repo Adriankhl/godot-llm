@@ -24,6 +24,9 @@ namespace godot {
             String get_model_path() const;
             void set_model_path(const String p_model_path);
 
+            int32_t get_n_ctx() const;
+            void set_n_ctx(const int32_t p_n_ctx);
+
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
 
