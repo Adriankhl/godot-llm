@@ -41,8 +41,7 @@ void LlamaRunner::llama_log_callback_logTee(ggml_log_level level, const char * t
     LOG_TEE("%s", text);
 }
 
-std::string LlamaRunner::llama_generate_text(std::string prompt, gpt_params* p_params, std::function<void(std::string)> emit_signal){
-    gpt_params params = *p_params;
+std::string LlamaRunner::llama_generate_text(std::string prompt, gpt_params params, std::function<void(std::string)> emit_signal){
     std::string generated_text = "";
 
     params.prompt = prompt;

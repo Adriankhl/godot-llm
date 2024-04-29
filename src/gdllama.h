@@ -12,7 +12,7 @@ namespace godot {
         GDCLASS(GDLlama, Node)
 
         private:
-            gpt_params               * params;
+            gpt_params params;
 
 
         protected:

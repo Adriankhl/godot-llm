@@ -31,52 +31,51 @@ namespace godot {
     }
 
     GDLlama::GDLlama() {
-        params = new gpt_params();
+        params = gpt_params();
         //llama_numa_init(g_params->numa);
     }
 
     GDLlama::~GDLlama() {
-
     }
 
     String GDLlama::get_model_path() const {
-        return String(params->model.c_str());
+        return String(params.model.c_str());
     }
 
     void GDLlama::set_model_path(const String p_model_path) {
-        params->model = std::string(p_model_path.utf8().get_data());
+        params.model = std::string(p_model_path.utf8().get_data());
     }
 
     int32_t GDLlama::get_n_gpu_layer() const {
-        return params->n_gpu_layers;
+        return params.n_gpu_layers;
     }
 
     void GDLlama::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
-        params->n_gpu_layers = p_n_gpu_layers;
+        params.n_gpu_layers = p_n_gpu_layers;
     }
 
     bool GDLlama::get_escape() const {
-        return params->escape;
+        return params.escape;
     }
 
     void GDLlama::set_escape(const bool p_escape) {
-        params->escape = p_escape;
+        params.escape = p_escape;
     }
 
     int32_t GDLlama::get_n_predict() const {
-        return params->n_predict;
+        return params.n_predict;
     }
 
     void GDLlama::set_n_predict(const int32_t p_n_predict) {
-        params->n_predict = p_n_predict;
+        params.n_predict = p_n_predict;
     }
 
     int32_t GDLlama::get_n_threads() const {
-        return params->n_threads;
+        return params.n_threads;
     }
 
     void GDLlama::set_n_threads(const int32_t p_n_threads) {
-        params->n_threads = p_n_threads;
+        params.n_threads = p_n_threads;
     }
 
     String GDLlama::generate_text(String prompt) {
