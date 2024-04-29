@@ -27,6 +27,12 @@ namespace godot {
             int32_t get_n_ctx() const;
             void set_n_ctx(const int32_t p_n_ctx);
 
+            int32_t get_n_batch() const;
+            void set_n_batch(const int32_t p_n_batch);
+
+            int32_t get_n_ubatch() const;
+            void set_n_ubatch(const int32_t p_n_ubatch);
+
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
 

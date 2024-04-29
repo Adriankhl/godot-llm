@@ -18,6 +18,14 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
 
+       	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlama::get_n_batch);
+    	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlama::set_n_batch);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
+
+       	ClassDB::bind_method(D_METHOD("get_n_ubatch"), &GDLlama::get_n_ubatch);
+    	ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &GDLlama::set_n_ubatch);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
+
     	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDLlama::get_n_gpu_layer);
     	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
@@ -57,6 +65,22 @@ namespace godot {
 
     void GDLlama::set_n_ctx(const int32_t p_n_ctx) {
         params.n_ctx = p_n_ctx;
+    }
+
+    int32_t GDLlama::get_n_batch() const {
+        return params.n_batch;
+    }
+
+    void GDLlama::set_n_batch(const int32_t p_n_batch) {
+        params.n_batch = p_n_batch;
+    }
+
+    int32_t GDLlama::get_n_ubatch() const {
+        return params.n_ubatch;
+    }
+
+    void GDLlama::set_n_ubatch(const int32_t p_n_ubatch) {
+        params.n_ubatch = p_n_ubatch;
     }
 
     int32_t GDLlama::get_n_gpu_layer() const {
