@@ -54,6 +54,15 @@ add_library(${LIB_NAME} SHARED ${src_files})
 
 target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
+
+install(TARGETS ${LIB_NAME}
+	RUNTIME
+	DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/bin
+)
+
+install(FILES "godot_llm.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/)
+
 file(GLOB test_files
 	"test/src/*.h"
 	"test/src/*.cpp"
