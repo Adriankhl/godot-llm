@@ -27,6 +27,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &GDLlama::set_n_ubatch);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
 
+        ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
+        ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
+
     	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDLlama::get_n_gpu_layer);
     	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
@@ -39,9 +43,9 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlama::set_n_predict);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
 
-    	ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
-    	ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
+        ClassDB::bind_method(D_METHOD("get_temperature"), &GDLlama::get_temperature);
+        ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlama::set_temperature);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
@@ -88,6 +92,14 @@ namespace godot {
         params.n_ubatch = p_n_ubatch;
     }
 
+    int32_t GDLlama::get_n_threads() const {
+        return params.n_threads;
+    }
+
+    void GDLlama::set_n_threads(const int32_t p_n_threads) {
+        params.n_threads = p_n_threads;
+    }
+
     int32_t GDLlama::get_n_gpu_layer() const {
         return params.n_gpu_layers;
     }
@@ -112,12 +124,12 @@ namespace godot {
         params.n_predict = p_n_predict;
     }
 
-    int32_t GDLlama::get_n_threads() const {
-        return params.n_threads;
+    float GDLlama::get_temperature() const {
+        return params.sparams.temp;
     }
 
-    void GDLlama::set_n_threads(const int32_t p_n_threads) {
-        params.n_threads = p_n_threads;
+    void GDLlama::set_temperature(const float p_temperature) {
+        params.sparams.temp = p_temperature;
     }
 
     String GDLlama::generate_text(String prompt) {

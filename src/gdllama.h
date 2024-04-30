@@ -38,6 +38,9 @@ namespace godot {
             int32_t get_n_ubatch() const;
             void set_n_ubatch(const int32_t p_n_ubatch);
 
+            int32_t get_n_threads() const;
+            void set_n_threads(const int32_t n_threads);
+
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
 
@@ -47,8 +50,8 @@ namespace godot {
             int32_t get_n_predict() const;
             void set_n_predict(const int32_t p_n_predict);
 
-            int32_t get_n_threads() const;
-            void set_n_threads(const int32_t n_threads);
+            float get_temperature() const;
+            void set_temperature(const float p_temperature);
 
             String generate_text(String prompt);
             void stop_generate_text();
