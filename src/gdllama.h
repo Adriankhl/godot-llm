@@ -40,6 +40,12 @@ namespace godot {
             String get_reverse_prompt() const;
             void set_reverse_prompt(const String p_reverse_prompt);
 
+            String get_input_prefix() const;
+            void set_input_prefix(const String p_input_prefix);
+
+            String get_input_suffix() const;
+            void set_input_suffix(const String p_input_suffix);
+
             int32_t get_n_ctx() const;
             void set_n_ctx(const int32_t p_n_ctx);
 

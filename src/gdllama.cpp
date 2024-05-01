@@ -27,6 +27,14 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_reverse_prompt", "p_reverse_prompt"), &GDLlama::set_reverse_prompt);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "reverse_prompt", PROPERTY_HINT_NONE), "set_reverse_prompt", "get_reverse_prompt");
 
+    	ClassDB::bind_method(D_METHOD("get_input_prefix"), &GDLlama::get_input_prefix);
+    	ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &GDLlama::set_input_prefix);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
+
+    	ClassDB::bind_method(D_METHOD("get_input_suffix"), &GDLlama::get_input_suffix);
+    	ClassDB::bind_method(D_METHOD("set_input_suffix", "p_input_suffix"), &GDLlama::set_input_suffix);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_NONE), "set_input_suffix", "get_input_suffix");
+
        	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
     	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
@@ -104,7 +112,21 @@ namespace godot {
         reverse_prompt = std::string(p_reverse_prompt.utf8().get_data());
     };
 
+    String GDLlama::get_input_prefix() const {
+        return String(params.input_prefix.c_str());
+    };
 
+    void GDLlama::set_input_prefix(const String p_input_prefix) {
+        params.input_prefix = std::string(p_input_prefix.utf8().get_data());
+    };
+
+    String GDLlama::get_input_suffix() const {
+        return String(params.input_suffix.c_str());
+    };
+
+    void GDLlama::set_input_suffix(const String p_input_suffix) {
+        params.input_suffix = std::string(p_input_suffix.utf8().get_data());
+    };
 
     int32_t GDLlama::get_n_ctx() const {
         return params.n_ctx;
