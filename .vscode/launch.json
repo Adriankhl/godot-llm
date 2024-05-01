@@ -7,7 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "CodeLLDB base test",
+            "name": "Release base test",
+            "program": "${workspaceFolder}/build_release/base_test.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug base test",
             "program": "${workspaceFolder}/build/base_test.exe",
             "args": [],
             "cwd": "${workspaceFolder}"

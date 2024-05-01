@@ -72,6 +72,7 @@ namespace godot {
 
             String generate_text(String prompt);
             void stop_generate_text();
+            void input_text(String input);
     };
 }
 

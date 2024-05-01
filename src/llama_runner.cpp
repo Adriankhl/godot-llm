@@ -1,9 +1,11 @@
 #include "llama_runner.h"
+#include <chrono>
 #include <common.h>
 #include <fstream>
 #include <cstddef>
 #include <functional>
 #include <string>
+#include <thread>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <unistd.h>
@@ -15,7 +17,10 @@
 #include <windows.h>
 #endif
 
-LlamaRunner::LlamaRunner() : should_stop_generation(false) {
+LlamaRunner::LlamaRunner() : should_stop_generation {false},
+    is_waiting_input {false},
+    input {""}
+{
 
 }
 
@@ -43,7 +48,8 @@ void LlamaRunner::llama_log_callback_logTee(ggml_log_level level, const char * t
 
 std::string LlamaRunner::llama_generate_text(
     std::string prompt, gpt_params params,
-    std::function<void(std::string)> emit_signal
+    std::function<void(std::string)> on_generate_text_updated,
+    std::function<void()> on_input_wait_started
 ){
     std::string generated_text = "";
 
@@ -657,7 +663,7 @@ std::string LlamaRunner::llama_generate_text(
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
                 generated_text.append(token_str);
-                emit_signal(token_str);
+                on_generate_text_updated(token_str);
                 printf("%s", token_str.c_str());
 
                 if (embd.size() > 1) {
@@ -755,20 +761,27 @@ std::string LlamaRunner::llama_generate_text(
                     printf("%s", params.input_prefix.c_str());
                 }
 
+                is_waiting_input = true;
+                on_input_wait_started();
+                while(is_waiting_input && !should_stop_generation) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
+
+                buffer = input;
                 // color user input only
                 //console::set_display(console::user_input);
-                display = params.display_prompt;
+                //display = params.display_prompt;
 
-                std::string line;
-                bool another_line = true;
-                do {
-                    //another_line = console::readline(line, params.multiline_input);
-                    buffer += line;
-                } while (another_line);
+                //std::string line;
+                //bool another_line = true;
+                //do {
+                //    //another_line = console::readline(line, params.multiline_input);
+                //    buffer += line;
+                //} while (another_line);
 
-                // done taking input, reset color
-                //console::set_display(console::reset);
-                display = true;
+                //// done taking input, reset color
+                ////console::set_display(console::reset);
+                //display = true;
 
                 // Add tokens to embd only if the input buffer is non-empty
                 // Entering a empty line lets the user pass control back
@@ -881,4 +894,9 @@ std::string LlamaRunner::llama_generate_text(
 
 void LlamaRunner::llama_stop_generate_text() {
     should_stop_generation = true;
+}
+
+void LlamaRunner::set_input(std::string input) {
+    this->input = input;
+    is_waiting_input = false;
 }

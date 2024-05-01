@@ -69,9 +69,10 @@ namespace godot {
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
-
+        ClassDB::bind_method(D_METHOD("input_text"), &GDLlama::input_text);
 
         ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
+        ADD_SIGNAL(MethodInfo("input_wait_started"));
     }
 
     GDLlama::GDLlama() : params {gpt_params()},
@@ -199,7 +200,9 @@ namespace godot {
 
         // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
         params.antiprompt.clear();
-        params.antiprompt.emplace_back(reverse_prompt);
+        if (reverse_prompt != "") {
+            params.antiprompt.emplace_back(reverse_prompt);
+        }
 
         std::string text = llama_runner->llama_generate_text(
             std::string(prompt.utf8().get_data()),
@@ -207,6 +210,9 @@ namespace godot {
                 [this](std::string s) {
                     String new_text {s.c_str()};
                     call_deferred("emit_signal", "generate_text_updated", new_text);
+                },
+                [this]() {
+                    call_deferred("emit_signal", "input_wait_started");
                 }
         );
 
@@ -215,5 +221,9 @@ namespace godot {
 
     void GDLlama::stop_generate_text() {
         llama_runner->llama_stop_generate_text();
+    }
+
+    void GDLlama::input_text(String input) {
+        llama_runner->set_input(std::string(input.utf8().get_data()));
     }
 }
