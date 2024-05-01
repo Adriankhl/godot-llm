@@ -39,13 +39,17 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
 
-       	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlama::get_n_batch);
-    	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlama::set_n_batch);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
+    	ClassDB::bind_method(D_METHOD("get_n_predict"), &GDLlama::get_n_predict);
+    	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlama::set_n_predict);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
 
-       	ClassDB::bind_method(D_METHOD("get_n_ubatch"), &GDLlama::get_n_ubatch);
-    	ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &GDLlama::set_n_ubatch);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
+    	ClassDB::bind_method(D_METHOD("get_n_keep"), &GDLlama::get_n_keep);
+    	ClassDB::bind_method(D_METHOD("set_n_keep", "p_n_keep"), &GDLlama::set_n_keep);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_keep", PROPERTY_HINT_NONE), "set_n_keep", "get_n_keep");
+
+        ClassDB::bind_method(D_METHOD("get_temperature"), &GDLlama::get_temperature);
+        ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlama::set_temperature);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
 
         ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
         ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
@@ -59,13 +63,13 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlama::set_escape);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
 
-    	ClassDB::bind_method(D_METHOD("get_n_predict"), &GDLlama::get_n_predict);
-    	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlama::set_n_predict);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
+       	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlama::get_n_batch);
+    	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlama::set_n_batch);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
 
-        ClassDB::bind_method(D_METHOD("get_temperature"), &GDLlama::get_temperature);
-        ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlama::set_temperature);
-        ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
+       	ClassDB::bind_method(D_METHOD("get_n_ubatch"), &GDLlama::get_n_ubatch);
+    	ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &GDLlama::set_n_ubatch);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
@@ -137,20 +141,28 @@ namespace godot {
         params.n_ctx = p_n_ctx;
     }
 
-    int32_t GDLlama::get_n_batch() const {
-        return params.n_batch;
+    int32_t GDLlama::get_n_predict() const {
+        return params.n_predict;
     }
 
-    void GDLlama::set_n_batch(const int32_t p_n_batch) {
-        params.n_batch = p_n_batch;
+    void GDLlama::set_n_predict(const int32_t p_n_predict) {
+        params.n_predict = p_n_predict;
     }
 
-    int32_t GDLlama::get_n_ubatch() const {
-        return params.n_ubatch;
+    int32_t GDLlama::get_n_keep() const {
+        return params.n_keep;
     }
 
-    void GDLlama::set_n_ubatch(const int32_t p_n_ubatch) {
-        params.n_ubatch = p_n_ubatch;
+    void GDLlama::set_n_keep(const int32_t p_n_keep) {
+        params.n_keep = p_n_keep;
+    }
+
+    float GDLlama::get_temperature() const {
+        return params.sparams.temp;
+    }
+
+    void GDLlama::set_temperature(const float p_temperature) {
+        params.sparams.temp = p_temperature;
     }
 
     int32_t GDLlama::get_n_threads() const {
@@ -177,20 +189,20 @@ namespace godot {
         params.escape = p_escape;
     }
 
-    int32_t GDLlama::get_n_predict() const {
-        return params.n_predict;
+    int32_t GDLlama::get_n_batch() const {
+        return params.n_batch;
     }
 
-    void GDLlama::set_n_predict(const int32_t p_n_predict) {
-        params.n_predict = p_n_predict;
+    void GDLlama::set_n_batch(const int32_t p_n_batch) {
+        params.n_batch = p_n_batch;
     }
 
-    float GDLlama::get_temperature() const {
-        return params.sparams.temp;
+    int32_t GDLlama::get_n_ubatch() const {
+        return params.n_ubatch;
     }
 
-    void GDLlama::set_temperature(const float p_temperature) {
-        params.sparams.temp = p_temperature;
+    void GDLlama::set_n_ubatch(const int32_t p_n_ubatch) {
+        params.n_ubatch = p_n_ubatch;
     }
 
     String GDLlama::generate_text(String prompt) {

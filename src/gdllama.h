@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <godot_cpp/classes/node.hpp>
 #include <common/common.h>
+#include <godot_cpp/core/object_id.hpp>
 #include <llama.h>
 #include <memory>
 #include <mutex>
@@ -49,14 +50,14 @@ namespace godot {
             int32_t get_n_ctx() const;
             void set_n_ctx(const int32_t p_n_ctx);
 
-            int32_t get_n_batch() const;
-            void set_n_batch(const int32_t p_n_batch);
+            int32_t get_n_predict() const;
+            void set_n_predict(const int32_t p_n_predict);
 
-            int32_t get_n_ubatch() const;
-            void set_n_ubatch(const int32_t p_n_ubatch);
+            int32_t get_n_keep() const;
+            void set_n_keep(const int32_t p_n_keep);
 
-            int32_t get_n_threads() const;
-            void set_n_threads(const int32_t n_threads);
+            float get_temperature() const;
+            void set_temperature(const float p_temperature);
 
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
@@ -64,11 +65,14 @@ namespace godot {
             bool get_escape() const;
             void set_escape(const bool p_escape);
 
-            int32_t get_n_predict() const;
-            void set_n_predict(const int32_t p_n_predict);
+            int32_t get_n_threads() const;
+            void set_n_threads(const int32_t n_threads);
 
-            float get_temperature() const;
-            void set_temperature(const float p_temperature);
+            int32_t get_n_batch() const;
+            void set_n_batch(const int32_t p_n_batch);
+
+            int32_t get_n_ubatch() const;
+            void set_n_ubatch(const int32_t p_n_ubatch);
 
             String generate_text(String prompt);
             void stop_generate_text();
