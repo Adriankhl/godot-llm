@@ -15,6 +15,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
+    	ClassDB::bind_method(D_METHOD("get_instruct"), &GDLlama::get_instruct);
+    	ClassDB::bind_method(D_METHOD("set_instruct", "p_instruct"), &GDLlama::set_instruct);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "instruct", PROPERTY_HINT_NONE), "set_instruct", "get_instruct");
+
     	ClassDB::bind_method(D_METHOD("get_interactive"), &GDLlama::get_interactive);
     	ClassDB::bind_method(D_METHOD("set_interactive", "p_interactive"), &GDLlama::set_interactive);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "interactive", PROPERTY_HINT_NONE), "set_interactive", "get_interactive");
@@ -70,6 +74,14 @@ namespace godot {
 
     void GDLlama::set_model_path(const String p_model_path) {
         params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    }
+
+    bool GDLlama::get_instruct() const {
+        return params.instruct;
+    }
+
+    void GDLlama::set_instruct(const bool p_instruct) {
+        params.instruct = p_instruct;
     }
 
     bool GDLlama::get_interactive() const {
