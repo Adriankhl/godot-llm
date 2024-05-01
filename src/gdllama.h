@@ -8,6 +8,7 @@
 #include <llama.h>
 #include <memory>
 #include <mutex>
+#include <string>
 
 namespace godot {
     class GDLlama : public Node {
@@ -15,6 +16,7 @@ namespace godot {
 
         private:
             gpt_params params;
+            std::string reverse_prompt;
             std::mutex generate_text_mutex;
             std::unique_ptr<LlamaRunner> llama_runner;
 
@@ -34,6 +36,9 @@ namespace godot {
 
             bool get_interactive() const;
             void set_interactive(const bool p_interactive);
+
+            String get_reverse_prompt() const;
+            void set_reverse_prompt(const String p_reverse_prompt);
 
             int32_t get_n_ctx() const;
             void set_n_ctx(const int32_t p_n_ctx);

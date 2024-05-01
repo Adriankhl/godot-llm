@@ -23,6 +23,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_interactive", "p_interactive"), &GDLlama::set_interactive);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "interactive", PROPERTY_HINT_NONE), "set_interactive", "get_interactive");
 
+    	ClassDB::bind_method(D_METHOD("get_reverse_prompt"), &GDLlama::get_reverse_prompt);
+    	ClassDB::bind_method(D_METHOD("set_reverse_prompt", "p_reverse_prompt"), &GDLlama::set_reverse_prompt);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "reverse_prompt", PROPERTY_HINT_NONE), "set_reverse_prompt", "get_reverse_prompt");
+
        	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
     	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
@@ -63,6 +67,7 @@ namespace godot {
     }
 
     GDLlama::GDLlama() : params {gpt_params()},
+        reverse_prompt {""},
         llama_runner {new LlamaRunner()}
     {}
 
@@ -91,6 +96,15 @@ namespace godot {
     void GDLlama::set_interactive(const bool p_interactive) {
         params.interactive = p_interactive;
     }
+
+    String GDLlama::get_reverse_prompt() const {
+        return String(reverse_prompt.c_str());
+    };
+    void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
+        reverse_prompt = std::string(p_reverse_prompt.utf8().get_data());
+    };
+
+
 
     int32_t GDLlama::get_n_ctx() const {
         return params.n_ctx;
@@ -160,6 +174,10 @@ namespace godot {
         std::lock_guard<std::mutex> guard(generate_text_mutex);
 
         llama_runner.reset(new LlamaRunner());
+
+        // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
+        params.antiprompt.clear();
+        params.antiprompt.emplace_back(reverse_prompt);
 
         std::string text = llama_runner->llama_generate_text(
             std::string(prompt.utf8().get_data()),
