@@ -29,6 +29,9 @@ namespace godot {
             String get_model_path() const;
             void set_model_path(const String p_model_path);
 
+            bool get_interactive() const;
+            void set_interactive(const bool p_interactive);
+
             int32_t get_n_ctx() const;
             void set_n_ctx(const int32_t p_n_ctx);
 

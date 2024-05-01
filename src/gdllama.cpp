@@ -15,6 +15,10 @@ namespace godot {
     	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
+    	ClassDB::bind_method(D_METHOD("get_interactive"), &GDLlama::get_interactive);
+    	ClassDB::bind_method(D_METHOD("set_interactive", "p_interactive"), &GDLlama::set_interactive);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "interactive", PROPERTY_HINT_NONE), "set_interactive", "get_interactive");
+
        	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
     	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
@@ -66,6 +70,14 @@ namespace godot {
 
     void GDLlama::set_model_path(const String p_model_path) {
         params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    }
+
+    bool GDLlama::get_interactive() const {
+        return params.interactive;
+    }
+
+    void GDLlama::set_interactive(const bool p_interactive) {
+        params.interactive = p_interactive;
     }
 
     int32_t GDLlama::get_n_ctx() const {
