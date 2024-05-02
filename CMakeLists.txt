@@ -4,6 +4,8 @@ project(gdllama)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "")
+
 
 file(GLOB src_files
   "src/*.h"
@@ -47,6 +49,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-fPIC)
 endif()
 
+
 add_subdirectory(godot-cpp)
 add_subdirectory(llama.cpp)
 
@@ -58,6 +61,7 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
+
 
 target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
