@@ -77,7 +77,7 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("generate_text_grammar", "prompt", "grammar"), &GDLlama::generate_text_grammar);
         ClassDB::bind_method(D_METHOD("generate_text_json", "prompt", "json"), &GDLlama::generate_text_json);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
-        ClassDB::bind_method(D_METHOD("input_text"), &GDLlama::input_text);
+        ClassDB::bind_method(D_METHOD("input_text", "input"), &GDLlama::input_text);
 
         ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
         ADD_SIGNAL(MethodInfo("input_wait_started"));
