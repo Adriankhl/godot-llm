@@ -13,3 +13,7 @@ windows.release.x86_64 = "bin/libgodot_llm.windows.release.amd64.dll"
 #linux.debug.x86_64 = "bin/libgodot_llm.linux.debug.x86_64.so"
 linux.debug.x86_64 = "bin/libgodot_llm.linux.release.x86_64.so"
 linux.release.x86_64 = "bin/libgodot_llm.linux.release.x86_64.so"
+
+#android.debug.arm64 = "bin/libgodot_llm.android.debug.aarch64.so"
+android.debug.arm64 = "bin/libgodot_llm.android.release.aarch64.so"
+android.release.arm64 = "bin/libgodot_llm.android.release.aarch64.so"
