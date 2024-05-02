@@ -1,7 +1,7 @@
 #ifndef LLAMA_FUNCTIONS_H
 #define LLAMA_FUNCTIONS_H
 
-#include "common.h"
+#include <common.h>
 #include <functional>
 #include <string>
 

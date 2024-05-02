@@ -2,11 +2,11 @@
 #define GDLLAMA_H
 
 #include "llama_runner.h"
-#include <cstdint>
 #include <godot_cpp/classes/node.hpp>
-#include <common/common.h>
 #include <godot_cpp/core/object_id.hpp>
+#include <common/common.h>
 #include <llama.h>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -20,7 +20,7 @@ namespace godot {
             std::string reverse_prompt;
             std::mutex generate_text_mutex;
             std::unique_ptr<LlamaRunner> llama_runner;
-
+            String generate_text_internal(String prompt);
 
         protected:
     	    static void _bind_methods();
@@ -75,6 +75,8 @@ namespace godot {
             void set_n_ubatch(const int32_t p_n_ubatch);
 
             String generate_text(String prompt);
+            String generate_text_grammar(String prompt, String grammar);
+            String generate_text_json(String prompt, String json);
             void stop_generate_text();
             void input_text(String input);
     };

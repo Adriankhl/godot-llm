@@ -1,10 +1,12 @@
 #include "gdllama.h"
-#include "common/common.h"
 #include "llama_runner.h"
-#include <cstdint>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/string.hpp>
+#include <common/common.h>
+#include <common/json.hpp>
+#include <common/json-schema-to-grammar.h>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -72,6 +74,8 @@ namespace godot {
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
 
         ClassDB::bind_method(D_METHOD("generate_text", "prompt"), &GDLlama::generate_text);
+        ClassDB::bind_method(D_METHOD("generate_text_grammar", "prompt", "grammar"), &GDLlama::generate_text_grammar);
+        ClassDB::bind_method(D_METHOD("generate_text_json", "prompt", "json"), &GDLlama::generate_text_json);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
         ClassDB::bind_method(D_METHOD("input_text"), &GDLlama::input_text);
 
@@ -205,9 +209,7 @@ namespace godot {
         params.n_ubatch = p_n_ubatch;
     }
 
-    String GDLlama::generate_text(String prompt) {
-        std::lock_guard<std::mutex> guard(generate_text_mutex);
-
+    String GDLlama::generate_text_internal(String prompt) {
         llama_runner.reset(new LlamaRunner());
 
         // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
@@ -229,6 +231,39 @@ namespace godot {
         );
 
         return String(text.c_str());
+    }
+
+    String GDLlama::generate_text(String prompt) {
+        std::lock_guard<std::mutex> guard(generate_text_mutex);
+
+        String full_generated_text = generate_text_internal(prompt);
+
+        return full_generated_text;
+    }
+
+    String GDLlama::generate_text_grammar(String prompt, String grammar) {
+        std::lock_guard<std::mutex> guard(generate_text_mutex);
+
+        params.sparams.grammar = std::string(grammar.utf8().get_data());
+
+        String full_generated_text = generate_text_internal(prompt);
+
+        params.sparams.grammar = std::string();
+
+        return full_generated_text;
+    }
+
+    String GDLlama::generate_text_json(String prompt, String json) {
+        std::lock_guard<std::mutex> guard(generate_text_mutex);
+
+        std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(json.utf8().get_data()));
+        params.sparams.grammar = grammar;
+
+        String full_generated_text = generate_text_internal(prompt);
+
+        params.sparams.grammar = std::string();
+
+        return full_generated_text;
     }
 
     void GDLlama::stop_generate_text() {
