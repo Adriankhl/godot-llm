@@ -137,12 +137,12 @@ Run `cmake`.
 
 On Windows:
 ```
-cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DLLAMA_VULKAN=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
 ```
 
 On Linux:
 ```
-cmake .. -GNinja -DLLAMA_VULKAN=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DLLAMA_VULKAN=1 -DLLAMA_NATIVE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
 ```
 
 For Android, set `$NDK_PATH` to your android ndk directory, then:
