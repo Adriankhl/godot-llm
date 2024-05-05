@@ -53,6 +53,18 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlama::set_temperature);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
 
+        ClassDB::bind_method(D_METHOD("get_penalty_repeat"), &GDLlama::get_penalty_repeat);
+        ClassDB::bind_method(D_METHOD("set_penalty_repeat", "p_penalty_repeat"), &GDLlama::set_penalty_repeat);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "penalty_repeat", PROPERTY_HINT_NONE), "set_penalty_repeat", "get_penalty_repeat");
+
+        ClassDB::bind_method(D_METHOD("get_penalty_last_n"), &GDLlama::get_penalty_last_n);
+        ClassDB::bind_method(D_METHOD("set_penalty_last_n", "p_penalty_last_n"), &GDLlama::set_penalty_last_n);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "penalty_last_n", PROPERTY_HINT_NONE), "set_penalty_last_n", "get_penalty_last_n");
+
+        ClassDB::bind_method(D_METHOD("get_penalize_nl"), &GDLlama::get_penalize_nl);
+        ClassDB::bind_method(D_METHOD("set_penalize_nl", "p_penalize_nl"), &GDLlama::set_penalize_nl);
+        ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "penalize_nl", PROPERTY_HINT_NONE), "set_penalize_nl", "get_penalize_nl");
+
         ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
         ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
         ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
@@ -167,6 +179,30 @@ namespace godot {
 
     void GDLlama::set_temperature(const float p_temperature) {
         params.sparams.temp = p_temperature;
+    }
+
+    float GDLlama::get_penalty_repeat() const {
+        return params.sparams.penalty_repeat;
+    }
+
+    void GDLlama::set_penalty_repeat(const float p_penalty_repeat) {
+        params.sparams.penalty_repeat = p_penalty_repeat;
+    }
+
+    int32_t GDLlama::get_penalty_last_n() const {
+        return params.sparams.penalty_last_n;
+    }
+
+    void GDLlama::set_penalty_last_n(const int32_t p_penalty_last_n) {
+        params.sparams.penalty_last_n = p_penalty_last_n;
+    }
+
+    bool GDLlama::get_penalize_nl() const {
+        return params.sparams.penalize_nl;
+    }
+
+    void GDLlama::set_penalize_nl(const bool p_penalize_nl) {
+        params.sparams.penalize_nl = p_penalize_nl;
     }
 
     int32_t GDLlama::get_n_threads() const {

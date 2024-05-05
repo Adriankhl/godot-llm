@@ -59,6 +59,15 @@ namespace godot {
             float get_temperature() const;
             void set_temperature(const float p_temperature);
 
+            float get_penalty_repeat() const;
+            void set_penalty_repeat(const float p_penalty_repeat);
+
+            int32_t get_penalty_last_n() const;
+            void set_penalty_last_n(const int32_t p_penalty_last_n);
+
+            bool get_penalize_nl() const;
+            void set_penalize_nl(const bool p_penalize_nl);
+
             int32_t get_n_gpu_layer() const;
             void set_n_gpu_layer(const int32_t p_n_gpu_layers);
 
