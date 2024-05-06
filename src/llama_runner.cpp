@@ -49,7 +49,8 @@ void LlamaRunner::llama_log_callback_logTee(ggml_log_level level, const char * t
 std::string LlamaRunner::llama_generate_text(
     std::string prompt, gpt_params params,
     std::function<void(std::string)> on_generate_text_updated,
-    std::function<void()> on_input_wait_started
+    std::function<void()> on_input_wait_started,
+    std::function<void(std::string)> on_generate_text_finished
 ){
     std::string generated_text = "";
 
@@ -58,11 +59,11 @@ std::string LlamaRunner::llama_generate_text(
 
     llama_sampling_params & sparams = params.sparams;
 
-//#ifndef LOG_DISABLE_LOGS
+#ifndef LOG_DISABLE_LOGS
 //    log_set_target(log_filename_generator("main", "log"));
-//    LOG("Log start\n");
+    LOG("Log start\n");
 //    llama_log_set(llama_log_callback_logTee, nullptr);
-//#endif // LOG_DISABLE_LOGS
+#endif // LOG_DISABLE_LOGS
 
     // TODO: Dump params ?
     //LOG("Params perplexity: %s\n", LOG_TOSTR(params.perplexity));
@@ -888,6 +889,8 @@ std::string LlamaRunner::llama_generate_text(
 #ifndef LOG_DISABLE_LOGS
     LOG("Log end\n");
 #endif // LOG_DISABLE_LOGS
+
+    on_generate_text_finished(generated_text);
 
     return generated_text;
 }

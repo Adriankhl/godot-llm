@@ -21,7 +21,8 @@ class LlamaRunner {
             std::string prompt,
             gpt_params params,
             std::function<void(std::string)> on_generate_text_updated,
-            std::function<void()> on_input_wait_started
+            std::function<void()> on_input_wait_started,
+            std::function<void(std::string)> on_generate_text_finished
         );
         void llama_stop_generate_text();
         void set_input(std::string input);

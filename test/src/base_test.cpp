@@ -21,7 +21,7 @@ int main(int argc, char ** argv) {
     gpt_params params1 {gpt_params()};
     std::cout << "Model: " << params1.model << std::endl;
 
-    std::string text1 = lr->llama_generate_text(prompt, params1, [](auto a) {}, []() {});
+    std::string text1 = lr->llama_generate_text(prompt, params1, [](auto a) {}, []() {}, [](auto a){});
     std::cout << "Generated text: " << text1 << std::endl;
 
     gpt_params params2 {gpt_params()};
@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
     std::cout << "Model: " << params2.model << std::endl;
     params2.n_predict = 10;
 
-    std::string text2 = lr->llama_generate_text(prompt, params2, [](auto a) {}, []() {});
+    std::string text2 = lr->llama_generate_text(prompt, params2, [](auto a) {}, []() {}, [](auto a){});
     std::cout << "Generated text: " << text2 << std::endl;
 
     return 0;

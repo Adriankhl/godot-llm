@@ -104,6 +104,8 @@ namespace godot {
 
         ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
         ADD_SIGNAL(MethodInfo("input_wait_started"));
+        ADD_SIGNAL(MethodInfo("generate_text_finished", PropertyInfo(Variant::STRING, "text")));
+
     }
 
     // A dummy function for instantiating the state of generate_text_thread
@@ -317,6 +319,10 @@ namespace godot {
                 },
                 [this]() {
                     call_deferred("emit_signal", "input_wait_started");
+                },
+                [this](std::string s) {
+                    String text {s.c_str()};
+                    call_deferred("emit_signal", "generate_text_finished", text);
                 }
         );
 
