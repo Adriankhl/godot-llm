@@ -1,14 +1,18 @@
 #include "gdllama.h"
 #include "llama_runner.h"
 #include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/mutex.hpp>
+#include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/variant/callable_method_pointer.hpp>
+#include <godot_cpp/variant/quaternion.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <common/common.h>
 #include <common/json.hpp>
 #include <common/json-schema-to-grammar.h>
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <string>
 
 namespace godot {
@@ -98,9 +102,31 @@ namespace godot {
     GDLlama::GDLlama() : params {gpt_params()},
         reverse_prompt {""},
         llama_runner {new LlamaRunner()}
-    {}
+    {
+        func_mutex.instantiate();
+        generate_text_mutex.instantiate();
+        generate_text_thread.instantiate();
+        generate_text_thread->start(callable_mp_static(&GDLlama::dummy));
+        generate_text_thread->wait_to_finish();
+    }
 
-    GDLlama::~GDLlama() {}
+    GDLlama::~GDLlama() {
+        stop_generate_text();
+        if (generate_text_thread->is_alive()) {
+            generate_text_thread->wait_to_finish();
+        }
+    }
+
+    void GDLlama::_exit_tree() {
+        func_mutex->lock();
+        stop_generate_text();
+        if (generate_text_thread->is_alive()) {
+            generate_text_thread->wait_to_finish();
+        }
+    }
+
+    // A dummy function for changing the state of generate_text_thread
+    void GDLlama::dummy() {}
 
     String GDLlama::get_model_path() const {
         return String(params.model.c_str());
@@ -270,15 +296,34 @@ namespace godot {
     }
 
     String GDLlama::generate_text(String prompt) {
-        std::lock_guard<std::mutex> guard(generate_text_mutex);
+        func_mutex->lock();
+
+        if (generate_text_mutex->try_lock()) {
+            generate_text_mutex->lock();
+        } else {
+            return "Error: GDLlama is running on the other thread";
+        }
+          generate_text_mutex->lock();
+
+        func_mutex->unlock();
 
         String full_generated_text = generate_text_internal(prompt);
+
+        generate_text_mutex->unlock();
 
         return full_generated_text;
     }
 
     String GDLlama::generate_text_grammar(String prompt, String grammar) {
-        std::lock_guard<std::mutex> guard(generate_text_mutex);
+        func_mutex->lock();
+
+        if (generate_text_mutex->try_lock()) {
+            generate_text_mutex->lock();
+        } else {
+            return "Error: GDLlama is running on the other thread";
+        }
+
+        func_mutex->unlock();
 
         params.sparams.grammar = std::string(grammar.utf8().get_data());
 
@@ -286,11 +331,21 @@ namespace godot {
 
         params.sparams.grammar = std::string();
 
+        generate_text_mutex->unlock();
+
         return full_generated_text;
     }
 
     String GDLlama::generate_text_json(String prompt, String json) {
-        std::lock_guard<std::mutex> guard(generate_text_mutex);
+        func_mutex->lock();
+
+        if (generate_text_mutex->try_lock()) {
+            generate_text_mutex->lock();
+        } else {
+            return "Error: GDLlama is running on the other thread";
+        }
+
+        func_mutex->unlock();
 
         std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(json.utf8().get_data()));
         params.sparams.grammar = grammar;
@@ -298,6 +353,8 @@ namespace godot {
         String full_generated_text = generate_text_internal(prompt);
 
         params.sparams.grammar = std::string();
+
+        generate_text_mutex->unlock();
 
         return full_generated_text;
     }

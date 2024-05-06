@@ -2,13 +2,15 @@
 #define GDLLAMA_H
 
 #include "llama_runner.h"
+#include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/thread.hpp>
+#include <godot_cpp/classes/worker_thread_pool.hpp>
 #include <godot_cpp/core/object_id.hpp>
 #include <common/common.h>
 #include <llama.h>
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <string>
 
 namespace godot {
@@ -18,9 +20,12 @@ namespace godot {
         private:
             gpt_params params;
             std::string reverse_prompt;
-            std::mutex generate_text_mutex;
             std::unique_ptr<LlamaRunner> llama_runner;
+            Ref<Mutex> generate_text_mutex;
+            Ref<Mutex> func_mutex;
+            Ref<Thread> generate_text_thread;
             String generate_text_internal(String prompt);
+            static void dummy();
 
         protected:
     	    static void _bind_methods();
@@ -28,6 +33,8 @@ namespace godot {
         public:
             GDLlama();
             ~GDLlama();
+
+            void _exit_tree() override;
 
             String get_model_path() const;
             void set_model_path(const String p_model_path);
