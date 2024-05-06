@@ -113,6 +113,7 @@ namespace godot {
         reverse_prompt {""},
         llama_runner {new LlamaRunner()}
     {
+        log_set_target(stdout);
         LOG("Instantiate GDLlama mutex\n");
         func_mutex.instantiate();
         generate_text_mutex.instantiate();
