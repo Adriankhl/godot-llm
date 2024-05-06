@@ -401,21 +401,21 @@ std::string LlamaRunner::llama_generate_text(
     LOG("\n\n");
 
     if (params.interactive) {
-        const char *control_message;
-        if (params.multiline_input) {
-            control_message = " - To return control to LLaMa, end your input with '\\'.\n"
-                              " - To return control without starting a new line, end your input with '/'.\n";
-        } else {
-            control_message = " - Press Return to return control to LLaMa.\n"
-                              " - To return control without starting a new line, end your input with '/'.\n"
-                              " - If you want to submit another line, end your input with '\\'.\n";
-        }
-        LOG("== Running in interactive mode. ==\n");
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__)) || defined (_WIN32)
-        LOG(       " - Press Ctrl+C to interject at any time.\n");
-#endif
-        LOG(       "%s\n", control_message);
-
+//        const char *control_message;
+//        if (params.multiline_input) {
+//            control_message = " - To return control to LLaMa, end your input with '\\'.\n"
+//                              " - To return control without starting a new line, end your input with '/'.\n";
+//        } else {
+//            control_message = " - Press Return to return control to LLaMa.\n"
+//                              " - To return control without starting a new line, end your input with '/'.\n"
+//                              " - If you want to submit another line, end your input with '\\'.\n";
+//        }
+//        LOG("== Running in interactive mode. ==\n");
+//#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__)) || defined (_WIN32)
+//        LOG(       " - Press Ctrl+C to interject at any time.\n");
+//#endif
+//        LOG(       "%s\n", control_message);
+//
         is_interacting = params.interactive_first;
     }
 
