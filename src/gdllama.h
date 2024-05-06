@@ -26,7 +26,7 @@ namespace godot {
             Ref<Mutex> func_mutex;
             Ref<Thread> generate_text_thread;
             String generate_text_common(String prompt);
-            String generate_text_internal(String prompt);
+            String generate_text_simple_internal(String prompt);
             String generate_text_grammar_internal(String prompt, String grammar);
             String generate_text_json_internal(String prompt, String json);
 
@@ -93,7 +93,8 @@ namespace godot {
             int32_t get_n_ubatch() const;
             void set_n_ubatch(const int32_t p_n_ubatch);
 
-            String generate_text(String prompt);
+            String generate_text(String prompt, String grammar, String json);
+            String generate_text_simple(String prompt);
             String generate_text_grammar(String prompt, String grammar);
             String generate_text_json(String prompt, String json);
             Error run_generate_text(String prompt, String grammar = "", String json = "");
