@@ -900,3 +900,7 @@ void LlamaRunner::set_input(std::string input) {
     this->input = input;
     is_waiting_input = false;
 }
+
+bool LlamaRunner::get_is_waiting_input() {
+    return is_waiting_input;
+}

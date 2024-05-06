@@ -18,14 +18,17 @@ namespace godot {
         GDCLASS(GDLlama, Node)
 
         private:
+            static void dummy();
             gpt_params params;
             std::string reverse_prompt;
             std::unique_ptr<LlamaRunner> llama_runner;
             Ref<Mutex> generate_text_mutex;
             Ref<Mutex> func_mutex;
             Ref<Thread> generate_text_thread;
+            String generate_text_common(String prompt);
             String generate_text_internal(String prompt);
-            static void dummy();
+            String generate_text_grammar_internal(String prompt, String grammar);
+            String generate_text_json_internal(String prompt, String json);
 
         protected:
     	    static void _bind_methods();
@@ -93,6 +96,9 @@ namespace godot {
             String generate_text(String prompt);
             String generate_text_grammar(String prompt, String grammar);
             String generate_text_json(String prompt, String json);
+            Error run_generate_text(String prompt, String grammar = "", String json = "");
+            bool is_running();
+            bool is_waiting_input();
             void stop_generate_text();
             void input_text(String input);
     };

@@ -25,6 +25,7 @@ class LlamaRunner {
         );
         void llama_stop_generate_text();
         void set_input(std::string input);
+        bool get_is_waiting_input();
 };
 
 #endif

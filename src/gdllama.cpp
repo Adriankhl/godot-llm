@@ -12,7 +12,9 @@
 #include <common/json.hpp>
 #include <common/json-schema-to-grammar.h>
 #include <cstdint>
+#include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 
 namespace godot {
@@ -94,10 +96,16 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("generate_text_json", "prompt", "json"), &GDLlama::generate_text_json);
         ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlama::stop_generate_text);
         ClassDB::bind_method(D_METHOD("input_text", "input"), &GDLlama::input_text);
+        ClassDB::bind_method(D_METHOD("run_generate_text", "prompt", "grammar", "json"), &GDLlama::run_generate_text);
+        ClassDB::bind_method(D_METHOD("is_running"), &GDLlama::is_running);
+        ClassDB::bind_method(D_METHOD("is_waiting_input"), &GDLlama::is_waiting_input);
 
         ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
         ADD_SIGNAL(MethodInfo("input_wait_started"));
     }
+
+    // A dummy function for instantiating the state of generate_text_thread
+    void GDLlama::dummy() {}
 
     GDLlama::GDLlama() : params {gpt_params()},
         reverse_prompt {""},
@@ -124,9 +132,6 @@ namespace godot {
             generate_text_thread->wait_to_finish();
         }
     }
-
-    // A dummy function for changing the state of generate_text_thread
-    void GDLlama::dummy() {}
 
     String GDLlama::get_model_path() const {
         return String(params.model.c_str());
@@ -271,7 +276,9 @@ namespace godot {
         params.n_ubatch = p_n_ubatch;
     }
 
-    String GDLlama::generate_text_internal(String prompt) {
+    String GDLlama::generate_text_common(String prompt) {
+        std::cout << "Start generate" << std::endl;
+
         llama_runner.reset(new LlamaRunner());
 
         // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
@@ -295,6 +302,15 @@ namespace godot {
         return String(text.c_str());
     }
 
+    String GDLlama::generate_text_internal(String prompt) {
+        String full_generated_text = generate_text_common(prompt);
+
+        generate_text_mutex->unlock();
+
+        return full_generated_text;
+    }
+
+
     String GDLlama::generate_text(String prompt) {
         func_mutex->lock();
 
@@ -308,6 +324,16 @@ namespace godot {
         func_mutex->unlock();
 
         String full_generated_text = generate_text_internal(prompt);
+
+        return full_generated_text;
+    }
+
+    String GDLlama::generate_text_grammar_internal(String prompt, String grammar) {
+        params.sparams.grammar = std::string(grammar.utf8().get_data());
+
+        String full_generated_text = generate_text_common(prompt);
+
+        params.sparams.grammar = std::string();
 
         generate_text_mutex->unlock();
 
@@ -325,9 +351,16 @@ namespace godot {
 
         func_mutex->unlock();
 
-        params.sparams.grammar = std::string(grammar.utf8().get_data());
+        String full_generated_text = generate_text_grammar_internal(prompt, grammar);
 
-        String full_generated_text = generate_text_internal(prompt);
+        return full_generated_text;
+    }
+
+    String GDLlama::generate_text_json_internal(String prompt, String json) {
+        std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(json.utf8().get_data()));
+        params.sparams.grammar = grammar;
+
+        String full_generated_text = generate_text_common(prompt);
 
         params.sparams.grammar = std::string();
 
@@ -335,6 +368,7 @@ namespace godot {
 
         return full_generated_text;
     }
+
 
     String GDLlama::generate_text_json(String prompt, String json) {
         func_mutex->lock();
@@ -347,16 +381,54 @@ namespace godot {
 
         func_mutex->unlock();
 
-        std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(json.utf8().get_data()));
-        params.sparams.grammar = grammar;
-
-        String full_generated_text = generate_text_internal(prompt);
-
-        params.sparams.grammar = std::string();
-
-        generate_text_mutex->unlock();
+        String full_generated_text = generate_text_json_internal(prompt, json);
 
         return full_generated_text;
+    }
+
+    Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
+        func_mutex->lock();
+
+        std::cout << "Locking" << std::endl;
+
+        if (generate_text_mutex->try_lock()) {
+            generate_text_mutex->lock();
+        } else {
+            return FAILED;
+        }
+
+        func_mutex->unlock();
+
+        if (generate_text_thread->is_alive()) {
+            generate_text_thread->wait_to_finish();
+        }
+
+        std::cout << "Before instantiate" << std::endl;
+
+        generate_text_thread.instantiate();
+
+        Error error;
+
+        if (!grammar.is_empty()) {
+            Callable c = callable_mp(this, &GDLlama::generate_text_grammar_internal);
+            error = generate_text_thread->start(c.bind(prompt, grammar));
+        } else if (!json.is_empty()) {
+            Callable c = callable_mp(this, &GDLlama::generate_text_json_internal);
+            error = generate_text_thread->start(c.bind(prompt, json));
+        } else {
+            std::cout << "Call" << std::endl;
+
+            Callable c = callable_mp(this, &GDLlama::generate_text_internal);
+            std::cout << "Bind" << std::endl;
+
+            std::cout << "Run" << std::endl;
+
+            error = generate_text_thread->start(c.bind(prompt));
+        }
+
+        std::cout << "Done" << std::endl;
+
+        return OK;
     }
 
     void GDLlama::stop_generate_text() {
@@ -365,5 +437,13 @@ namespace godot {
 
     void GDLlama::input_text(String input) {
         llama_runner->set_input(std::string(input.utf8().get_data()));
+    }
+
+    bool GDLlama::is_running() {
+        return !generate_text_mutex->try_lock() || generate_text_thread->is_alive();
+    }
+
+    bool GDLlama::is_waiting_input() {
+        return llama_runner->get_is_waiting_input();
     }
 }
