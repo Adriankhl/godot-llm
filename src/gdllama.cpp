@@ -134,7 +134,8 @@ GDLlama::~GDLlama() {
 
     stop_generate_text();
 
-    if (generate_text_thread->is_alive()) {
+    //is_started instead of is_alive to properly clean up all threads
+    if (generate_text_thread->is_started()) {
         LOG("GDLlama destructor waiting thread to finish\n");
         generate_text_thread->wait_to_finish();
     }
@@ -149,7 +150,9 @@ void GDLlama::_exit_tree() {
     LOG("func_mutex locked\n");
 
     stop_generate_text();
-    if (generate_text_thread->is_alive()) {
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (generate_text_thread->is_started()) {
         LOG("Waiting thread to finish\n");
         generate_text_thread->wait_to_finish();
     }
@@ -484,7 +487,8 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
 
     func_mutex->unlock();
 
-    if (generate_text_thread->is_alive()) {
+    //is_started instead of is_alive to properly clean up all threads
+    if (generate_text_thread->is_started()) {
         generate_text_thread->wait_to_finish();
     }
 
