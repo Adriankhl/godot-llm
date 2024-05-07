@@ -9,9 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-file(GLOB src_files
-  "src/*.h"
-  "src/*.cpp"
+set(src_files
+  "src/gdllama.h"
+  "src/gdllama.cpp"
+  "src/llama_embedding_runner.h"
+  "src/llama_embedding_runner.cpp"
+  "src/llama_runner.h"
+  "src/llama_runner.cpp"
+  "src/register_types.h"
+  "src/register_types.cpp"
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -64,7 +70,6 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
 
-
 target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
@@ -83,16 +88,28 @@ endif()
 
 install(FILES "godot_llm.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/)
 
-file(GLOB test_files
-  "test/src/llama*.h"
-  "test/src/llama*.cpp"
+set(llama_runnner_test_files
+  "test/src/llama_runner_test.cpp"
 )
 
-add_executable(llama_runner_test ${test_files} ${src_files})
+add_executable(llama_runner_test ${llama_runnner_test_files} ${src_files})
 
-target_link_libraries(llama_runner_test PRIVATE ${LIB_NAME} godot-cpp common llama)
+target_link_libraries(llama_runner_test PRIVATE godot-cpp common llama)
 
 add_test(
   NAME llama_runner_test
   COMMAND llama_runner_test
+)
+
+set(llama_embedding_runnner_test_files
+  "test/src/llama_embedding_runner_test.cpp"
+)
+
+add_executable(llama_embedding_runner_test ${llama_embedding_runnner_test_files} ${src_files})
+
+target_link_libraries(llama_embedding_runner_test PRIVATE godot-cpp common llama)
+
+add_test(
+  NAME llama_embedding_runner_test
+  COMMAND llama_embedding_runner_test
 )
