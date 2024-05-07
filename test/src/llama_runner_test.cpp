@@ -24,6 +24,10 @@ int main(int argc, char ** argv) {
     std::string text1 = lr->llama_generate_text(prompt, params1, [](auto a) {}, []() {}, [](auto a){});
     std::cout << "Generated text: " << text1 << std::endl;
 
+    if (text1 != "error: unable to load model") {
+        return 1;
+    }
+
     gpt_params params2 {gpt_params()};
     params2.model = "../../models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf";
     std::cout << "Model: " << params2.model << std::endl;

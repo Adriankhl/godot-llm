@@ -82,10 +82,10 @@ endif()
 install(FILES "godot_llm.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/)
 
 file(GLOB test_files
-  "test/src/*.h"
-  "test/src/*.cpp"
+  "test/src/llama*.h"
+  "test/src/llama*.cpp"
 )
 
-add_executable(base_test ${test_files} ${src_files})
+add_executable(llama_runner_test ${test_files} ${src_files})
 
-target_link_libraries(base_test PRIVATE godot-cpp common llama)
+target_link_libraries(llama_runner_test PRIVATE ${LIB_NAME} godot-cpp common llama)
