@@ -1,5 +1,6 @@
 #include "llama_embedding_runner.h"
 #include "common.h"
+#include "log.h"
 #include <string>
 #include <vector>
 
@@ -100,7 +101,8 @@ std::vector<float> LlamaEmbeddingRunner::compute_embedding(std::string prompt, g
     }
 
     // split the prompt into lines
-    std::vector<std::string> prompts = split_lines(params.prompt);
+    //std::vector<std::string> prompts = split_lines(params.prompt);
+    std::vector<std::string> prompts = std::vector<std::string> {params.prompt};
 
     // max batch size
     const uint64_t n_batch = params.n_batch;
@@ -190,4 +192,13 @@ std::vector<float> LlamaEmbeddingRunner::compute_embedding(std::string prompt, g
     llama_backend_free();
 
     return embeddings;
+}
+
+float LlamaEmbeddingRunner::similarity_cos(std::vector<float> embd1, std::vector<float> embd2) {
+    if (embd1.size() != embd2.size()) {
+        LOG("Error: embedding sizes don't match");
+        return 0.0;
+    }
+
+    return llama_embd_similarity_cos(embd1.data(), embd2.data(), embd1.size());
 }

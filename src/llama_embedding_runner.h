@@ -14,6 +14,7 @@ class LlamaEmbeddingRunner {
         LlamaEmbeddingRunner();
         ~LlamaEmbeddingRunner();
         std::vector<float> compute_embedding(std::string prompt, gpt_params params);
+        float similarity_cos(std::vector<float> embd1, std::vector<float> embd2);
 };
 
 #endif //LLAMA_EMBEDDDING_RUNNER_H

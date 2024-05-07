@@ -26,5 +26,13 @@
             "args": [],
             "cwd": "${workspaceFolder}"
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug llama_embedding_runner test",
+            "program": "${workspaceFolder}/build/llama_embedding_runner_test.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/build"
+        },
     ]
 }
