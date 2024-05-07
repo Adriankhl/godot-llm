@@ -41,6 +41,14 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_should_output_prompt", "p_should_output_prompt"), &GDLlama::set_should_output_prompt);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_prompt", PROPERTY_HINT_NONE), "set_should_output_prompt", "get_should_output_prompt");
 
+    ClassDB::bind_method(D_METHOD("get_should_output_bos"), &GDLlama::get_should_output_bos);
+	ClassDB::bind_method(D_METHOD("set_should_output_bos", "p_should_output_bos"), &GDLlama::set_should_output_bos);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_bos", PROPERTY_HINT_NONE), "set_should_output_bos", "get_should_output_bos");
+
+    ClassDB::bind_method(D_METHOD("get_should_output_eos"), &GDLlama::get_should_output_eos);
+	ClassDB::bind_method(D_METHOD("set_should_output_eos", "p_should_output_eos"), &GDLlama::set_should_output_eos);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_eos", PROPERTY_HINT_NONE), "set_should_output_eos", "get_should_output_eos");
+
 	ClassDB::bind_method(D_METHOD("get_input_prefix"), &GDLlama::get_input_prefix);
 	ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &GDLlama::set_input_prefix);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
@@ -119,7 +127,9 @@ void GDLlama::dummy() {}
 GDLlama::GDLlama() : params {gpt_params()},
     reverse_prompt {""},
     llama_runner {new LlamaRunner(should_output_prompt)},
-    should_output_prompt {true}
+    should_output_prompt {true},
+    should_output_bos {true},
+    should_output_eos {true}
 {
     log_set_target(stdout);
     LOG("Instantiate GDLlama mutex\n");
@@ -190,6 +200,7 @@ void GDLlama::set_interactive(const bool p_interactive) {
 String GDLlama::get_reverse_prompt() const {
     return String(reverse_prompt.c_str());
 };
+
 void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
     reverse_prompt = std::string(p_reverse_prompt.utf8().get_data());
 };
@@ -197,8 +208,25 @@ void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
 bool GDLlama::get_should_output_prompt() const {
     return should_output_prompt;
 };
+
 void GDLlama::set_should_output_prompt(const bool p_should_output_prompt) {
     should_output_prompt = p_should_output_prompt;
+};
+
+bool GDLlama::get_should_output_bos() const {
+    return should_output_bos;
+};
+
+void GDLlama::set_should_output_bos(const bool p_should_output_bos) {
+    should_output_bos = p_should_output_bos;
+};
+
+bool GDLlama::get_should_output_eos() const {
+    return should_output_eos;
+};
+
+void GDLlama::set_should_output_eos(const bool p_should_output_eos) {
+    should_output_eos = p_should_output_eos;
 };
 
 String GDLlama::get_input_prefix() const {
@@ -316,7 +344,9 @@ void GDLlama::set_n_ubatch(const int32_t p_n_ubatch) {
 String GDLlama::generate_text_common(String prompt) {
     LOG("generate_text_common start\n");
 
-    llama_runner.reset(new LlamaRunner(should_output_prompt));
+    llama_runner.reset(
+        new LlamaRunner(should_output_prompt, should_output_bos, should_output_eos)
+    );
 
     // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
     params.antiprompt.clear();

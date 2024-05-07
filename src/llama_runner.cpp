@@ -1,4 +1,5 @@
 #include "llama_runner.h"
+#include "llama.h"
 #include <chrono>
 #include <common.h>
 #include <fstream>
@@ -17,10 +18,16 @@
 #include <windows.h>
 #endif
 
-LlamaRunner::LlamaRunner(bool should_output_prompt) : should_stop_generation {false},
+LlamaRunner::LlamaRunner(
+    bool should_output_prompt,
+    bool should_output_bos,
+    bool should_output_eos
+) : should_stop_generation {false},
     is_waiting_input {false},
     input {""},
-    should_output_prompt {should_output_prompt}
+    should_output_prompt {should_output_prompt},
+    should_output_bos {should_output_bos},
+    should_output_eos {should_output_eos}
 {
     log_set_target("llama.log");
 }
@@ -664,8 +671,13 @@ std::string LlamaRunner::llama_generate_text(
         if (input_echo && display) {
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
-                generated_text.append(token_str);
-                on_generate_text_updated(token_str);
+
+                bool is_bos = (id == llama_token_bos(model));
+                bool is_eos = (id == llama_token_eos(model));
+                if ((!is_bos || should_output_bos) && (!is_eos || should_output_eos)) {
+                    generated_text.append(token_str);
+                    on_generate_text_updated(token_str);
+                }
                 printf("%s", token_str.c_str());
 
                 if (embd.size() > 1) {

@@ -10,10 +10,16 @@ class LlamaRunner {
         bool should_stop_generation;
         bool is_waiting_input;
         bool should_output_prompt;
+        bool should_output_bos;
+        bool should_output_eos;
         std::string input;
 
     public:
-        LlamaRunner(bool should_output_prompt = true);
+        LlamaRunner(
+            bool should_output_prompt = true,
+            bool should_output_bos = true,
+            bool should_output_eos = true
+        );
         ~LlamaRunner();
         static bool file_exists(const std::string &path);
         static bool file_is_empty(const std::string &path);

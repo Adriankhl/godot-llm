@@ -22,6 +22,8 @@ class GDLlama : public Node {
         static void dummy();
         gpt_params params;
         bool should_output_prompt;
+        bool should_output_bos;
+        bool should_output_eos;
         std::string reverse_prompt;
         std::unique_ptr<LlamaRunner> llama_runner;
         Ref<Mutex> generate_text_mutex;
@@ -55,6 +57,12 @@ class GDLlama : public Node {
 
         bool get_should_output_prompt() const;
         void set_should_output_prompt(const bool p_should_output_prompt);
+
+        bool get_should_output_bos() const;
+        void set_should_output_bos(const bool p_should_output_bos);
+
+        bool get_should_output_eos() const;
+        void set_should_output_eos(const bool p_should_output_eos);
 
         String get_input_prefix() const;
         void set_input_prefix(const String p_input_prefix);
