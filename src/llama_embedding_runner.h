@@ -13,7 +13,7 @@ class LlamaEmbeddingRunner {
     public:
         LlamaEmbeddingRunner();
         ~LlamaEmbeddingRunner();
-        std::vector<float> compute_embedding(gpt_params params);
+        std::vector<float> compute_embedding(std::string prompt, gpt_params params);
 };
 
 #endif //LLAMA_EMBEDDDING_RUNNER_H

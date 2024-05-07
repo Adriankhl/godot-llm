@@ -1,5 +1,6 @@
 #include "llama_embedding_runner.h"
 #include "common.h"
+#include <string>
 #include <vector>
 
 LlamaEmbeddingRunner::LlamaEmbeddingRunner() {}
@@ -51,7 +52,9 @@ void LlamaEmbeddingRunner::batch_decode(llama_context * ctx, llama_batch & batch
     }
 }
 
-std::vector<float> LlamaEmbeddingRunner::compute_embedding(gpt_params params) {
+std::vector<float> LlamaEmbeddingRunner::compute_embedding(std::string prompt, gpt_params params) {
+    params.prompt = prompt;
+
     params.embedding = true;
     // For non-causal models, batch size must be equal to ubatch size
     params.n_ubatch = params.n_batch;

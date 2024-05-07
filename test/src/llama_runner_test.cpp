@@ -2,7 +2,6 @@
 #include "common.h"
 #include <iostream>
 #include <ostream>
-#include <regex>
 #include <string>
 
 int main(int argc, char ** argv) {

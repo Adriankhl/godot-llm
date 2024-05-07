@@ -13,16 +13,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Release base test",
-            "program": "${workspaceFolder}/build_release/base_test.exe",
+            "name": "Release llama_runner test",
+            "program": "${workspaceFolder}/build_release/llama_runner_test.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug base test",
-            "program": "${workspaceFolder}/build/base_test.exe",
+            "name": "Debug llama_runner test",
+            "program": "${workspaceFolder}/build/llama_runner_test.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
         },
