@@ -37,6 +37,10 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_reverse_prompt", "p_reverse_prompt"), &GDLlama::set_reverse_prompt);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "reverse_prompt", PROPERTY_HINT_NONE), "set_reverse_prompt", "get_reverse_prompt");
 
+    ClassDB::bind_method(D_METHOD("get_should_output_prompt"), &GDLlama::get_should_output_prompt);
+	ClassDB::bind_method(D_METHOD("set_should_output_prompt", "p_should_output_prompt"), &GDLlama::set_should_output_prompt);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_prompt", PROPERTY_HINT_NONE), "set_should_output_prompt", "get_should_output_prompt");
+
 	ClassDB::bind_method(D_METHOD("get_input_prefix"), &GDLlama::get_input_prefix);
 	ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &GDLlama::set_input_prefix);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
@@ -114,7 +118,8 @@ void GDLlama::dummy() {}
 
 GDLlama::GDLlama() : params {gpt_params()},
     reverse_prompt {""},
-    llama_runner {new LlamaRunner()}
+    llama_runner {new LlamaRunner(should_output_prompt)},
+    should_output_prompt {true}
 {
     log_set_target(stdout);
     LOG("Instantiate GDLlama mutex\n");
@@ -187,6 +192,13 @@ String GDLlama::get_reverse_prompt() const {
 };
 void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
     reverse_prompt = std::string(p_reverse_prompt.utf8().get_data());
+};
+
+bool GDLlama::get_should_output_prompt() const {
+    return should_output_prompt;
+};
+void GDLlama::set_should_output_prompt(const bool p_should_output_prompt) {
+    should_output_prompt = p_should_output_prompt;
 };
 
 String GDLlama::get_input_prefix() const {
@@ -304,7 +316,7 @@ void GDLlama::set_n_ubatch(const int32_t p_n_ubatch) {
 String GDLlama::generate_text_common(String prompt) {
     LOG("generate_text_common start\n");
 
-    llama_runner.reset(new LlamaRunner());
+    llama_runner.reset(new LlamaRunner(should_output_prompt));
 
     // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)
     params.antiprompt.clear();

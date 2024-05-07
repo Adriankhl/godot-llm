@@ -17,9 +17,10 @@
 #include <windows.h>
 #endif
 
-LlamaRunner::LlamaRunner() : should_stop_generation {false},
+LlamaRunner::LlamaRunner(bool should_output_prompt) : should_stop_generation {false},
     is_waiting_input {false},
-    input {""}
+    input {""},
+    should_output_prompt {should_output_prompt}
 {
     log_set_target("llama.log");
 }
@@ -420,7 +421,7 @@ std::string LlamaRunner::llama_generate_text(
     }
 
     bool is_antiprompt        = false;
-    bool input_echo           = true;
+    bool input_echo           = should_output_prompt;
     bool display              = true;
     bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
