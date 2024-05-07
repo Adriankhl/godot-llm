@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 project(gdllama)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -89,3 +91,8 @@ file(GLOB test_files
 add_executable(llama_runner_test ${test_files} ${src_files})
 
 target_link_libraries(llama_runner_test PRIVATE ${LIB_NAME} godot-cpp common llama)
+
+add_test(
+  NAME llama_runner_test
+  COMMAND llama_runner_test
+)

@@ -142,7 +142,7 @@ std::string LlamaRunner::llama_generate_text(
 
     if (model == NULL) {
         LOG("%s: error: unable to load model\n", __func__);
-        return std::string(__func__) + ": error: unable to load model " + params.model + "\n";
+        return "Error: unable to load model";
     }
 
     const int n_ctx_train = llama_n_ctx_train(model);
