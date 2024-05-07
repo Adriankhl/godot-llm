@@ -91,14 +91,23 @@ class GDLlama : public Node {
         bool get_penalize_nl() const;
         void set_penalize_nl(const bool p_penalize_nl);
 
+        int32_t get_top_k() const;
+        void set_top_k(const int32_t p_top_k);
+
+        float get_top_p() const;
+        void set_top_p(const float p_top_p);
+
+        float get_min_p() const;
+        void set_min_p(const float p_min_p);
+
+        int32_t get_n_threads() const;
+        void set_n_threads(const int32_t n_threads);
+
         int32_t get_n_gpu_layer() const;
         void set_n_gpu_layer(const int32_t p_n_gpu_layers);
 
         bool get_escape() const;
         void set_escape(const bool p_escape);
-
-        int32_t get_n_threads() const;
-        void set_n_threads(const int32_t n_threads);
 
         int32_t get_n_batch() const;
         void set_n_batch(const int32_t p_n_batch);

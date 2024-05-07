@@ -85,6 +85,18 @@ void GDLlama::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_penalize_nl", "p_penalize_nl"), &GDLlama::set_penalize_nl);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "penalize_nl", PROPERTY_HINT_NONE), "set_penalize_nl", "get_penalize_nl");
 
+    ClassDB::bind_method(D_METHOD("get_top_k"), &GDLlama::get_top_k);
+    ClassDB::bind_method(D_METHOD("set_top_k", "p_top_k"), &GDLlama::set_top_k);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "top_k", PROPERTY_HINT_NONE), "set_top_k", "get_top_k");
+
+    ClassDB::bind_method(D_METHOD("get_top_p"), &GDLlama::get_top_p);
+    ClassDB::bind_method(D_METHOD("set_top_p", "p_top_p"), &GDLlama::set_top_p);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "top_p", PROPERTY_HINT_NONE), "set_top_p", "get_top_p");
+
+    ClassDB::bind_method(D_METHOD("get_min_p"), &GDLlama::get_min_p);
+    ClassDB::bind_method(D_METHOD("set_min_p", "p_min_p"), &GDLlama::set_min_p);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::FLOAT, "min_p", PROPERTY_HINT_NONE), "set_min_p", "get_min_p");
+
     ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlama::get_n_threads);
     ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlama::set_n_threads);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
@@ -299,6 +311,30 @@ bool GDLlama::get_penalize_nl() const {
 
 void GDLlama::set_penalize_nl(const bool p_penalize_nl) {
     params.sparams.penalize_nl = p_penalize_nl;
+}
+
+int32_t GDLlama::get_top_k() const {
+    return params.sparams.top_k;
+}
+
+void GDLlama::set_top_k(const int32_t p_top_k) {
+    params.sparams.top_k = p_top_k;
+}
+
+float GDLlama::get_top_p() const {
+    return params.sparams.top_p;
+}
+
+void GDLlama::set_top_p(const float p_top_p) {
+    params.sparams.top_p = p_top_p;
+}
+
+float GDLlama::get_min_p() const {
+    return params.sparams.min_p;
+}
+
+void GDLlama::set_min_p(const float p_min_p) {
+    params.sparams.min_p = p_min_p;
 }
 
 int32_t GDLlama::get_n_threads() const {
