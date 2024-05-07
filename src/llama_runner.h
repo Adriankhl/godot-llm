@@ -1,5 +1,5 @@
-#ifndef LLAMA_FUNCTIONS_H
-#define LLAMA_FUNCTIONS_H
+#ifndef LLAMA_RUNNER_H
+#define LLAMA_RUNNER_H
 
 #include <common.h>
 #include <functional>
@@ -36,4 +36,4 @@ class LlamaRunner {
         bool get_is_waiting_input();
 };
 
-#endif
+#endif //LLAMA_RUNNER_H
