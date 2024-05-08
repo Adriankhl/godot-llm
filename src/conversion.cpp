@@ -1,4 +1,6 @@
 #include "conversion.h"
+#include <iostream>
+#include <string>
 #include <vector>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -22,11 +24,13 @@ PackedFloat32Array float32_vec_to_array(std::vector<float> vec) {
 }
 
 std::string string_gd_to_std(String s) {
-    return s.utf8().get_data();
+    return std::string(s.utf8().get_data());
 }
 
 String string_std_to_gd(std::string s) {
-    return String(s.c_str());
+    String new_s;
+    new_s.parse_utf8(s.data());
+    return new_s;
 }
 
 } //namespace godot
