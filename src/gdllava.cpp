@@ -1,4 +1,5 @@
 #include "gdllava.h"
+#include "conversion.h"
 #include "llava_runner.h"
 
 namespace godot {
@@ -66,11 +67,11 @@ void GDLlava::_exit_tree() {
 }
 
 String GDLlava::get_model_path() const {
-    return String(params.model.c_str());
+    return string_std_to_gd(params.model);
 }
 
 void GDLlava::set_model_path(const String p_model_path) {
-    params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
 int32_t GDLlava::get_n_ctx() const {

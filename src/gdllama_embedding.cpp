@@ -1,3 +1,4 @@
+#include "conversion.h"
 #include "gdllama_embedding.h"
 #include "llama_embedding_runner.h"
 #include "log.h"
@@ -74,11 +75,11 @@ void GDLlamaEmbedding::_exit_tree() {
 }
 
 String GDLlamaEmbedding::get_model_path() const {
-    return String(params.model.c_str());
+    return string_std_to_gd(params.model);
 }
 
 void GDLlamaEmbedding::set_model_path(const String p_model_path) {
-    params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
 int32_t GDLlamaEmbedding::get_n_batch() const {
@@ -98,7 +99,7 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
     std::vector<float> vec = llama_embedding_runner->compute_embedding(
-        prompt.utf8().get_data(),
+        string_gd_to_std(prompt),
         params,
         [this](std::vector<float> vec) {
             PackedFloat32Array array = float32_vec_to_array(vec);
@@ -164,23 +165,6 @@ Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
     return error;
 }
 
-
-std::vector<float> GDLlamaEmbedding::float32_array_to_vec(PackedFloat32Array array) {
-    std::vector<float> vec {};
-    for (float f : array) {
-        vec.push_back(f);
-    }
-    return vec;
-}
-
-PackedFloat32Array GDLlamaEmbedding::float32_vec_to_array(std::vector<float> vec) {
-    PackedFloat32Array array {};
-    for (float f : vec) {
-        array.push_back(f);
-    }
-    return array;
-}
-
 float GDLlamaEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2){
     if (array1.size() != array2.size() || array1.size() == 0) {
         LOG("Error: embedding sizes don't match");
@@ -205,13 +189,13 @@ float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
     std::vector<float> vec1 = llama_embedding_runner->compute_embedding(
-        s1.utf8().get_data(),
+        string_gd_to_std(s1),
         params,
         [](auto a){}
     );
 
     std::vector<float> vec2 = llama_embedding_runner->compute_embedding(
-        s2.utf8().get_data(),
+        string_gd_to_std(s2),
         params,
         [](auto a){}
     );

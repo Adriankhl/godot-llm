@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set(src_files
+  "src/conversion.h"
+  "src/conversion.cpp"
   "src/gdllama_embedding.h"
   "src/gdllama_embedding.cpp"
   "src/gdllama.h"

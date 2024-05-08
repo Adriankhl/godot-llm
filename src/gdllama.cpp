@@ -1,4 +1,5 @@
 #include "gdllama.h"
+#include "conversion.h"
 #include "llama_runner.h"
 #include "log.h"
 #include <godot_cpp/classes/global_constants.hpp>
@@ -190,11 +191,11 @@ void GDLlama::_exit_tree() {
 }
 
 String GDLlama::get_model_path() const {
-    return String(params.model.c_str());
+    return string_std_to_gd(params.model);
 }
 
 void GDLlama::set_model_path(const String p_model_path) {
-    params.model = std::string(p_model_path.trim_prefix(String("res://")).utf8().get_data());
+    params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
 bool GDLlama::get_instruct() const {
@@ -214,11 +215,11 @@ void GDLlama::set_interactive(const bool p_interactive) {
 }
 
 String GDLlama::get_reverse_prompt() const {
-    return String(reverse_prompt.c_str());
+    return string_std_to_gd(reverse_prompt);
 };
 
 void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
-    reverse_prompt = std::string(p_reverse_prompt.utf8().get_data());
+    reverse_prompt = string_gd_to_std(p_reverse_prompt);
 };
 
 bool GDLlama::get_should_output_prompt() const {
@@ -246,19 +247,19 @@ void GDLlama::set_should_output_eos(const bool p_should_output_eos) {
 };
 
 String GDLlama::get_input_prefix() const {
-    return String(params.input_prefix.c_str());
+    return string_std_to_gd(params.input_prefix);
 };
 
 void GDLlama::set_input_prefix(const String p_input_prefix) {
-    params.input_prefix = std::string(p_input_prefix.utf8().get_data());
+    params.input_prefix = string_gd_to_std(p_input_prefix);
 };
 
 String GDLlama::get_input_suffix() const {
-    return String(params.input_suffix.c_str());
+    return string_std_to_gd(params.input_suffix);
 };
 
 void GDLlama::set_input_suffix(const String p_input_suffix) {
-    params.input_suffix = std::string(p_input_suffix.utf8().get_data());
+    params.input_suffix = string_gd_to_std(p_input_suffix);
 };
 
 int32_t GDLlama::get_n_ctx() const {
@@ -397,22 +398,22 @@ String GDLlama::generate_text_common(String prompt) {
     }
 
     std::string text = llama_runner->llama_generate_text(
-        std::string(prompt.utf8().get_data()),
+        string_gd_to_std(prompt),
             params,
             [this](std::string s) {
-                String new_text {s.c_str()};
+                String new_text = string_std_to_gd(s);
                 call_deferred("emit_signal", "generate_text_updated", new_text);
             },
             [this]() {
                 call_deferred("emit_signal", "input_wait_started");
             },
             [this](std::string s) {
-                String text {s.c_str()};
+                String text {string_std_to_gd(s)};
                 call_deferred("emit_signal", "generate_text_finished", text);
             }
     );
 
-    return String(text.c_str());
+    return string_std_to_gd(text);
 }
 
 String GDLlama::generate_text_simple_internal(String prompt) {
@@ -451,7 +452,7 @@ String GDLlama::generate_text_simple(String prompt) {
 
 String GDLlama::generate_text_grammar_internal(String prompt, String grammar) {
     LOG("generate_text_grammar_internal\n");
-    params.sparams.grammar = std::string(grammar.utf8().get_data());
+    params.sparams.grammar = string_gd_to_std(grammar);
 
     String full_generated_text = generate_text_common(prompt);
 
@@ -487,7 +488,7 @@ String GDLlama::generate_text_grammar(String prompt, String grammar) {
 
 String GDLlama::generate_text_json_internal(String prompt, String json) {
     LOG("generate_text_json_internal\n");
-    std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(json.utf8().get_data()));
+    std::string grammar = json_schema_to_grammar(nlohmann::ordered_json::parse(string_gd_to_std(json)));
     params.sparams.grammar = grammar;
 
     String full_generated_text = generate_text_common(prompt);
@@ -591,8 +592,8 @@ void GDLlama::stop_generate_text() {
 }
 
 void GDLlama::input_text(String input) {
-    LOG("input_text: %s\n", input.utf8().get_data());
-    llama_runner->set_input(std::string(input.utf8().get_data()));
+    LOG("input_text: %s\n", string_gd_to_std(input).c_str());
+    llama_runner->set_input(string_gd_to_std(input));
 }
 
 bool GDLlama::is_running() {

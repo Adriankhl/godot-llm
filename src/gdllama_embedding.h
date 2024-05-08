@@ -7,7 +7,6 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
-#include <vector>
 
 
 namespace godot {
@@ -31,8 +30,7 @@ class GDLlamaEmbedding : public Node {
     public:
         GDLlamaEmbedding();
         ~GDLlamaEmbedding();
-        static std::vector<float> float32_array_to_vec(PackedFloat32Array array);
-        static PackedFloat32Array float32_vec_to_array(std::vector<float> vec);
+
         void _exit_tree() override;
         String get_model_path() const;
         void set_model_path(const String p_model_path);
