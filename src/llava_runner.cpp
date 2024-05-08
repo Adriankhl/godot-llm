@@ -283,6 +283,12 @@ std::string LlavaRunner::llava_generate_text_base64(
 
     params.prompt = IMG_BASE64_TAG_BEGIN + image_base64 + IMG_BASE64_TAG_END + prompt;
 
+    //Need to push an empty image for the last loop to process
+    params.image.clear();
+    if (prompt_contains_image(params.prompt)) {
+        params.image.push_back(" ");
+    }
+
     ggml_time_init();
 
 //    if (!gpt_params_parse(argc, argv, params)) {

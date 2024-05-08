@@ -75,7 +75,7 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
 
-target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama llava)
+target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama llava_static llava)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 
@@ -99,7 +99,7 @@ set(llama_runnner_test_files
 
 add_executable(llama_runner_test ${llama_runnner_test_files} ${src_files})
 
-target_link_libraries(llama_runner_test PRIVATE godot-cpp common llama llava)
+target_link_libraries(llama_runner_test PRIVATE godot-cpp common llama llava_static llava)
 
 add_test(
   NAME llama_runner_test
@@ -112,9 +112,22 @@ set(llama_embedding_runnner_test_files
 
 add_executable(llama_embedding_runner_test ${llama_embedding_runnner_test_files} ${src_files})
 
-target_link_libraries(llama_embedding_runner_test PRIVATE godot-cpp common llama llava)
+target_link_libraries(llama_embedding_runner_test PRIVATE godot-cpp common llama llava_static llava)
 
 add_test(
   NAME llama_embedding_runner_test
   COMMAND llama_embedding_runner_test
+)
+
+set(llava_runnner_test_files
+  "test/src/llava_runner_test.cpp"
+)
+
+add_executable(llava_runner_test ${llava_runnner_test_files} ${src_files})
+
+target_link_libraries(llava_runner_test PRIVATE godot-cpp common llama llava_static llava)
+
+add_test(
+  NAME llava_runner_test
+  COMMAND llava_runner_test
 )
