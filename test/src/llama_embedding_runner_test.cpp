@@ -48,8 +48,8 @@ int main(int argc, char ** argv) {
     float s12 = ler->similarity_cos(v1, v2);
     float s23 = ler->similarity_cos(v2, v3);
 
-    std::cout << "Similarity 1 and 2: " << s12  << std::endl;
-    std::cout << "Similarity 2 and 3: " << s23  << std::endl;
+    std::cout << "Similarity '" << prompt1 << "' and '" << prompt2 << "' :"  << s12  << std::endl;
+    std::cout << "Similarity '" << prompt2 << "' and '" << prompt3 << "' :"  << s23  << std::endl;
 
     if (s12 < s23) {
         return 1;
