@@ -19,7 +19,7 @@ class LlamaEmbeddingRunner {
             gpt_params params,
             std::function<void(std::vector<float>)> on_compute_finished
         );
-        float similarity_cos(std::vector<float> embd1, std::vector<float> embd2);
+        static float similarity_cos(std::vector<float> embd1, std::vector<float> embd2);
 };
 
 #endif //LLAMA_EMBEDDDING_RUNNER_H

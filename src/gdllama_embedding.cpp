@@ -18,8 +18,11 @@ void GDLlamaEmbedding::_bind_methods() {
     ClassDB::bind_method(D_METHOD("compute_embedding", "prompt"), &GDLlamaEmbedding::compute_embedding);
     ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDLlamaEmbedding::run_compute_embedding);
     ClassDB::bind_method(D_METHOD("is_running"), &GDLlamaEmbedding::is_running);
+    ClassDB::bind_method(D_METHOD("similarity_cos_array", "array1", "array2"), &GDLlamaEmbedding::similarity_cos_array);
+    ClassDB::bind_method(D_METHOD("run_similarity_cos_string", "s1", "s2"), &GDLlamaEmbedding::run_similarity_cos_string);
 
-    ADD_SIGNAL(MethodInfo("compute_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
+    ADD_SIGNAL(MethodInfo("compute_embedding_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
+    ADD_SIGNAL(MethodInfo("similarity_cos_string_finished", PropertyInfo(Variant::FLOAT, "similarity")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
@@ -96,7 +99,7 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
         params,
         [this](std::vector<float> vec) {
             PackedFloat32Array array = float32_vec_to_array(vec);
-            call_deferred("emit_signal", "compute_finished", array);
+            call_deferred("emit_signal", "compute_embedding_finished", array);
         }
     );
 
@@ -150,6 +153,97 @@ Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
 
     Callable c = callable_mp(this, &GDLlamaEmbedding::compute_embedding_internal);
     Error error = compute_embedding_thread->start(c.bind(prompt));
+
+    return error;
+}
+
+
+std::vector<float> GDLlamaEmbedding::float32_array_to_vec(PackedFloat32Array array) {
+    std::vector<float> vec {};
+    for (float f : array) {
+        vec.push_back(f);
+    }
+    return vec;
+}
+
+PackedFloat32Array GDLlamaEmbedding::float32_vec_to_array(std::vector<float> vec) {
+    PackedFloat32Array array {};
+    for (float f : vec) {
+        array.push_back(f);
+    }
+    return array;
+}
+
+float GDLlamaEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2){
+    if (array1.size() != array2.size() || array1.size() == 0) {
+        LOG("Error: embedding sizes don't match");
+        return 0.0;
+    }
+
+    double sum  = 0.0;
+    double sum1 = 0.0;
+    double sum2 = 0.0;
+
+    for (int i = 0; i < array1.size(); i++) {
+        sum  += array1[i] * array2[i];
+        sum1 += array1[i] * array1[i];
+        sum2 += array2[i] * array2[i];
+    }
+
+    return sum / (sqrt(sum1) * sqrt(sum2));
+};
+
+float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
+    LOG("similarity_cos_string_internal\n");
+    llama_embedding_runner.reset(new LlamaEmbeddingRunner());
+
+    std::vector<float> vec1 = llama_embedding_runner->compute_embedding(
+        s1.utf8().get_data(),
+        params,
+        [](auto a){}
+    );
+
+    std::vector<float> vec2 = llama_embedding_runner->compute_embedding(
+        s2.utf8().get_data(),
+        params,
+        [](auto a){}
+    );
+
+    float similarity = LlamaEmbeddingRunner::similarity_cos(vec1, vec2);
+
+    call_deferred("emit_signal", "similarity_cos_string_finished", similarity);
+
+    compute_embedding_mutex->unlock();
+
+    return similarity;
+}
+
+
+Error GDLlamaEmbedding::run_similarity_cos_string(String s1, String s2) {
+    LOG("run_similarity_cos_string\n");
+    func_mutex->lock();
+
+    std::cout << "Locking" << std::endl;
+
+    if (compute_embedding_mutex->try_lock()) {
+        LOG("GDLlamaEmbedding is busy\n");
+    }
+
+    compute_embedding_mutex->lock();
+    LOG("compute_embedding_mutex locked\n");
+
+    func_mutex->unlock();
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (compute_embedding_thread->is_started()) {
+        compute_embedding_thread->wait_to_finish();
+    }
+
+    compute_embedding_thread.instantiate();
+    LOG("compute_embedding_thread instantiated\n");
+
+    Callable c = callable_mp(this, &GDLlamaEmbedding::similarity_cos_string_internal);
+    Error error = compute_embedding_thread->start(c.bind(s1, s2));
 
     return error;
 }

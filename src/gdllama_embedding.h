@@ -23,6 +23,7 @@ class GDLlamaEmbedding : public Node {
         Ref<Mutex> func_mutex;
         Ref<Thread> compute_embedding_thread;
         PackedFloat32Array compute_embedding_internal(String prompt);
+        float similarity_cos_string_internal(String s1, String s2);
 
     protected:
 	    static void _bind_methods();
@@ -30,6 +31,8 @@ class GDLlamaEmbedding : public Node {
     public:
         GDLlamaEmbedding();
         ~GDLlamaEmbedding();
+        static std::vector<float> float32_array_to_vec(PackedFloat32Array array);
+        static PackedFloat32Array float32_vec_to_array(std::vector<float> vec);
         void _exit_tree() override;
         String get_model_path() const;
         void set_model_path(const String p_model_path);
@@ -38,23 +41,9 @@ class GDLlamaEmbedding : public Node {
         bool is_running();
         PackedFloat32Array compute_embedding(String prompt);
         Error run_compute_embedding(String prompt);
+        float similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2);
+        Error run_similarity_cos_string(String s1, String s2);
 };
-
-inline std::vector<float> float32_array_to_vec(PackedFloat32Array array) {
-    std::vector<float> vec {};
-    for (float f : array) {
-        vec.push_back(f);
-    }
-    return vec;
-}
-
-inline PackedFloat32Array float32_vec_to_array(std::vector<float> vec) {
-    PackedFloat32Array array {};
-    for (float f : vec) {
-        array.push_back(f);
-    }
-    return array;
-}
 
 } //namespace godot
 
