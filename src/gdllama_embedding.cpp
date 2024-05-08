@@ -87,15 +87,11 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
     LOG("compute_embedding_internal\n");
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
-    std::vector<float> embedding = llama_embedding_runner->compute_embedding(prompt.utf8().get_data(), params);
+    std::vector<float> vec = llama_embedding_runner->compute_embedding(prompt.utf8().get_data(), params);
 
-    PackedFloat32Array pfa {};
+    PackedFloat32Array array = float32_vec_to_array(vec);
 
-    for (float f : embedding) {
-        pfa.append(f);
-    }
-
-    return pfa;
+    return array;
 }
 
 PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
