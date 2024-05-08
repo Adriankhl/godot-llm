@@ -42,6 +42,7 @@ class GDLlamaEmbedding : public Node {
         PackedFloat32Array compute_embedding(String prompt);
         Error run_compute_embedding(String prompt);
         float similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2);
+        float similarity_cos_string(String s1, String s2);
         Error run_similarity_cos_string(String s1, String s2);
 };
 

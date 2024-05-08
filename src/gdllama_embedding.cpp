@@ -21,6 +21,7 @@ void GDLlamaEmbedding::_bind_methods() {
     ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDLlamaEmbedding::run_compute_embedding);
     ClassDB::bind_method(D_METHOD("is_running"), &GDLlamaEmbedding::is_running);
     ClassDB::bind_method(D_METHOD("similarity_cos_array", "array1", "array2"), &GDLlamaEmbedding::similarity_cos_array);
+    ClassDB::bind_method(D_METHOD("similarity_cos_string", "s1", "s2"), &GDLlamaEmbedding::similarity_cos_string);
     ClassDB::bind_method(D_METHOD("run_similarity_cos_string", "s1", "s2"), &GDLlamaEmbedding::run_similarity_cos_string);
 
     ADD_SIGNAL(MethodInfo("compute_embedding_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
@@ -107,6 +108,8 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
 
     PackedFloat32Array array = float32_vec_to_array(vec);
 
+    LOG("compute_embedding_internal -- done\n");
+
     return array;
 }
 
@@ -127,14 +130,14 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
 
     compute_embedding_mutex->unlock();
 
+    LOG("compute_embedding -- done\n");
+
     return pfa;
 }
 
 Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
     LOG("run_compute_embedding\n");
     func_mutex->lock();
-    
-    std::cout << "Locking" << std::endl;
     
     if (compute_embedding_mutex->try_lock()) {
         LOG("GDLlamaEmbedding is busy\n");
@@ -155,6 +158,8 @@ Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
 
     Callable c = callable_mp(this, &GDLlamaEmbedding::compute_embedding_internal);
     Error error = compute_embedding_thread->start(c.bind(prompt));
+
+    LOG("run_compute_embedding -- done\n");
 
     return error;
 }
@@ -217,6 +222,28 @@ float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
 
     compute_embedding_mutex->unlock();
 
+    LOG("similarity_cos_string_internal -- done\n");
+
+    return similarity;
+}
+
+float GDLlamaEmbedding::similarity_cos_string(String s1, String s2) {
+    LOG("similarity_cos_string\n");
+    func_mutex->lock();
+
+    if (compute_embedding_mutex->try_lock()) {
+        LOG("GDLlamaEmbedding is busy\n");
+    }
+
+    compute_embedding_mutex->lock();
+    LOG("compute_embedding_mutex locked\n");
+
+    func_mutex->unlock();
+
+    float similarity = similarity_cos_string(s1, s2);
+
+    LOG("similarity_cos_string -- done\n");
+
     return similarity;
 }
 
@@ -224,8 +251,6 @@ float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
 Error GDLlamaEmbedding::run_similarity_cos_string(String s1, String s2) {
     LOG("run_similarity_cos_string\n");
     func_mutex->lock();
-
-    std::cout << "Locking" << std::endl;
 
     if (compute_embedding_mutex->try_lock()) {
         LOG("GDLlamaEmbedding is busy\n");
@@ -246,6 +271,8 @@ Error GDLlamaEmbedding::run_similarity_cos_string(String s1, String s2) {
 
     Callable c = callable_mp(this, &GDLlamaEmbedding::similarity_cos_string_internal);
     Error error = compute_embedding_thread->start(c.bind(s1, s2));
+
+    LOG("run_similarity_cos_string -- done\n");
 
     return error;
 }

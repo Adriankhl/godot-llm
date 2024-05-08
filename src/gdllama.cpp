@@ -553,8 +553,6 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
     LOG("run_generate_text\n");
     func_mutex->lock();
 
-    std::cout << "Locking" << std::endl;
-
     if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
     }
