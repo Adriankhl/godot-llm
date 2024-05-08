@@ -4,6 +4,7 @@
 #include "common.h"
 #include "llama.h"
 #include "llava.h"
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -29,7 +30,13 @@ class LlavaRunner {
         static std::string remove_image_from_prompt(const std::string& prompt, const char * replacement = "");
         static void show_additional_info(int /*argc*/, char ** argv);
         static struct llava_image_embed * load_image(llava_context * ctx_llava, gpt_params * params, const std::string & fname);
-        static void process_prompt(struct llava_context * ctx_llava, struct llava_image_embed * image_embed, gpt_params * params, const std::string & prompt);
+        static std::string process_prompt(
+            struct llava_context * ctx_llava,
+            struct llava_image_embed * image_embed,
+            gpt_params * params,
+            const std::string & prompt,
+            std::function<void(std::string)> on_generate_text_updated
+        );
         static struct llama_model * llava_init(gpt_params * params);
         static struct llava_context * llava_init_context(gpt_params * params, llama_model * model);
         static void llava_free(struct llava_context * ctx_llava);
@@ -39,7 +46,13 @@ class LlavaRunner {
     public:
         LlavaRunner();
         ~LlavaRunner();
-        std::string llava_generate_text();
+        std::string llava_generate_text_base64(
+            std::string prompt,
+            std::string image_base64,
+            gpt_params params,
+            std::function<void(std::string)> on_generate_text_updated,
+            std::function<void(std::string)> on_generate_text_finished
+        );
 };
 
 #endif //LLAVA_RUNNER_H

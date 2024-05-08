@@ -140,7 +140,13 @@ struct llava_image_embed * LlavaRunner::load_image(llava_context * ctx_llava, gp
     return embed;
 }
 
-void LlavaRunner::process_prompt(struct llava_context * ctx_llava, struct llava_image_embed * image_embed, gpt_params * params, const std::string & prompt) {
+std::string LlavaRunner::process_prompt(
+    struct llava_context * ctx_llava,
+    struct llava_image_embed * image_embed,
+    gpt_params * params,
+    const std::string & prompt,
+    std::function<void(std::string)> on_generate_text_updated
+) {
     int n_past = 0;
 
     const int max_tgt_len = params->n_predict < 0 ? 256 : params->n_predict;
@@ -193,6 +199,7 @@ void LlavaRunner::process_prompt(struct llava_context * ctx_llava, struct llava_
         if (strcmp(tmp, "</s>") == 0) break;
         if (strstr(tmp, "###")) break; // Yi-VL behavior
         printf("%s", tmp);
+        on_generate_text_updated(tmp);
         if (strstr(response.c_str(), "<|im_end|>")) break; // Yi-34B llava-1.6 - for some reason those decode not as the correct token (tokenizer works)
         if (strstr(response.c_str(), "<|im_start|>")) break; // Yi-34B llava-1.6
         if (strstr(response.c_str(), "USER:")) break; // mistral llava-1.6
@@ -202,6 +209,7 @@ void LlavaRunner::process_prompt(struct llava_context * ctx_llava, struct llava_
 
     llama_sampling_free(ctx_sampling);
     printf("\n");
+    return response;
 }
 
 struct llama_model * LlavaRunner::llava_init(gpt_params * params) {
@@ -264,10 +272,18 @@ void LlavaRunner::llama_log_callback_logTee(ggml_log_level level, const char * t
     LOG_TEE("%s", text);
 }
 
-std::string LlavaRunner::llava_generate_text() {
-    ggml_time_init();
+std::string LlavaRunner::llava_generate_text_base64(
+    std::string prompt,
+    std::string image_base64,
+    gpt_params params,
+    std::function<void(std::string)> on_generate_text_updated,
+    std::function<void(std::string)> on_generate_text_finished
+) {
+    std::string generated_text = "";
 
-    gpt_params params;
+    params.prompt = IMG_BASE64_TAG_BEGIN + image_base64 + IMG_BASE64_TAG_END + prompt;
+
+    ggml_time_init();
 
 //    if (!gpt_params_parse(argc, argv, params)) {
 //        show_additional_info(argc, argv);
@@ -302,7 +318,13 @@ std::string LlavaRunner::llava_generate_text() {
         }
 
         // process the prompt
-        process_prompt(ctx_llava, image_embed, &params, params.prompt);
+        generated_text = process_prompt(
+            ctx_llava,
+            image_embed,
+            &params,
+            params.prompt,
+            on_generate_text_updated
+        );
 
         llama_print_timings(ctx_llava->ctx_llama);
         llava_image_embed_free(image_embed);
@@ -311,5 +333,5 @@ std::string LlavaRunner::llava_generate_text() {
     }
     llama_free_model(model);
 
-    return "";
+    return generated_text;
 }

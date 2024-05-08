@@ -18,6 +18,8 @@ set(src_files
   "src/llama_embedding_runner.cpp"
   "src/llama_runner.h"
   "src/llama_runner.cpp"
+  "src/llava_runner.h"
+  "src/llava_runner.cpp"
   "src/register_types.h"
   "src/register_types.cpp"
 )
