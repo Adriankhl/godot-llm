@@ -159,7 +159,10 @@ GDLlama::GDLlama() : params {gpt_params()},
 GDLlama::~GDLlama() {
     LOG("GDLlama destructor\n");
 
-    stop_generate_text();
+    while (!generate_text_mutex->try_lock()) {
+        stop_generate_text();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {
@@ -176,7 +179,10 @@ void GDLlama::_exit_tree() {
 
     LOG("func_mutex locked\n");
 
-    stop_generate_text();
+    while (!generate_text_mutex->try_lock()) {
+        stop_generate_text();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {
@@ -430,13 +436,12 @@ String GDLlama::generate_text_simple(String prompt) {
     func_mutex->lock();
 
     if (generate_text_mutex->try_lock()) {
-        generate_text_mutex->lock();
         LOG("generate_text_mutex locked\n");
     } else {
-        LOG("Error: GDLlama is busy\n");
-        return "Error: GDLlama is busy";
+        LOG("GDLlama is busy\n");
     }
-      generate_text_mutex->lock();
+
+    generate_text_mutex->lock();
 
     func_mutex->unlock();
 
@@ -468,12 +473,12 @@ String GDLlama::generate_text_grammar(String prompt, String grammar) {
     func_mutex->lock();
 
     if (generate_text_mutex->try_lock()) {
-        generate_text_mutex->lock();
         LOG("generate_text_mutex locked\n");
     } else {
-        LOG("Error: GDLlama is busy\n");
-        return "Error: GDLlama is busy";
+        LOG("GDLlama is busy\n");
     }
+
+    generate_text_mutex->lock();
 
     func_mutex->unlock();
 
@@ -506,12 +511,12 @@ String GDLlama::generate_text_json(String prompt, String json) {
     func_mutex->lock();
 
     if (generate_text_mutex->try_lock()) {
-        generate_text_mutex->lock();
         LOG("generate_text_mutex locked\n");
     } else {
-        LOG("Error: GDLlama is busy\n");
-        return "Error: GDLlama is busy";
+        LOG("GDLlama is busy\n");
     }
+
+    generate_text_mutex->lock();
 
     func_mutex->unlock();
 
@@ -526,12 +531,12 @@ String GDLlama::generate_text(String prompt, String grammar, String json) {
     func_mutex->lock();
 
     if (generate_text_mutex->try_lock()) {
-        generate_text_mutex->lock();
         LOG("generate_text_mutex locked\n");
     } else {
-        LOG("Error: GDLlama is busy\n");
-        return "Error: GDLlama is busy";
+        LOG("GDLlama is busy\n");
     }
+
+    generate_text_mutex->lock();
 
     func_mutex->unlock();
 
@@ -559,7 +564,7 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
         generate_text_mutex->lock();
         LOG("generate_text_mutex locked\n");
     } else {
-        LOG("Error: GDLlama is busy\n");
+        LOG("GDLlama is busy\n");
         return FAILED;
     }
 
