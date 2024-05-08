@@ -41,4 +41,4 @@ class GDLlava : public Node {
 
 } //namespace godot
 
-#endif //GDLLAMA_EMBEDDING_H
+#endif //GDLLAVA_H

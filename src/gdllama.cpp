@@ -13,9 +13,7 @@
 #include <common/json.hpp>
 #include <common/json-schema-to-grammar.h>
 #include <cstdint>
-#include <iostream>
 #include <memory>
-#include <ostream>
 #include <string>
 
 namespace godot {

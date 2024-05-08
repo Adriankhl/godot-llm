@@ -14,6 +14,8 @@ set(src_files
   "src/gdllama_embedding.cpp"
   "src/gdllama.h"
   "src/gdllama.cpp"
+  "src/gdllava.h"
+  "src/gdllava.cpp"
   "src/llama_embedding_runner.h"
   "src/llama_embedding_runner.cpp"
   "src/llama_runner.h"
