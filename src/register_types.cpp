@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 #include "gdllama.h"
+#include "gdllama_embedding.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -15,6 +16,7 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	}
 
 	ClassDB::register_class<GDLlama>();
+	ClassDB::register_class<GDLlamaEmbedding>();
 }
 
 void uninitialize_llm_module(ModuleInitializationLevel p_level) {
