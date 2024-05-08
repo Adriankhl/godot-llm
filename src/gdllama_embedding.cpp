@@ -17,6 +17,7 @@ void GDLlamaEmbedding::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("compute_embedding", "prompt"), &GDLlamaEmbedding::compute_embedding);
     ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDLlamaEmbedding::run_compute_embedding);
+    ClassDB::bind_method(D_METHOD("is_running"), &GDLlamaEmbedding::is_running);
 
     ADD_SIGNAL(MethodInfo("compute_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
 }
