@@ -16,6 +16,9 @@ void GDLlamaEmbedding::_bind_methods() {
     ClassDB::add_property("GDLlamaEmbedding", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
 
     ClassDB::bind_method(D_METHOD("compute_embedding", "prompt"), &GDLlamaEmbedding::compute_embedding);
+    ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDLlamaEmbedding::run_compute_embedding);
+
+    ADD_SIGNAL(MethodInfo("compute_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
@@ -87,7 +90,14 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
     LOG("compute_embedding_internal\n");
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
-    std::vector<float> vec = llama_embedding_runner->compute_embedding(prompt.utf8().get_data(), params);
+    std::vector<float> vec = llama_embedding_runner->compute_embedding(
+        prompt.utf8().get_data(),
+        params,
+        [this](std::vector<float> vec) {
+            PackedFloat32Array array = float32_vec_to_array(vec);
+            call_deferred("emit_signal", "compute_finished", array);
+        }
+    );
 
     PackedFloat32Array array = float32_vec_to_array(vec);
 
@@ -99,12 +109,11 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
     func_mutex->lock();
 
     if (compute_embedding_mutex->try_lock()) {
-        LOG("compute_embedding_mutex locked\n");
-    } else {
         LOG("GDLlamaEmbedding is busy\n");
     }
 
     compute_embedding_mutex->lock();
+    LOG("compute_embedding_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -113,6 +122,35 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
     compute_embedding_mutex->unlock();
 
     return pfa;
+}
+
+Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
+    LOG("run_compute_embedding\n");
+    func_mutex->lock();
+    
+    std::cout << "Locking" << std::endl;
+    
+    if (compute_embedding_mutex->try_lock()) {
+        LOG("GDLlamaEmbedding is busy\n");
+    }
+
+    compute_embedding_mutex->lock();
+    LOG("compute_embedding_mutex locked\n");
+
+    func_mutex->unlock();
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (compute_embedding_thread->is_started()) {
+        compute_embedding_thread->wait_to_finish();
+    }
+
+    compute_embedding_thread.instantiate();
+    LOG("compute_embedding_thread instantiated\n");
+
+    Callable c = callable_mp(this, &GDLlamaEmbedding::compute_embedding_internal);
+    Error error = compute_embedding_thread->start(c.bind(prompt));
+
+    return error;
 }
 
 } //namespace godot

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "llama.h"
+#include <functional>
 #include <string>
 #include <vector>
 class LlamaEmbeddingRunner {
@@ -13,7 +14,11 @@ class LlamaEmbeddingRunner {
     public:
         LlamaEmbeddingRunner();
         ~LlamaEmbeddingRunner();
-        std::vector<float> compute_embedding(std::string prompt, gpt_params params);
+        std::vector<float> compute_embedding(
+            std::string prompt,
+            gpt_params params,
+            std::function<void(std::vector<float>)> on_compute_finished
+        );
         float similarity_cos(std::vector<float> embd1, std::vector<float> embd2);
 };
 

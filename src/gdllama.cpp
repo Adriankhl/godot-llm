@@ -435,13 +435,12 @@ String GDLlama::generate_text_simple(String prompt) {
     LOG("generate_text_simple\n");
     func_mutex->lock();
 
-    if (generate_text_mutex->try_lock()) {
-        LOG("generate_text_mutex locked\n");
-    } else {
+    if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
     }
 
     generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -472,13 +471,12 @@ String GDLlama::generate_text_grammar(String prompt, String grammar) {
     LOG("generate_text_grammar\n");
     func_mutex->lock();
 
-    if (generate_text_mutex->try_lock()) {
-        LOG("generate_text_mutex locked\n");
-    } else {
+    if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
     }
 
     generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -510,13 +508,12 @@ String GDLlama::generate_text_json(String prompt, String json) {
     LOG("generate_text_json\n");
     func_mutex->lock();
 
-    if (generate_text_mutex->try_lock()) {
-        LOG("generate_text_mutex locked\n");
-    } else {
+    if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
     }
 
     generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -530,13 +527,12 @@ String GDLlama::generate_text(String prompt, String grammar, String json) {
     LOG("generate_text\n");
     func_mutex->lock();
 
-    if (generate_text_mutex->try_lock()) {
-        LOG("generate_text_mutex locked\n");
-    } else {
+    if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
     }
 
     generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -548,7 +544,6 @@ String GDLlama::generate_text(String prompt, String grammar, String json) {
     } else {
         full_generated_text = generate_text_simple_internal(prompt);
     }
-     generate_text_json_internal(prompt, json);
 
     LOG("generate_text_json -- done\n");
     return full_generated_text;
@@ -560,13 +555,12 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
 
     std::cout << "Locking" << std::endl;
 
-    if (generate_text_mutex->try_lock()) {
-        generate_text_mutex->lock();
-        LOG("generate_text_mutex locked\n");
-    } else {
+    if (!generate_text_mutex->try_lock()) {
         LOG("GDLlama is busy\n");
-        return FAILED;
     }
+
+    generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
 
     func_mutex->unlock();
 
@@ -592,7 +586,7 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
     }
 
     LOG("run_generate_text -- done\n");
-    return OK;
+    return error;
 }
 
 void GDLlama::stop_generate_text() {

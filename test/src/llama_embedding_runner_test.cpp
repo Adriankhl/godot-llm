@@ -21,7 +21,7 @@ int main(int argc, char ** argv) {
     params.model = "../../../models/all-MiniLM-L6-v2-Q5_K_M.gguf";
     std::cout << "Model: " << params.model << std::endl;
 
-    std::vector<float> v1 = ler->compute_embedding(prompt1, params);
+    std::vector<float> v1 = ler->compute_embedding(prompt1, params, [](auto a){});
 
     std::cout << "Vector 1: "  << std::endl;
     for (float f: v1) {
@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
     }
     std::cout << std::endl;
 
-    std::vector<float> v2 = ler->compute_embedding(prompt2, params);
+    std::vector<float> v2 = ler->compute_embedding(prompt2, params, [](auto a){});
 
     std::cout << "Vector 2: "  << std::endl;
     for (float f: v2) {
@@ -37,7 +37,7 @@ int main(int argc, char ** argv) {
     }
     std::cout << std::endl;
 
-    std::vector<float> v3 = ler->compute_embedding(prompt3, params);
+    std::vector<float> v3 = ler->compute_embedding(prompt3, params, [](auto a){});
 
     std::cout << "Vector 3: "  << std::endl;
     for (float f: v3) {

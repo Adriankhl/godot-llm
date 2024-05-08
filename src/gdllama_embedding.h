@@ -37,9 +37,10 @@ class GDLlamaEmbedding : public Node {
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();
         PackedFloat32Array compute_embedding(String prompt);
+        Error run_compute_embedding(String prompt);
 };
 
-std::vector<float> float32_array_to_vec(PackedFloat32Array array) {
+inline std::vector<float> float32_array_to_vec(PackedFloat32Array array) {
     std::vector<float> vec {};
     for (float f : array) {
         vec.push_back(f);
@@ -47,7 +48,7 @@ std::vector<float> float32_array_to_vec(PackedFloat32Array array) {
     return vec;
 }
 
-PackedFloat32Array float32_vec_to_array(std::vector<float> vec) {
+inline PackedFloat32Array float32_vec_to_array(std::vector<float> vec) {
     PackedFloat32Array array {};
     for (float f : vec) {
         array.push_back(f);

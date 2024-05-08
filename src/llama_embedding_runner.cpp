@@ -1,6 +1,7 @@
 #include "llama_embedding_runner.h"
 #include "common.h"
 #include "log.h"
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,11 @@ void LlamaEmbeddingRunner::batch_decode(llama_context * ctx, llama_batch & batch
     }
 }
 
-std::vector<float> LlamaEmbeddingRunner::compute_embedding(std::string prompt, gpt_params params) {
+std::vector<float> LlamaEmbeddingRunner::compute_embedding(
+    std::string prompt,
+    gpt_params params,
+    std::function<void(std::vector<float>)> on_compute_finished
+) {
     params.prompt = prompt;
 
     params.embedding = true;
@@ -190,6 +195,8 @@ std::vector<float> LlamaEmbeddingRunner::compute_embedding(std::string prompt, g
     llama_free(ctx);
     llama_free_model(model);
     llama_backend_free();
+
+    on_compute_finished(embeddings);
 
     return embeddings;
 }
