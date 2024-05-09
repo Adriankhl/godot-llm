@@ -30,7 +30,7 @@ class LlavaRunner {
         static std::string remove_image_from_prompt(const std::string& prompt, const char * replacement = "");
         static void show_additional_info(int /*argc*/, char ** argv);
         static struct llava_image_embed * load_image(llava_context * ctx_llava, gpt_params * params, const std::string & fname);
-        static std::string process_prompt(
+        std::string process_prompt(
             struct llava_context * ctx_llava,
             struct llava_image_embed * image_embed,
             gpt_params * params,
@@ -41,6 +41,7 @@ class LlavaRunner {
         static struct llava_context * llava_init_context(gpt_params * params, llama_model * model);
         static void llava_free(struct llava_context * ctx_llava);
         static void llama_log_callback_logTee(ggml_log_level level, const char * text, void * user_data);
+        bool should_stop_generation;
         
 
     public:
@@ -53,6 +54,7 @@ class LlavaRunner {
             std::function<void(std::string)> on_generate_text_updated,
             std::function<void(std::string)> on_generate_text_finished
         );
+        void llava_stop_generate_text();
 };
 
 #endif //LLAVA_RUNNER_H

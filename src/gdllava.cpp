@@ -32,6 +32,7 @@ void GDLlava::_bind_methods() {
     ClassDB::bind_method(D_METHOD("run_generate_text_base64", "prompt", "image_base64"), &GDLlava::run_generate_text_base64);
     ClassDB::bind_method(D_METHOD("run_generate_text_image", "prompt", "image"), &GDLlava::run_generate_text_image);
     ClassDB::bind_method(D_METHOD("is_running"), &GDLlava::is_running);
+    ClassDB::bind_method(D_METHOD("stop_generate_text"), &GDLlava::stop_generate_text);
 
     ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
     ADD_SIGNAL(MethodInfo("generate_text_finished", PropertyInfo(Variant::STRING, "text")));
@@ -275,5 +276,12 @@ Error GDLlava::run_generate_text_image(String prompt, Image* image) {
 bool GDLlava::is_running() {
     return !generate_text_mutex->try_lock() || generate_text_thread->is_alive();
 }
+
+void GDLlava::stop_generate_text() {
+    LOG("Stopping llava_runner\n");
+    llava_runner->llava_stop_generate_text();
+}
+
+
 
 } //namespace godot

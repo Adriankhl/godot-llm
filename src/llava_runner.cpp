@@ -8,7 +8,10 @@
 #include <string>
 
 
-LlavaRunner::LlavaRunner() {};
+LlavaRunner::LlavaRunner() : should_stop_generation {false}
+{
+    log_set_target("llava.log");
+};
 LlavaRunner::~LlavaRunner() {};
 
 bool LlavaRunner::eval_tokens(struct llama_context * ctx_llama, std::vector<llama_token> tokens, int n_batch, int * n_past) {
@@ -193,7 +196,7 @@ std::string LlavaRunner::process_prompt(
 
     struct llama_sampling_context * ctx_sampling = llama_sampling_init(params->sparams);
     std::string response = "";
-    for (int i = 0; i < max_tgt_len; i++) {
+    for (int i = 0; (i < max_tgt_len) && !should_stop_generation; i++) {
         const char * tmp = sample(ctx_sampling, ctx_llava->ctx_llama, &n_past);
         if (strcmp(tmp, "</s>") == 0) break;
         if (strstr(tmp, "###")) break; // Yi-VL behavior
@@ -339,5 +342,11 @@ std::string LlavaRunner::llava_generate_text_base64(
     }
     llama_free_model(model);
 
+    on_generate_text_finished(generated_text);
+
     return generated_text;
+}
+
+void LlavaRunner::llava_stop_generate_text() {
+    should_stop_generation = true;
 }

@@ -47,6 +47,7 @@ class GDLlava : public Node {
         Error run_generate_text_base64(String prompt, String image_base64);
         String generate_text_image(String prompt, Image* image);
         Error run_generate_text_image(String prompt, Image* image);
+        void stop_generate_text();
 };
 
 } //namespace godot
