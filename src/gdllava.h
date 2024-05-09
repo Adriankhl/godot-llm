@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "llava_runner.h"
+#include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>
@@ -22,6 +23,7 @@ class GDLlava : public Node {
         Ref<Thread> generate_text_thread;
         String generate_text_common(String prompt, String image_base64);
         String generate_text_base64_internal(String prompt, String image_base64);
+        String generate_text_image_internal(String prompt, Image* image);
 
     protected:
 	    static void _bind_methods();
@@ -42,6 +44,7 @@ class GDLlava : public Node {
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();
         String generate_text_base64(String prompt, String image_base64);
+        String generate_text_image(String prompt, Image* image);
 };
 
 } //namespace godot

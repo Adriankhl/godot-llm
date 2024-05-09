@@ -2,6 +2,7 @@
 #include "conversion.h"
 #include "llava_runner.h"
 #include "log.h"
+#include <godot_cpp/classes/marshalls.hpp>
 
 namespace godot {
 
@@ -27,6 +28,7 @@ void GDLlava::_bind_methods() {
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
 
     ClassDB::bind_method(D_METHOD("generate_text_base64", "prompt", "image_base64"), &GDLlava::generate_text_base64);
+    ClassDB::bind_method(D_METHOD("generate_text_image", "prompt", "image"), &GDLlava::generate_text_image);
 
     ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
     ADD_SIGNAL(MethodInfo("generate_text_finished", PropertyInfo(Variant::STRING, "text")));
@@ -170,6 +172,42 @@ String GDLlava::generate_text_base64(String prompt, String image_base64) {
     String full_generated_text = generate_text_base64_internal(prompt, image_base64);
 
     LOG("generate_text_base64 -- done");
+
+    return full_generated_text;
+}
+
+String GDLlava::generate_text_image_internal(String prompt, Image* image) {
+    LOG("generate_text_image_internal");
+
+    String image_base64 = Marshalls::get_singleton()->raw_to_base64(image->save_jpg_to_buffer());
+
+    String full_generated_text = generate_text_common(prompt, image_base64);
+
+    generate_text_mutex->unlock();
+    LOG("generate_text_mutex unlocked\n");
+
+    LOG("generate_text_image_internal -- done");
+
+    return full_generated_text;
+}
+
+String GDLlava::generate_text_image(String prompt, Image* image) {
+    LOG("generate_text_image");
+
+    func_mutex->lock();
+
+    if (!generate_text_mutex->try_lock()) {
+        LOG("GDLlama is busy\n");
+    }
+
+    generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
+
+    func_mutex->unlock();
+
+    String full_generated_text = generate_text_image_internal(prompt, image);
+
+    LOG("generate_text_image -- done");
 
     return full_generated_text;
 }
