@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <godot_cpp/variant/packed_float32_array.hpp>
+#include <godot_cpp/variant/string.hpp>
 
 
 namespace godot {

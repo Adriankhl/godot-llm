@@ -399,19 +399,21 @@ String GDLlama::generate_text_common(String prompt) {
 
     std::string text = llama_runner->llama_generate_text(
         string_gd_to_std(prompt),
-            params,
-            [this](std::string s) {
-                String new_text = string_std_to_gd(s);
-                call_deferred("emit_signal", "generate_text_updated", new_text);
-            },
-            [this]() {
-                call_deferred("emit_signal", "input_wait_started");
-            },
-            [this](std::string s) {
-                String text {string_std_to_gd(s)};
-                call_deferred("emit_signal", "generate_text_finished", text);
-            }
+        params,
+        [this](std::string s) {
+            String new_text = string_std_to_gd(s);
+            call_deferred("emit_signal", "generate_text_updated", new_text);
+        },
+        [this]() {
+            call_deferred("emit_signal", "input_wait_started");
+        },
+        [this](std::string s) {
+            String text {string_std_to_gd(s)};
+            call_deferred("emit_signal", "generate_text_finished", text);
+        }
     );
+
+    LOG("generate_text_common start -- done\n");
 
     return string_std_to_gd(text);
 }

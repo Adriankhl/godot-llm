@@ -1,6 +1,7 @@
 #include "gdllava.h"
 #include "conversion.h"
 #include "llava_runner.h"
+#include "log.h"
 
 namespace godot {
 
@@ -96,6 +97,30 @@ int32_t GDLlava::get_n_batch() const {
 
 void GDLlava::set_n_batch(const int32_t p_n_batch) {
     params.n_batch = p_n_batch;
+}
+
+String GDLlava::generate_text_common(String prompt, String image_base64) {
+    LOG("generate_text_common");
+
+    llava_runner.reset(new LlavaRunner());
+
+    std::string generated_text = llava_runner->llava_generate_text_base64(
+        string_gd_to_std(prompt),
+        string_gd_to_std(image_base64),
+        params,
+        [this](std::string s) {
+            String new_text = string_std_to_gd(s);
+            call_deferred("emit_signal", "generate_text_updated", new_text);
+        },
+        [this](std::string s) {
+            String text {string_std_to_gd(s)};
+            call_deferred("emit_signal", "generate_text_finished", text);
+        }
+    );
+
+    LOG("generate_text_common -- done");
+
+    return string_std_to_gd(generated_text);
 }
 
 bool GDLlava::is_running() {

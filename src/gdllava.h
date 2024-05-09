@@ -20,6 +20,7 @@ class GDLlava : public Node {
         Ref<Mutex> generate_text_mutex;
         Ref<Mutex> func_mutex;
         Ref<Thread> generate_text_thread;
+        String generate_text_common(String prompt, String image_base64);
 
     protected:
 	    static void _bind_methods();
