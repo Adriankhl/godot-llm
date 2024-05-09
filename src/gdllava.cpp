@@ -60,6 +60,15 @@ GDLlava::GDLlava() : params {gpt_params()},
 GDLlava::~GDLlava() {
     LOG("GDLlava destructor\n");
 
+    if (!func_mutex->try_lock()) {
+        func_mutex->lock();
+    }
+
+    while (!generate_text_mutex->try_lock()) {
+        stop_generate_text();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {
         LOG("GDLlava destructor waiting thread to finish\n");
@@ -74,6 +83,11 @@ void GDLlava::_exit_tree() {
     func_mutex->lock();
 
     LOG("func_mutex locked\n");
+
+    while (!generate_text_mutex->try_lock()) {
+        stop_generate_text();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {

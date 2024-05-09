@@ -52,6 +52,14 @@ GDLlamaEmbedding::GDLlamaEmbedding() : params {gpt_params()},
 GDLlamaEmbedding::~GDLlamaEmbedding() {
     LOG("GDLlamaEmbedding destructor\n");
 
+    if (!func_mutex->try_lock()) {
+        func_mutex->lock();
+    }
+
+    while (!compute_embedding_mutex->try_lock()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+
     //is_started instead of is_alive to properly clean up all threads
     if (compute_embedding_thread->is_started()) {
         LOG("GDLlamaEmbedding destructor waiting thread to finish\n");
@@ -66,6 +74,10 @@ void GDLlamaEmbedding::_exit_tree() {
     func_mutex->lock();
 
     LOG("func_mutex locked\n");
+
+    while (!compute_embedding_mutex->try_lock()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 
     //is_started instead of is_alive to properly clean up all threads
     if (compute_embedding_thread->is_started()) {

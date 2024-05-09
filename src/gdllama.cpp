@@ -158,9 +158,13 @@ GDLlama::GDLlama() : params {gpt_params()},
 GDLlama::~GDLlama() {
     LOG("GDLlama destructor\n");
 
+    if (!func_mutex->try_lock()) {
+        func_mutex->lock();
+    }
+
     while (!generate_text_mutex->try_lock()) {
         stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     //is_started instead of is_alive to properly clean up all threads
@@ -180,7 +184,7 @@ void GDLlama::_exit_tree() {
 
     while (!generate_text_mutex->try_lock()) {
         stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     //is_started instead of is_alive to properly clean up all threads
