@@ -397,7 +397,7 @@ String GDLlama::generate_text_common(String prompt) {
         params.antiprompt.emplace_back(reverse_prompt);
     }
 
-    std::string text = llama_runner->llama_generate_text(
+    std::string generated_text = llama_runner->llama_generate_text(
         string_gd_to_std(prompt),
         params,
         [this](std::string s) {
@@ -415,7 +415,7 @@ String GDLlama::generate_text_common(String prompt) {
 
     LOG("generate_text_common start -- done\n");
 
-    return string_std_to_gd(text);
+    return string_std_to_gd(generated_text);
 }
 
 String GDLlama::generate_text_simple_internal(String prompt) {

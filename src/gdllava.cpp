@@ -10,6 +10,10 @@ void GDLlava::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlava::set_model_path);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
+	ClassDB::bind_method(D_METHOD("get_mmproj_path"), &GDLlava::get_mmproj_path);
+	ClassDB::bind_method(D_METHOD("set_mmproj_path", "p_mmproj_path"), &GDLlava::set_mmproj_path);
+    ClassDB::add_property("GDLlava", PropertyInfo(Variant::STRING, "mmproj_path", PROPERTY_HINT_FILE), "set_mmproj_path", "get_mmproj_path");
+
     ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlava::get_n_ctx);
     ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlava::set_n_ctx);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE), "set_n_ctx", "get_n_ctx");
@@ -21,6 +25,11 @@ void GDLlava::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlava::get_n_batch);
     ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlava::set_n_batch);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
+
+    ClassDB::bind_method(D_METHOD("generate_text_base64", "prompt", "image_base64"), &GDLlava::generate_text_base64);
+
+    ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
+    ADD_SIGNAL(MethodInfo("generate_text_finished", PropertyInfo(Variant::STRING, "text")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
@@ -75,6 +84,14 @@ void GDLlava::set_model_path(const String p_model_path) {
     params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
+String GDLlava::get_mmproj_path() const {
+    return string_std_to_gd(params.mmproj);
+}
+
+void GDLlava::set_mmproj_path(const String p_mmproj_path) {
+    params.mmproj = string_gd_to_std(p_mmproj_path.trim_prefix(String("res://")));
+}
+
 int32_t GDLlava::get_n_ctx() const {
     return params.n_ctx;
 }
@@ -121,6 +138,40 @@ String GDLlava::generate_text_common(String prompt, String image_base64) {
     LOG("generate_text_common -- done");
 
     return string_std_to_gd(generated_text);
+}
+
+String GDLlava::generate_text_base64_internal(String prompt, String image_base64) {
+    LOG("generate_text_base64_internal");
+
+    String full_generated_text = generate_text_common(prompt, image_base64);
+
+    generate_text_mutex->unlock();
+    LOG("generate_text_mutex unlocked\n");
+
+    LOG("generate_text_base64_internal -- done");
+
+    return full_generated_text;
+}
+
+String GDLlava::generate_text_base64(String prompt, String image_base64) {
+    LOG("generate_text_base64");
+
+    func_mutex->lock();
+
+    if (!generate_text_mutex->try_lock()) {
+        LOG("GDLlama is busy\n");
+    }
+
+    generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
+
+    func_mutex->unlock();
+
+    String full_generated_text = generate_text_base64_internal(prompt, image_base64);
+
+    LOG("generate_text_base64 -- done");
+
+    return full_generated_text;
 }
 
 bool GDLlava::is_running() {

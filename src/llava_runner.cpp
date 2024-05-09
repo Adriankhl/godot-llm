@@ -195,9 +195,9 @@ std::string LlavaRunner::process_prompt(
     std::string response = "";
     for (int i = 0; i < max_tgt_len; i++) {
         const char * tmp = sample(ctx_sampling, ctx_llava->ctx_llama, &n_past);
-        response += tmp;
         if (strcmp(tmp, "</s>") == 0) break;
         if (strstr(tmp, "###")) break; // Yi-VL behavior
+        response += tmp;
         printf("%s", tmp);
         on_generate_text_updated(tmp);
         if (strstr(response.c_str(), "<|im_end|>")) break; // Yi-34B llava-1.6 - for some reason those decode not as the correct token (tokenizer works)
