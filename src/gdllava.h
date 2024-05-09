@@ -44,7 +44,9 @@ class GDLlava : public Node {
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();
         String generate_text_base64(String prompt, String image_base64);
+        Error run_generate_text_base64(String prompt, String image_base64);
         String generate_text_image(String prompt, Image* image);
+        Error run_generate_text_image(String prompt, Image* image);
 };
 
 } //namespace godot

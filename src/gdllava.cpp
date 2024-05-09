@@ -29,6 +29,9 @@ void GDLlava::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("generate_text_base64", "prompt", "image_base64"), &GDLlava::generate_text_base64);
     ClassDB::bind_method(D_METHOD("generate_text_image", "prompt", "image"), &GDLlava::generate_text_image);
+    ClassDB::bind_method(D_METHOD("run_generate_text_base64", "prompt", "image_base64"), &GDLlava::run_generate_text_base64);
+    ClassDB::bind_method(D_METHOD("run_generate_text_image", "prompt", "image"), &GDLlava::run_generate_text_image);
+    ClassDB::bind_method(D_METHOD("is_running"), &GDLlava::is_running);
 
     ADD_SIGNAL(MethodInfo("generate_text_updated", PropertyInfo(Variant::STRING, "new_text")));
     ADD_SIGNAL(MethodInfo("generate_text_finished", PropertyInfo(Variant::STRING, "text")));
@@ -161,7 +164,7 @@ String GDLlava::generate_text_base64(String prompt, String image_base64) {
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlama is busy\n");
+        LOG("GDLlava is busy\n");
     }
 
     generate_text_mutex->lock();
@@ -175,6 +178,35 @@ String GDLlava::generate_text_base64(String prompt, String image_base64) {
 
     return full_generated_text;
 }
+
+Error GDLlava::run_generate_text_base64(String prompt, String image_base64) {
+    LOG("run_generate_text_base64\n");
+    func_mutex->lock();
+
+    if (!generate_text_mutex->try_lock()) {
+        LOG("GDLlava is busy\n");
+    }
+
+    generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
+
+    func_mutex->unlock();
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (generate_text_thread->is_started()) {
+        generate_text_thread->wait_to_finish();
+    }
+
+    generate_text_thread.instantiate();
+    LOG("generate_text_thread instantiated\n");
+
+    Callable c = callable_mp(this, &GDLlava::generate_text_base64_internal);
+    Error error = generate_text_thread->start(c.bind(prompt, image_base64));
+
+    LOG("run_generate_text_base64 -- done\n");
+    return error;
+}
+
 
 String GDLlava::generate_text_image_internal(String prompt, Image* image) {
     LOG("generate_text_image_internal");
@@ -197,7 +229,7 @@ String GDLlava::generate_text_image(String prompt, Image* image) {
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlama is busy\n");
+        LOG("GDLlava is busy\n");
     }
 
     generate_text_mutex->lock();
@@ -210,6 +242,34 @@ String GDLlava::generate_text_image(String prompt, Image* image) {
     LOG("generate_text_image -- done");
 
     return full_generated_text;
+}
+
+Error GDLlava::run_generate_text_image(String prompt, Image* image) {
+    LOG("run_generate_text_image\n");
+    func_mutex->lock();
+
+    if (!generate_text_mutex->try_lock()) {
+        LOG("GDLlava is busy\n");
+    }
+
+    generate_text_mutex->lock();
+    LOG("generate_text_mutex locked\n");
+
+    func_mutex->unlock();
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (generate_text_thread->is_started()) {
+        generate_text_thread->wait_to_finish();
+    }
+
+    generate_text_thread.instantiate();
+    LOG("generate_text_thread instantiated\n");
+
+    Callable c = callable_mp(this, &GDLlava::generate_text_image_internal);
+    Error error = generate_text_thread->start(c.bind(prompt, image));
+
+    LOG("run_generate_text_image -- done\n");
+    return error;
 }
 
 bool GDLlava::is_running() {
