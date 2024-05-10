@@ -2,13 +2,55 @@
 Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU.
 I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
 
-# How to use
-1. Download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
-2. Download an LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
-3. Now you should be able to add the `GdLlama` node, set the variables (you must point the `Model Path` to the GGUF file) and call function `generate_text(prompt: String) -> String` to generate some texts
+# Table of Contents
+1. [Quick start](#quick-start)
+    - [Install](#install)
+    - [GDLlama](#gdllama)
+    - [GDEmbedding](#gdembedding)
+    - [GDLlava](#gdllava)
 
-# Demo
-See [godot-llm-template](https://github.com/Adriankhl/godot-llm-template)
+# Quick Start
+
+## Install
+1. Get `Godot LLM` directly from the asset library, or download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
+2. Now you should be able to see `GdLlama`, `GdEmbedding`, and `GDLlava` nodes in your godot editor.
+
+## GDLlama
+1. Download an LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
+2. Setup your model with GDScript, point `model_path` to your GGUF file. The default `n_predict = -1` generates an infinite sequence, we want it to be shorter here
+```
+var gdllama = GDLlama.new()
+gdllama.model_path = "./models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf" ##Your model path
+gdllama.n_predict = 20
+```
+3. Generate some text
+```
+var generated_text = gdllama.generate_text_simple("Hello")
+print(hello)
+```
+4. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in the background, then handle the `generate_text_updated` and `generate_text_finished` signals
+
+```
+gdllama.run_generate_text("Hello", "", "")
+gdllama.generate_text_updated.connect(_on_gdllama_updated)
+
+func _on_gdllama_updated(new_text: String):
+    print(s)
+```
+
+## GDEmbedding
+1. Download an embedding model in GGUF format (recommendation: [all-MiniLM-L6-v2-Q5_K_M.gguf](https://huggingface.co/leliuga/all-MiniLM-L6-v2-GGUF/tree/main)), move the file to somewhere in your godot project
+2. Setup your model with GDScript, point `model_path` to your GGUF file
+```
+var gdllama = GDLlama.new()
+gdllama.model_path = "./models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf" ##Your model path
+gdllama.n_predict = 20
+```
+
+## GDLlava
+
+## Template/Demo
+The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provides a rather complete demonstration on different functionalities of this plugin
 
 # Features
 * `GdLlama` node
