@@ -158,15 +158,24 @@ Each type of node owns a set of properties which affect the computational perfor
 * `Reverse Prompt`: AI stops to wait for user input after seeing this prompt being generated, a good example is "User:"
 * `Input Prefix`: append before every user input
 * `Input Suffix`: append after every user input
+* `Should Output prompt`: whether the input prompt should be included in the output
+* `Should Output Bos`: whether the special bos (beginning of sequence) token should be included in the output
+* `Should Output Eos`: whether the special eos (ending of sequence) token should be included in the output
 * `Context Size`: number of tokens the model can process at a time
-* `N Predict`: number of new tokens to generate
+* `N Predict`: number of new tokens to generate, generate infinite sequence if -1
 * `N Keep`: when the model run out of `context size`, it starts to forget about earlier context, set this variable to force the model to keep a number of the earliest tokens to keep the conversation relevant
 * `Temperature`: the higher the temperature, the more random the generated text
+* `Penalty Repeat`: penalize repeated sequence, diabled if -1
+* `Penalty Last N`: the number of latest token to consider when penalizing repeated sequence, disabled if 0, `Context Size` if -1
+* `Penalilze Nl`: penallize newline token
+* `Top K`: only sample from this amount of tokens with the highest probabilities, disabled if 0
+* `Top P`: only sample from tokens within this cumulative probability, disabledd if 1.0
+* `Min P`: only sample from tokens with at least this probability, disabledd if 0.0
 * `N Thread`: number of cpu threads to use
 * `N GPU Layer`: number of layer offloaded to GPU
+* `Escape`: process escape character in input prompt
 * `N Batch`: maximum number of tokens per iteration during continuous batching
 * `N Ubatch`: maximum batch size for computation
-* `Escape`: process escape character in input prompt
 
 
 
