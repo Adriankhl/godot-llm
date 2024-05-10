@@ -11,6 +11,10 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Template/Demo](#templatedemo)
 2. [Features](#features)
 3. [Documentation](#documentation)
+    - [Inspector Properties](#inspector-properties)
+    - [GDLlama Functions and Signals](#gdllama-functions-and-signals)
+    - [GDEmbedding Functions and Signals](#gdembedding-functions-and-signals)
+    - [GDLlava Functions and Signals](#gdllava-functions-and-signals)
 4. [Compile from Source](#compile-from-source)
 
 # Quick Start
@@ -177,36 +181,52 @@ Each type of node owns a set of properties which affect the computational perfor
 * `N Batch`: maximum number of tokens per iteration during continuous batching
 * `N Ubatch`: maximum batch size for computation
 
+## GdLlama functions and signals
+
+### Functions
+* `generate_text_simple(prompt: String) -> String`: generate text from prompt
+* `generate_text_json(prompt: String, json: String) -> String`: generate text in a format enforced by a [json schema](https://json-schema.org/), see [the following section](#text-generation-with-json-schema)
+* `generate_text_grammar(prompt: String, grammar: String) -> String`: generate text in a format enforced by [GBNF grammar](https://github.com/ggerganov/llama.cpp/blob/master/grammars/README.md)
+* `generate_text(prompt: String, grammar: String, json: String) -> String`: a wrapper function, run `generate_text_gramma` if `grammar` is non-empty, runs `generate_text_json` if `json` is non-empty, run `generate_text_simple` otherwise
+* `run_generate_text(prompt: String, grammar: String, json: String) -> Error`: run `generate_text` in background, rely on signals to recieve generated text, note that only one background thread is allowd for a GDLlama node, calling this function when the background thread is still running will freeze the logic until the background thread is done
+* `input_text(input: String)`: input text to interactively generate text (with either `Instruct` or `Interactive` enabled) with the model, only works if the model is waiting for intput, inputing an empty string means the model should continue to generate what it has been generating
+* `stop_generate_text()`: stop text generation, clean up the model and the background thread
+* `is_running() -> bool`: whether the background thread is running
+* `is_waiting_input() -> bool`: whether the model is waiting for input text (with either `Instruct` or `Interactive` enabled)
+
+### Signals
+* `generate_text_finished(text: String) `: emitted with the full generated text when a text generation is completed. When either `Instruct` or `Interactive` enabled, this signal is emitted after the whole interaction is finished
+* `generate_text_updated(new_text: String)`: instead of waiting the full generated text, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of strings
+* `input_wait_started()`: the model is now starting to wait for user input (with either `Instruct` or `Interactive` enabled)
+
+## GDEmbedding functions and signals
+### Functions
+* `compute_embedding(prompt: String) -> PackedFloat32Array`: compute the embedding vector of a prompt
+* `similarity_cos_array(array1: PackedFloat32Array, array2: PackedFloat32Array) -> float`: compute the cosine similarity between two embedding vectors, this is a fast function, no model is loaded
+* `similarity_cos_string(s1: String, s2: String) -> float`: compute the cosine similarity between two strings
+* `run_compute_embedding(prompt: String) -> Error`: run `compute_embedding(prompt: String)` in background, rely on the `compute_embedding_finished` signal to recieve the embedding vector, note that only one background thread is allowd for a GDEmbedding node, calling this function when the background thread is still running will freeze the logic until the background thread is done
+* `run_similarity_cos_string(s1: String, s2: String) -> Error`: run `similarity_cos_string` in background, rely on the `compute_similairty_finished` signal to recieve the cosine similairty, note that only one background thread is allowd for a GDEmbedding node, calling this function when the background thread is still running will freeze the logic until the background thread is done
+* `is_running() -> bool`: whether the background thread is running
+
+### Signals
+* `compute_embedding_finished(embedding: PackedFloat32Array)`: emitted when `run_compute_embedding` is completed
+* `similarity_cos_string_finished(similarity: float)`: emitted when `run_similarity_cos_string` is completed
+
+## GDLlava functions and signals
+### functions
+* `generate_text_base64(prompt: String, image_base64: String) -> String`: generate text based on a prompt and a base64 string which encodes a `jpg` or `png` image
+* `generate_text_image(prompt: String, image: Image) -> String`: generate text based on a prompt and an `Image` object in Godot
+* `run_generate_text_base64(prompt: String, image_base64: String) -> Error`: run `generate_text_base64` in background, rely on signals to recieve generated text, note that only one background thread is allowd for a GDLlava node, calling this function when the background thread is still running will freeze the logic until the background thread is done
+* `run_generate_text_base64(prompt: String, image: Image) -> Error`: run `generate_text_base64` in background, rely on signals to recieve generated text, note that only one background thread is allowd for a GDLlava node, calling this function when the background thread is still running will freeze the logic until the background thread is done
+* `stop_generate_text()`: stop text generation, clean up the model and the background thread
+* `is_running() -> bool`: whether the background thread is running
+
+### Signals
+* `generate_text_finished(text: String) `: emitted with the full generated text when a text generation is completed
+* `generate_text_updated(new_text: String)`: instead of waiting the full generated text, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of strings
 
 
-* `GdLlama` node
-  - Function:
-    * `generate_text(prompt: String) -> String`: generate text from prommpt, note that this function takes a long time to run so it is best to use this with `Thread`
-    * `generate_text_json(prompt: String, json: String) -> String`: generate text in a format enforced by a [json schema](https://json-schema.org/), see [the following section](#text-generation-with-json-schema)
-    * `generate_text_grammar(prompt: String, grammar: String) -> String`: generate text in a format enforced by [GBNF grammar](https://github.com/ggerganov/llama.cpp/blob/master/grammars/README.md)
-    * `input_text(input: String)`: input text to interactively generate text (with either `Instruct` or `Interactive` enabled) with the model, only works if the model is waiting for intput, inputing an empty string means the model should continue to generate what it has been generating
-    * `stop_generate_text()`: stop text generation from the above function
-  - Signals
-    * `generate_text_updated(new_text: String)`: instead of waiting the full generated text, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of strings
-    * `input_wait_started()`: the model is now starting to wait for user input
-  - Inspector variables
-    * `Model Path`: location of your gguf model
-    * `Instruct`: question and answer interactive mode
-    * `Interactive`: custom interactive mode, you should set your `reverse_prompt`, `input_prefix`, and `input_suffix` to set up a smooth interaction
-    * `Reverse Prompt`: AI stops to wait for user input after seeing this prompt being generated, a good example is "User:"
-    * `Input Prefix`: append before every user input
-    * `Input Suffix`: append after every user input
-    * `Context Size`: number of tokens the model can process at a time
-    * `N Predict`: number of new tokens to generate
-    * `N Keep`: when the model run out of `context size`, it starts to forget about earlier context, set this variable to force the model to keep a number of the earliest tokens to keep the conversation relevant
-    * `Temperature`: the higher the temperature, the more random the generated text
-    * `N Thread`: number of cpu threads to use
-    * `N GPU Layer`: number of layer offloaded to GPU
-    * `N Batch`: maximum number of tokens per iteration during continuous batching
-    * `N Ubatch`: maximum batch size for computation
-    * `Escape`: process escape character in input prompt
-
-# Text generation with Json schema
+## Text generation with Json schema
 
 Suppose you want to generate a character with:
   * `name`: a string from 3 character to 20 character
@@ -214,7 +234,15 @@ Suppose you want to generate a character with:
   * `weapon`: either "sword", "bow", or "wand
   * `description`: a text with minimum 10 character
 
-You can first construct the following `_person_schema` dictionary in GDScript:
+You should first create a GDLlama node, and turn `Should Output prompt`, `Should Output Bos`, and `Should Output Eos` off either by inspector or by script:
+```
+should_output_prompt = false
+should_output_bos = false
+should_output_eos = false
+```
+
+
+Construct the following `_person_schema` dictionary in GDScript:
 ```
 var _person_schema = {
 	"type": "object",
@@ -247,23 +275,10 @@ var person_schema: String = JSON.stringify(_person_schema)
 
 Supposed you are interested in a "Main character in a magic world", you can generate the character using the `generate_text_json(prompt, json_scheme)` of the `GDLlama` node:
 ```
-var generated_text: String = generate_text_json(prompt, json_scheme)
+var json_string: String = generate_text_json(prompt, json_scheme)
 ```
 
-Note that text generation is slow, you typically want to do the computation using a new `Thread` to avoid blocking the main thread, then either keep checking if the computing thread is runing (`is_alive()`) or use a signal to notify the main thread to indicate that the computation is finished.
-
-
-Now, the generated text may look like:
-```
-<|begin_of_text|>Main character in a magic world: {"birthday":"1997-07-22","description":"The main character is a young and ambitious magician who has been training for years to master the art of magic. They are skilled in both combat and spellcasting, and are known for their bravery and quick thinking in the heat of battle.","name":"Eira","weapon":"wand"} <|eot_id|>
-```
-
-You need a bit of further processing to get the properly formatted `json_string` back:
-```
-var json_string = generated_text
-json_string = json_string.right(-json_string.find("{"))
-json_string = json_string.left(json_string.rfind("}") + 1)
-```
+Note that text generation is slow, you may want to use `run_generate_text(prompt, "", json_scheme)` to run the generation in background, then handle `generate_text_finished` to receive the generated text.
 
 `json_string` should look like this:
 ```
