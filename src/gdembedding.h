@@ -1,5 +1,5 @@
-#ifndef GDLLAMA_EMBEDDING_H
-#define GDLLAMA_EMBEDDING_H
+#ifndef GDEMBEDDING_H
+#define GDEMBEDDING_H
 
 #include "common.h"
 #include "llama_embedding_runner.h"
@@ -11,8 +11,8 @@
 
 namespace godot {
 
-class GDLlamaEmbedding : public Node {
-    GDCLASS(GDLlamaEmbedding, Node)
+class GDEmbedding : public Node {
+    GDCLASS(GDEmbedding, Node)
 
     private:
         static void dummy();
@@ -28,8 +28,8 @@ class GDLlamaEmbedding : public Node {
 	    static void _bind_methods();
     
     public:
-        GDLlamaEmbedding();
-        ~GDLlamaEmbedding();
+        GDEmbedding();
+        ~GDEmbedding();
 
         void _exit_tree() override;
         String get_model_path() const;
@@ -46,4 +46,4 @@ class GDLlamaEmbedding : public Node {
 
 } //namespace godot
 
-#endif //GDLLAMA_EMBEDDING_H
+#endif //GDEMBEDDING_H

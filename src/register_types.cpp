@@ -1,7 +1,7 @@
 #include "register_types.h"
 
 #include "gdllama.h"
-#include "gdllama_embedding.h"
+#include "gdembedding.h"
 #include "gdllava.h"
 
 #include <gdextension_interface.h>
@@ -17,7 +17,7 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	}
 
 	ClassDB::register_class<GDLlama>();
-	ClassDB::register_class<GDLlamaEmbedding>();
+	ClassDB::register_class<GDEmbedding>();
 	ClassDB::register_class<GDLlava>();
 }
 

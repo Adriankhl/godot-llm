@@ -1,5 +1,5 @@
 #include "conversion.h"
-#include "gdllama_embedding.h"
+#include "gdembedding.h"
 #include "llama_embedding_runner.h"
 #include "log.h"
 #include <godot_cpp/variant/packed_float32_array.hpp>
@@ -9,48 +9,48 @@
 
 namespace godot {
 
-void GDLlamaEmbedding::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_model_path"), &GDLlamaEmbedding::get_model_path);
-	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlamaEmbedding::set_model_path);
-    ClassDB::add_property("GDLlamaEmbedding", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
+void GDEmbedding::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_model_path"), &GDEmbedding::get_model_path);
+	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDEmbedding::set_model_path);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
-   	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlamaEmbedding::get_n_batch);
-	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlamaEmbedding::set_n_batch);
-    ClassDB::add_property("GDLlamaEmbedding", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
+   	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDEmbedding::get_n_batch);
+	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDEmbedding::set_n_batch);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
 
-    ClassDB::bind_method(D_METHOD("compute_embedding", "prompt"), &GDLlamaEmbedding::compute_embedding);
-    ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDLlamaEmbedding::run_compute_embedding);
-    ClassDB::bind_method(D_METHOD("is_running"), &GDLlamaEmbedding::is_running);
-    ClassDB::bind_method(D_METHOD("similarity_cos_array", "array1", "array2"), &GDLlamaEmbedding::similarity_cos_array);
-    ClassDB::bind_method(D_METHOD("similarity_cos_string", "s1", "s2"), &GDLlamaEmbedding::similarity_cos_string);
-    ClassDB::bind_method(D_METHOD("run_similarity_cos_string", "s1", "s2"), &GDLlamaEmbedding::run_similarity_cos_string);
+    ClassDB::bind_method(D_METHOD("compute_embedding", "prompt"), &GDEmbedding::compute_embedding);
+    ClassDB::bind_method(D_METHOD("run_compute_embedding", "prompt"), &GDEmbedding::run_compute_embedding);
+    ClassDB::bind_method(D_METHOD("is_running"), &GDEmbedding::is_running);
+    ClassDB::bind_method(D_METHOD("similarity_cos_array", "array1", "array2"), &GDEmbedding::similarity_cos_array);
+    ClassDB::bind_method(D_METHOD("similarity_cos_string", "s1", "s2"), &GDEmbedding::similarity_cos_string);
+    ClassDB::bind_method(D_METHOD("run_similarity_cos_string", "s1", "s2"), &GDEmbedding::run_similarity_cos_string);
 
     ADD_SIGNAL(MethodInfo("compute_embedding_finished", PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "embedding")));
     ADD_SIGNAL(MethodInfo("similarity_cos_string_finished", PropertyInfo(Variant::FLOAT, "similarity")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
-void GDLlamaEmbedding::dummy() {}
+void GDEmbedding::dummy() {}
 
-GDLlamaEmbedding::GDLlamaEmbedding() : params {gpt_params()},
+GDEmbedding::GDEmbedding() : params {gpt_params()},
     llama_embedding_runner {new LlamaEmbeddingRunner()} 
 {
     log_set_target(stdout);
-    LOG("Instantiate GDLlamaEmbedding mutex\n");
+    LOG("Instantiate GDEmbedding mutex\n");
 
     func_mutex.instantiate();
     compute_embedding_mutex.instantiate();
 
-    LOG("Instantiate GDLlamaEmbedding thread\n");
+    LOG("Instantiate GDEmbedding thread\n");
     compute_embedding_thread.instantiate();
-    compute_embedding_thread->start(callable_mp_static(&GDLlamaEmbedding::dummy));
+    compute_embedding_thread->start(callable_mp_static(&GDEmbedding::dummy));
     compute_embedding_thread->wait_to_finish();
 
-    LOG("Instantiate GDLlamaEmbedding thread -- done\n");
+    LOG("Instantiate GDEmbedding thread -- done\n");
 }
 
-GDLlamaEmbedding::~GDLlamaEmbedding() {
-    LOG("GDLlamaEmbedding destructor\n");
+GDEmbedding::~GDEmbedding() {
+    LOG("GDEmbedding destructor\n");
 
     if (!func_mutex->try_lock()) {
         func_mutex->lock();
@@ -62,14 +62,14 @@ GDLlamaEmbedding::~GDLlamaEmbedding() {
 
     //is_started instead of is_alive to properly clean up all threads
     if (compute_embedding_thread->is_started()) {
-        LOG("GDLlamaEmbedding destructor waiting thread to finish\n");
+        LOG("GDEmbedding destructor waiting thread to finish\n");
         compute_embedding_thread->wait_to_finish();
     }
-    LOG("GDLlamaEmbedding destructor -- done\n");
+    LOG("GDEmbedding destructor -- done\n");
 }
 
-void GDLlamaEmbedding::_exit_tree() {
-    LOG("GDLlamaEmbedding exit tree\n");
+void GDEmbedding::_exit_tree() {
+    LOG("GDEmbedding exit tree\n");
 
     func_mutex->lock();
 
@@ -86,27 +86,27 @@ void GDLlamaEmbedding::_exit_tree() {
     }
 }
 
-String GDLlamaEmbedding::get_model_path() const {
+String GDEmbedding::get_model_path() const {
     return string_std_to_gd(params.model);
 }
 
-void GDLlamaEmbedding::set_model_path(const String p_model_path) {
+void GDEmbedding::set_model_path(const String p_model_path) {
     params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
-int32_t GDLlamaEmbedding::get_n_batch() const {
+int32_t GDEmbedding::get_n_batch() const {
     return params.n_batch;
 }
 
-void GDLlamaEmbedding::set_n_batch(const int32_t p_n_batch) {
+void GDEmbedding::set_n_batch(const int32_t p_n_batch) {
     params.n_batch = p_n_batch;
 }
 
-bool GDLlamaEmbedding::is_running() {
+bool GDEmbedding::is_running() {
     return !compute_embedding_mutex->try_lock() || compute_embedding_thread->is_alive();
 }
 
-PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
+PackedFloat32Array GDEmbedding::compute_embedding_internal(String prompt) {
     LOG("compute_embedding_internal\n");
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
@@ -126,12 +126,12 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding_internal(String prompt) {
     return array;
 }
 
-PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
+PackedFloat32Array GDEmbedding::compute_embedding(String prompt) {
     LOG("compute_embedding\n");
     func_mutex->lock();
 
     if (compute_embedding_mutex->try_lock()) {
-        LOG("GDLlamaEmbedding is busy\n");
+        LOG("GDEmbedding is busy\n");
     }
 
     compute_embedding_mutex->lock();
@@ -148,12 +148,12 @@ PackedFloat32Array GDLlamaEmbedding::compute_embedding(String prompt) {
     return pfa;
 }
 
-Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
+Error GDEmbedding::run_compute_embedding(String prompt) {
     LOG("run_compute_embedding\n");
     func_mutex->lock();
     
     if (compute_embedding_mutex->try_lock()) {
-        LOG("GDLlamaEmbedding is busy\n");
+        LOG("GDEmbedding is busy\n");
     }
 
     compute_embedding_mutex->lock();
@@ -169,7 +169,7 @@ Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
     compute_embedding_thread.instantiate();
     LOG("compute_embedding_thread instantiated\n");
 
-    Callable c = callable_mp(this, &GDLlamaEmbedding::compute_embedding_internal);
+    Callable c = callable_mp(this, &GDEmbedding::compute_embedding_internal);
     Error error = compute_embedding_thread->start(c.bind(prompt));
 
     LOG("run_compute_embedding -- done\n");
@@ -177,7 +177,7 @@ Error GDLlamaEmbedding::run_compute_embedding(String prompt) {
     return error;
 }
 
-float GDLlamaEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2){
+float GDEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2){
     if (array1.size() != array2.size() || array1.size() == 0) {
         LOG("Error: embedding sizes don't match");
         return 0.0;
@@ -196,7 +196,7 @@ float GDLlamaEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFl
     return sum / (sqrt(sum1) * sqrt(sum2));
 };
 
-float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
+float GDEmbedding::similarity_cos_string_internal(String s1, String s2) {
     LOG("similarity_cos_string_internal\n");
     llama_embedding_runner.reset(new LlamaEmbeddingRunner());
 
@@ -223,12 +223,12 @@ float GDLlamaEmbedding::similarity_cos_string_internal(String s1, String s2) {
     return similarity;
 }
 
-float GDLlamaEmbedding::similarity_cos_string(String s1, String s2) {
+float GDEmbedding::similarity_cos_string(String s1, String s2) {
     LOG("similarity_cos_string\n");
     func_mutex->lock();
 
     if (compute_embedding_mutex->try_lock()) {
-        LOG("GDLlamaEmbedding is busy\n");
+        LOG("GDEmbedding is busy\n");
     }
 
     compute_embedding_mutex->lock();
@@ -244,12 +244,12 @@ float GDLlamaEmbedding::similarity_cos_string(String s1, String s2) {
 }
 
 
-Error GDLlamaEmbedding::run_similarity_cos_string(String s1, String s2) {
+Error GDEmbedding::run_similarity_cos_string(String s1, String s2) {
     LOG("run_similarity_cos_string\n");
     func_mutex->lock();
 
     if (compute_embedding_mutex->try_lock()) {
-        LOG("GDLlamaEmbedding is busy\n");
+        LOG("GDEmbedding is busy\n");
     }
 
     compute_embedding_mutex->lock();
@@ -265,7 +265,7 @@ Error GDLlamaEmbedding::run_similarity_cos_string(String s1, String s2) {
     compute_embedding_thread.instantiate();
     LOG("compute_embedding_thread instantiated\n");
 
-    Callable c = callable_mp(this, &GDLlamaEmbedding::similarity_cos_string_internal);
+    Callable c = callable_mp(this, &GDEmbedding::similarity_cos_string_internal);
     Error error = compute_embedding_thread->start(c.bind(s1, s2));
 
     LOG("run_similarity_cos_string -- done\n");
