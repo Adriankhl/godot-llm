@@ -5,9 +5,10 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
 # Table of Contents
 1. [Quick start](#quick-start)
     - [Install](#install)
-    - [GDLlama](#gdllama)
-    - [GDEmbedding](#gdembedding)
-    - [GDLlava](#gdllava)
+    - [Text Generation: GDLlama node](#text-generation-gdllama-node)
+    - [Text Embedding: GDEmbedding node](#text-embedding-gdembedding-node)
+    - [Multimodal Text Generation: GDLlava node](#multimodal-text-generation-gdllava-node)
+    - [Template/Demo](#templatedemo)
 
 # Quick Start
 
@@ -15,39 +16,79 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
 1. Get `Godot LLM` directly from the asset library, or download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
 2. Now you should be able to see `GdLlama`, `GdEmbedding`, and `GDLlava` nodes in your godot editor.
 
-## GDLlama
-1. Download an LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
+## Text Generation: GDLlama node
+1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
 2. Setup your model with GDScript, point `model_path` to your GGUF file. The default `n_predict = -1` generates an infinite sequence, we want it to be shorter here
 ```
-var gdllama = GDLlama.new()
-gdllama.model_path = "./models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf" ##Your model path
-gdllama.n_predict = 20
+func _ready():
+    var gdllama = GDLlama.new()
+    gdllama.model_path = "./models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf" ##Your model path
+    gdllama.n_predict = 20
 ```
-3. Generate some text
+3. Generate text starting from "Hello"
 ```
-var generated_text = gdllama.generate_text_simple("Hello")
-print(hello)
+    var generated_text = gdllama.generate_text_simple("Hello")
+    print(hello)
 ```
-4. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in the background, then handle the `generate_text_updated` and `generate_text_finished` signals
+4. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in background, then handle the `generate_text_updated` or `generate_text_finished` signals
 
 ```
-gdllama.run_generate_text("Hello", "", "")
-gdllama.generate_text_updated.connect(_on_gdllama_updated)
+    gdllama.generate_text_updated.connect(_on_gdllama_updated)
+    gdllama.run_generate_text("Hello", "", "")
 
 func _on_gdllama_updated(new_text: String):
     print(s)
 ```
 
-## GDEmbedding
-1. Download an embedding model in GGUF format (recommendation: [all-MiniLM-L6-v2-Q5_K_M.gguf](https://huggingface.co/leliuga/all-MiniLM-L6-v2-GGUF/tree/main)), move the file to somewhere in your godot project
+## Text Embedding: GDEmbedding node
+1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) embedding model in GGUF format (recommendation: [mxbai-embed-large-v1.Q5_K_M.gguf](https://huggingface.co/ChristianAzinn/mxbai-embed-large-v1-gguf/tree/main)), move the file to somewhere in your godot project
 2. Setup your model with GDScript, point `model_path` to your GGUF file
 ```
-var gdllama = GDLlama.new()
-gdllama.model_path = "./models/Meta-Llama-3-8B-Instruct.Q5_K_M.gguf" ##Your model path
-gdllama.n_predict = 20
+func _ready():
+    var gdembedding= GDEmbedding.new()
+    gdembedding.model_path = "./models/mxbai-embed-large-v1.Q5_K_M.gguf"
+```
+3. Compute the embedded vector of "Hello world" in PackedFloat32Array
+```
+    var array: PackedFloat32Array = gdembedding.compute_embedding("Hello world")
+    print(array)
 ```
 
-## GDLlava
+4. Compute the similarity between "Hello" and "World"
+```
+    var similarity: float = gdembedding.similarity_cos_string("Hello", "World")
+    print(similarity)
+```
+
+5. Embedding computation can be slow, you may want to call `gdembedding.run_compute_embedding("Hello world")` or `gdembedding.run_similarity_cos_string("Hello", "Worlld")` to run the computation in background, then handle the `compute_embedding_finished` and `similarity_cos_string_finished` signals
+
+```
+    gdembedding.compute_embedding_finished.connect(_on_embedding_finished)
+    gdembedding.run_compute_embedding("Hello world")
+
+func _on_embedding_finished(embeddding: PackedFloat32Array):
+    print(embeddding)
+```
+
+```
+    gdembedding.similarity_cos_string_finished.connect(_on_embedding_finished)
+    gdembedding.run_similarity_cos_string("Hello", "Worlld")
+
+func _on_similarity_finished(similarity: float):
+    print(similarity)
+```
+
+Note that the current implementation only allows one thread running per node, avoid calling 2 `run_*` methods consecutively:
+```
+    ## Don't do this, this will hang your UI
+    gdembedding.run_compute_embedding("Hello world")
+    gdembedding.run_similarity_cos_string("Hello", "Worlld")
+```
+
+Instead, always wait for the finished signal or check `gdembedding.is_running()` before calling a `run_*` function.
+
+
+## Multimodal Text Generation: GDLlava node
 
 ## Template/Demo
 The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provides a rather complete demonstration on different functionalities of this plugin
