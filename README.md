@@ -37,7 +37,7 @@ func _ready():
     gdllama.run_generate_text("Hello", "", "")
 
 func _on_gdllama_updated(new_text: String):
-    print(s)
+    print(new_text)
 ```
 
 ## Text Embedding: GDEmbedding node
@@ -66,8 +66,8 @@ func _ready():
     gdembedding.compute_embedding_finished.connect(_on_embedding_finished)
     gdembedding.run_compute_embedding("Hello world")
 
-func _on_embedding_finished(embeddding: PackedFloat32Array):
-    print(embeddding)
+func _on_embedding_finished(embedding: PackedFloat32Array):
+    print(embedding)
 ```
 
 ```
@@ -89,9 +89,39 @@ Instead, always wait for the finished signal or check `gdembedding.is_running()`
 
 
 ## Multimodal Text Generation: GDLlava node
+1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) multimodal model in GGUF format (recommendation: [llava-phi-3-mini-int4.gguf](https://huggingface.co/xtuner/llava-phi-3-mini-gguf/tree/main)), be aware that there are two files needed - a `gguf` language model and a mmproj model (typical name `*mmproj*.gguf`), move the files to somewhere in your godot project
+2. Setup your model with GDScript, point `model_path` and `mmproj_path` to your corresponding GGUF files
+```
+func _ready():
+    var gdllava = GDLlava.new()
+    gdllava.model_path = "./models/llava-phi-3-mini-int4.gguf"
+    gdllava.mmproj_path = "./models/llava-phi-3-mini-mmproj-f16.gguf"
+```
+3. Load an image (`svg`, `png`, or `jpg`, other format may also works as long as it is supported by Godot), or use your game screen (viewport) as a image
+```
+    var image = Image.new()
+    image.load("icon.svg")
+
+    ## Or load the game screen instead
+    #var image = get_viewport().get_texture().get_image()
+```
+4. Generate text to provide "Provide a full description" for the image
+```
+    var generated_text = gdllava.generate_text_image("Provide a full description", image)
+    print(generated_text)
+```
+5. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in background, then handle the `generate_text_updated` or `generate_text_finished` signals
+```
+    gdllava.generate_text_updated.connect(_on_gdllava_updated)
+    gdllava.run_generate_text_image("Provide a full description", image)
+
+func _on_gdllava_updated(new_text: String):
+    print(new_text)
+```
 
 ## Template/Demo
 The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provides a rather complete demonstration on different functionalities of this plugin
+
 
 # Features
 * `GdLlama` node
