@@ -135,6 +135,7 @@ The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provid
     - Multimodal
 
 ## TODO
+* Add in-editor documentation, waiting for proper support in Godot 4.3
 * Vulken backend, need to resolve this [issue](https://github.com/ggerganov/llama.cpp/issues/7130)
 * Mac and ios
 * Automatically generate json schema from data classes in GDSCript
@@ -145,6 +146,30 @@ The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provid
 
 
 # Documentation
+
+## Inspector Properties
+There are 3 nodes added by this plugin: `GdLlama`, `GdEmbedding`, and `GdLlava`.
+Each type of node owns a set of properties which affect the computational performance and the generated output. Some of the properties belong to more than one node, and they generally have similar meaning for all types of node.
+
+* `Model Path`: location of your GGUF model
+* `Mmproj Path` location of your `mmproj` GGUF file, for `GdLlava` only
+* `Instruct`: question and answer interactive mode
+* `Interactive`: custom interactive mode, you should set your `reverse_prompt`, `input_prefix`, and `input_suffix` to set up a smooth interaction
+* `Reverse Prompt`: AI stops to wait for user input after seeing this prompt being generated, a good example is "User:"
+* `Input Prefix`: append before every user input
+* `Input Suffix`: append after every user input
+* `Context Size`: number of tokens the model can process at a time
+* `N Predict`: number of new tokens to generate
+* `N Keep`: when the model run out of `context size`, it starts to forget about earlier context, set this variable to force the model to keep a number of the earliest tokens to keep the conversation relevant
+* `Temperature`: the higher the temperature, the more random the generated text
+* `N Thread`: number of cpu threads to use
+* `N GPU Layer`: number of layer offloaded to GPU
+* `N Batch`: maximum number of tokens per iteration during continuous batching
+* `N Ubatch`: maximum batch size for computation
+* `Escape`: process escape character in input prompt
+
+
+
 * `GdLlama` node
   - Function:
     * `generate_text(prompt: String) -> String`: generate text from prommpt, note that this function takes a long time to run so it is best to use this with `Thread`
