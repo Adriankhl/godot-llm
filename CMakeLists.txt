@@ -18,8 +18,8 @@ set(src_files
   "src/gdllama.cpp"
   "src/gdllava.h"
   "src/gdllava.cpp"
-  "src/llama_embedding_runner.h"
-  "src/llama_embedding_runner.cpp"
+  "src/embedding_runner.h"
+  "src/embedding_runner.cpp"
   "src/llama_runner.h"
   "src/llama_runner.cpp"
   "src/llava_runner.h"
@@ -110,17 +110,17 @@ add_test(
   COMMAND llama_runner_test
 )
 
-set(llama_embedding_runnner_test_files
-  "test/src/llama_embedding_runner_test.cpp"
+set(embedding_runnner_test_files
+  "test/src/embedding_runner_test.cpp"
 )
 
-add_executable(llama_embedding_runner_test ${llama_embedding_runnner_test_files} ${src_files})
+add_executable(embedding_runner_test ${embedding_runnner_test_files} ${src_files})
 
-target_link_libraries(llama_embedding_runner_test PRIVATE godot-cpp common llama llava_static llava)
+target_link_libraries(embedding_runner_test PRIVATE godot-cpp common llama llava_static llava)
 
 add_test(
-  NAME llama_embedding_runner_test
-  COMMAND llama_embedding_runner_test
+  NAME embedding_runner_test
+  COMMAND embedding_runner_test
 )
 
 set(llava_runnner_test_files

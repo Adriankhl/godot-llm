@@ -2,7 +2,7 @@
 #define GDEMBEDDING_H
 
 #include "common.h"
-#include "llama_embedding_runner.h"
+#include "embedding_runner.h"
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>
@@ -17,7 +17,7 @@ class GDEmbedding : public Node {
     private:
         static void dummy();
         gpt_params params;
-        std::unique_ptr<LlamaEmbeddingRunner> llama_embedding_runner;
+        std::unique_ptr<EmbeddingRunner> embedding_runner;
         Ref<Mutex> compute_embedding_mutex;
         Ref<Mutex> func_mutex;
         Ref<Thread> compute_embedding_thread;

@@ -1,6 +1,6 @@
 #include "conversion.h"
 #include "gdembedding.h"
-#include "llama_embedding_runner.h"
+#include "embedding_runner.h"
 #include "log.h"
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
@@ -33,7 +33,7 @@ void GDEmbedding::_bind_methods() {
 void GDEmbedding::dummy() {}
 
 GDEmbedding::GDEmbedding() : params {gpt_params()},
-    llama_embedding_runner {new LlamaEmbeddingRunner()} 
+    embedding_runner {new EmbeddingRunner()}
 {
     log_set_target(stdout);
     LOG("Instantiate GDEmbedding mutex\n");
@@ -108,9 +108,9 @@ bool GDEmbedding::is_running() {
 
 PackedFloat32Array GDEmbedding::compute_embedding_internal(String prompt) {
     LOG("compute_embedding_internal\n");
-    llama_embedding_runner.reset(new LlamaEmbeddingRunner());
+    embedding_runner.reset(new EmbeddingRunner());
 
-    std::vector<float> vec = llama_embedding_runner->compute_embedding(
+    std::vector<float> vec = embedding_runner->compute_embedding(
         string_gd_to_std(prompt),
         params,
         [this](std::vector<float> vec) {
@@ -198,21 +198,21 @@ float GDEmbedding::similarity_cos_array(PackedFloat32Array array1, PackedFloat32
 
 float GDEmbedding::similarity_cos_string_internal(String s1, String s2) {
     LOG("similarity_cos_string_internal\n");
-    llama_embedding_runner.reset(new LlamaEmbeddingRunner());
+    embedding_runner.reset(new EmbeddingRunner());
 
-    std::vector<float> vec1 = llama_embedding_runner->compute_embedding(
+    std::vector<float> vec1 = embedding_runner->compute_embedding(
         string_gd_to_std(s1),
         params,
         [](auto a){}
     );
 
-    std::vector<float> vec2 = llama_embedding_runner->compute_embedding(
+    std::vector<float> vec2 = embedding_runner->compute_embedding(
         string_gd_to_std(s2),
         params,
         [](auto a){}
     );
 
-    float similarity = LlamaEmbeddingRunner::similarity_cos(vec1, vec2);
+    float similarity = EmbeddingRunner::similarity_cos(vec1, vec2);
 
     call_deferred("emit_signal", "similarity_cos_string_finished", similarity);
 

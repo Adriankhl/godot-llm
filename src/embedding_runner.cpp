@@ -1,14 +1,14 @@
-#include "llama_embedding_runner.h"
+#include "embedding_runner.h"
 #include "common.h"
 #include "log.h"
 #include <functional>
 #include <string>
 #include <vector>
 
-LlamaEmbeddingRunner::LlamaEmbeddingRunner() {}
-LlamaEmbeddingRunner::~LlamaEmbeddingRunner() {}
+EmbeddingRunner::EmbeddingRunner() {}
+EmbeddingRunner::~EmbeddingRunner() {}
 
-std::vector<std::string> LlamaEmbeddingRunner::split_lines(const std::string & s) {
+std::vector<std::string> EmbeddingRunner::split_lines(const std::string & s) {
     std::string line;
     std::vector<std::string> lines;
     std::stringstream ss(s);
@@ -18,13 +18,13 @@ std::vector<std::string> LlamaEmbeddingRunner::split_lines(const std::string & s
     return lines;
 }
 
-void LlamaEmbeddingRunner::batch_add_seq(llama_batch & batch, const std::vector<int32_t> & tokens, int seq_id) {
+void EmbeddingRunner::batch_add_seq(llama_batch & batch, const std::vector<int32_t> & tokens, int seq_id) {
     for (size_t i = 0; i < tokens.size(); i++) {
         llama_batch_add(batch, tokens[i], i, { seq_id }, i == tokens.size() - 1);
     }
 }
 
-void LlamaEmbeddingRunner::batch_decode(llama_context * ctx, llama_batch & batch, float * output, int n_seq, int n_embd) {
+void EmbeddingRunner::batch_decode(llama_context * ctx, llama_batch & batch, float * output, int n_seq, int n_embd) {
     // clear previous kv_cache values (irrelevant for embeddings)
     llama_kv_cache_clear(ctx);
 
@@ -54,7 +54,7 @@ void LlamaEmbeddingRunner::batch_decode(llama_context * ctx, llama_batch & batch
     }
 }
 
-std::vector<float> LlamaEmbeddingRunner::compute_embedding(
+std::vector<float> EmbeddingRunner::compute_embedding(
     std::string prompt,
     gpt_params params,
     std::function<void(std::vector<float>)> on_compute_finished
@@ -201,7 +201,7 @@ std::vector<float> LlamaEmbeddingRunner::compute_embedding(
     return embeddings;
 }
 
-float LlamaEmbeddingRunner::similarity_cos(std::vector<float> embd1, std::vector<float> embd2) {
+float EmbeddingRunner::similarity_cos(std::vector<float> embd1, std::vector<float> embd2) {
     if (embd1.size() != embd2.size()) {
         LOG("Error: embedding sizes don't match");
         return 0.0;

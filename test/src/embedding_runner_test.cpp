@@ -1,11 +1,11 @@
-#include "../../src/llama_embedding_runner.h"
+#include "../../src/embedding_runner.h"
 #include <iostream>
 #include <ostream>
 #include <vector>
 
 int main(int argc, char ** argv) {
     std::cout << "Start testing: " << std::endl;
-    std::unique_ptr<LlamaEmbeddingRunner> ler {new LlamaEmbeddingRunner()};
+    std::unique_ptr<EmbeddingRunner> er {new EmbeddingRunner()};
     std::cout << "Created llama embedding runner" << std::endl;
 
     std::string prompt1 = "Godot engine";
@@ -18,10 +18,10 @@ int main(int argc, char ** argv) {
     std::cout << "Prompt 3: " << prompt3 << std::endl;
 
     gpt_params params {gpt_params()};
-    params.model = "../../../models/all-MiniLM-L6-v2-Q5_K_M.gguf";
+    params.model = "../../../models/mxbai-embed-large-v1.Q5_K_M.gguf";
     std::cout << "Model: " << params.model << std::endl;
 
-    std::vector<float> v1 = ler->compute_embedding(prompt1, params, [](auto a){});
+    std::vector<float> v1 = er->compute_embedding(prompt1, params, [](auto a){});
 
     std::cout << "Vector 1: "  << std::endl;
     for (float f: v1) {
@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
     }
     std::cout << std::endl;
 
-    std::vector<float> v2 = ler->compute_embedding(prompt2, params, [](auto a){});
+    std::vector<float> v2 = er->compute_embedding(prompt2, params, [](auto a){});
 
     std::cout << "Vector 2: "  << std::endl;
     for (float f: v2) {
@@ -37,7 +37,7 @@ int main(int argc, char ** argv) {
     }
     std::cout << std::endl;
 
-    std::vector<float> v3 = ler->compute_embedding(prompt3, params, [](auto a){});
+    std::vector<float> v3 = er->compute_embedding(prompt3, params, [](auto a){});
 
     std::cout << "Vector 3: "  << std::endl;
     for (float f: v3) {
@@ -45,8 +45,8 @@ int main(int argc, char ** argv) {
     }
     std::cout << std::endl;
 
-    float s12 = ler->similarity_cos(v1, v2);
-    float s23 = ler->similarity_cos(v2, v3);
+    float s12 = er->similarity_cos(v1, v2);
+    float s23 = er->similarity_cos(v2, v3);
 
     std::cout << "Similarity '" << prompt1 << "' and '" << prompt2 << "' :"  << s12  << std::endl;
     std::cout << "Similarity '" << prompt2 << "' and '" << prompt3 << "' :"  << s23  << std::endl;
