@@ -36,6 +36,14 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_reverse_prompt", "p_reverse_prompt"), &GDLlama::set_reverse_prompt);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "reverse_prompt", PROPERTY_HINT_NONE), "set_reverse_prompt", "get_reverse_prompt");
 
+	ClassDB::bind_method(D_METHOD("get_input_prefix"), &GDLlama::get_input_prefix);
+	ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &GDLlama::set_input_prefix);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
+
+	ClassDB::bind_method(D_METHOD("get_input_suffix"), &GDLlama::get_input_suffix);
+	ClassDB::bind_method(D_METHOD("set_input_suffix", "p_input_suffix"), &GDLlama::set_input_suffix);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_NONE), "set_input_suffix", "get_input_suffix");
+
     ClassDB::bind_method(D_METHOD("get_should_output_prompt"), &GDLlama::get_should_output_prompt);
 	ClassDB::bind_method(D_METHOD("set_should_output_prompt", "p_should_output_prompt"), &GDLlama::set_should_output_prompt);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_prompt", PROPERTY_HINT_NONE), "set_should_output_prompt", "get_should_output_prompt");
@@ -47,14 +55,6 @@ void GDLlama::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_should_output_eos"), &GDLlama::get_should_output_eos);
 	ClassDB::bind_method(D_METHOD("set_should_output_eos", "p_should_output_eos"), &GDLlama::set_should_output_eos);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_eos", PROPERTY_HINT_NONE), "set_should_output_eos", "get_should_output_eos");
-
-	ClassDB::bind_method(D_METHOD("get_input_prefix"), &GDLlama::get_input_prefix);
-	ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &GDLlama::set_input_prefix);
-    ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
-
-	ClassDB::bind_method(D_METHOD("get_input_suffix"), &GDLlama::get_input_suffix);
-	ClassDB::bind_method(D_METHOD("set_input_suffix", "p_input_suffix"), &GDLlama::set_input_suffix);
-    ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_NONE), "set_input_suffix", "get_input_suffix");
 
    	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
 	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
@@ -226,6 +226,22 @@ void GDLlama::set_reverse_prompt(const String p_reverse_prompt) {
     reverse_prompt = string_gd_to_std(p_reverse_prompt);
 };
 
+String GDLlama::get_input_prefix() const {
+    return string_std_to_gd(params.input_prefix);
+};
+
+void GDLlama::set_input_prefix(const String p_input_prefix) {
+    params.input_prefix = string_gd_to_std(p_input_prefix);
+};
+
+String GDLlama::get_input_suffix() const {
+    return string_std_to_gd(params.input_suffix);
+};
+
+void GDLlama::set_input_suffix(const String p_input_suffix) {
+    params.input_suffix = string_gd_to_std(p_input_suffix);
+};
+
 bool GDLlama::get_should_output_prompt() const {
     return should_output_prompt;
 };
@@ -248,22 +264,6 @@ bool GDLlama::get_should_output_eos() const {
 
 void GDLlama::set_should_output_eos(const bool p_should_output_eos) {
     should_output_eos = p_should_output_eos;
-};
-
-String GDLlama::get_input_prefix() const {
-    return string_std_to_gd(params.input_prefix);
-};
-
-void GDLlama::set_input_prefix(const String p_input_prefix) {
-    params.input_prefix = string_gd_to_std(p_input_prefix);
-};
-
-String GDLlama::get_input_suffix() const {
-    return string_std_to_gd(params.input_suffix);
-};
-
-void GDLlama::set_input_suffix(const String p_input_suffix) {
-    params.input_suffix = string_gd_to_std(p_input_suffix);
 };
 
 int32_t GDLlama::get_n_ctx() const {
