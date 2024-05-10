@@ -9,6 +9,9 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Text Embedding: GDEmbedding node](#text-embedding-gdembedding-node)
     - [Multimodal Text Generation: GDLlava node](#multimodal-text-generation-gdllava-node)
     - [Template/Demo](#templatedemo)
+2. [Features](#features)
+3. [Documentation](#documentation)
+4. [Compile from Source](#compile-from-source)
 
 # Quick Start
 
@@ -124,6 +127,24 @@ The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provid
 
 
 # Features
+## Already working
+* Windows, Linux, Android
+* [llama.cpp](https://github.com/ggerganov/llama.cpp)
+    - Text generation
+    - Embedding
+    - Multimodal
+
+## TODO
+* Vulken backend, need to resolve this [issue](https://github.com/ggerganov/llama.cpp/issues/7130)
+* Mac and ios
+* Automatically generate json schema from data classes in GDSCript
+* More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
+* [mlc-llm](https://github.com/mlc-ai/mlc-llm) integration
+* RAG framework, waiting for [sqlite-vec](https://github.com/asg017/sqlite-vec) (seems like this is the only one with proper mobile support in mind)
+* Any suggestion?
+
+
+# Documentation
 * `GdLlama` node
   - Function:
     * `generate_text(prompt: String) -> String`: generate text from prommpt, note that this function takes a long time to run so it is best to use this with `Thread`
@@ -226,16 +247,6 @@ if (error == OK):
 print(dict["name"]) ##Eryndor Thorne
 ```
 
-# Already working
-* Windows, Linux, Android (experimental)
-* [llama.cpp](https://github.com/ggerganov/llama.cpp) text generation
-
-# TODO
-* Mac
-* Automatically generate schema from data classes in GDSCript
-* More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
-* [mlc-llm](https://github.com/mlc-ai/mlc-llm) integration
-
 # Compile from source
 Install build tools and Vulkan SDK for your operating system, then clone this repository
 ```
@@ -246,16 +257,18 @@ mkdir build
 cd build
 ```
 
+Currently, vulkan backend is not working for embedding, don't add the `-DLLAMA_VULKAN=1` flag
+
 Run `cmake`.
 
 On Windows:
 ```
-cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=1 -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
 ```
 
 On Linux:
 ```
-cmake .. -GNinja -DLLAMA_VULKAN=1 -DLLAMA_NATIVE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DLLAMA_NATIVE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
 ```
 
 For Android, set `$NDK_PATH` to your android ndk directory, then:
