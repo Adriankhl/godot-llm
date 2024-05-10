@@ -23,6 +23,10 @@ void GDLlava::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_n_predict", "p_n_predict"), &GDLlava::set_n_predict);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_predict", PROPERTY_HINT_NONE), "set_n_predict", "get_n_predict");
 
+    ClassDB::bind_method(D_METHOD("get_temperature"), &GDLlava::get_temperature);
+    ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlava::set_temperature);
+    ClassDB::add_property("GDLlava", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
+
     ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlava::get_n_batch);
     ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlava::set_n_batch);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
@@ -126,6 +130,14 @@ int32_t GDLlava::get_n_predict() const {
 
 void GDLlava::set_n_predict(const int32_t p_n_predict) {
     params.n_predict = p_n_predict;
+}
+
+float GDLlava::get_temperature() const {
+    return params.sparams.temp;
+}
+
+void GDLlava::set_temperature(const float p_temperature) {
+    params.sparams.temp = p_temperature;
 }
 
 int32_t GDLlava::get_n_batch() const {
