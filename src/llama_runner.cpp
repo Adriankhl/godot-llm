@@ -300,6 +300,9 @@ std::string LlamaRunner::llama_generate_text(
         params.interactive_first = true;
         params.antiprompt.emplace_back("<|im_start|>user\n");
     }
+    else if (params.conversation) {
+        params.interactive_first = true;
+    }
 
     // enable interactive mode if interactive start is specified
     if (params.interactive_first) {
@@ -457,6 +460,10 @@ std::string LlamaRunner::llama_generate_text(
     }
 
     struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
+    if (!ctx_sampling) {
+        fprintf(stderr, "%s: failed to initialize sampling subsystem\n", __func__);
+        return std::string(__func__) + ": failed to initialize sampling subsystem";
+    }
 
     while (!should_stop_generation && ((n_remain != 0 && !is_antiprompt) || params.interactive)) {
         // predict
@@ -670,7 +677,7 @@ std::string LlamaRunner::llama_generate_text(
         // display text
         if (input_echo && display) {
             for (auto id : embd) {
-                const std::string token_str = llama_token_to_piece(ctx, id);
+                const std::string token_str = llama_token_to_piece(ctx, id, !params.conversation);
 
                 bool is_bos = (id == llama_token_bos(model));
                 bool is_eos = (id == llama_token_eos(model));
@@ -740,7 +747,7 @@ std::string LlamaRunner::llama_generate_text(
 
             // deal with end of generation tokens in interactive mode
             if (llama_token_is_eog(model, llama_sampling_last(ctx_sampling))) {
-                LOG("found EOS token\n");
+                LOG("found an EOG token\n");
 
                 if (params.interactive) {
                     if (!params.antiprompt.empty()) {
@@ -760,7 +767,7 @@ std::string LlamaRunner::llama_generate_text(
             if (n_past > 0 && is_interacting) {
                 LOG("waiting for user input\n");
 
-                if (params.instruct || params.chatml) {
+                if (params.conversation || params.instruct || params.chatml) {
                     printf("\n> ");
                 }
 
@@ -770,7 +777,7 @@ std::string LlamaRunner::llama_generate_text(
                 }
 
                 std::string buffer;
-                if (!params.input_prefix.empty()) {
+                if (!params.input_prefix.empty() && !params.conversation) {
                     LOG("appending input prefix: '%s'\n", params.input_prefix.c_str());
                     printf("%s", params.input_prefix.c_str());
                 }
@@ -801,7 +808,7 @@ std::string LlamaRunner::llama_generate_text(
                 // Entering a empty line lets the user pass control back
                 if (buffer.length() > 1) {
                     // append input suffix if any
-                    if (!params.input_suffix.empty()) {
+                    if (!params.input_suffix.empty() && !params.conversation) {
                         LOG("appending input suffix: '%s'\n", params.input_suffix.c_str());
                         printf("%s", params.input_suffix.c_str());
                     }
@@ -827,7 +834,7 @@ std::string LlamaRunner::llama_generate_text(
                     }
 
                     const auto line_pfx = ::llama_tokenize(ctx, params.input_prefix, false, true);
-                    const auto line_inp = ::llama_tokenize(ctx, buffer,              false, false);
+                    const auto line_inp = ::llama_tokenize(ctx, buffer,              false, params.interactive_specials);
                     const auto line_sfx = ::llama_tokenize(ctx, params.input_suffix, false, true);
 
                     LOG("input tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, line_inp).c_str());
