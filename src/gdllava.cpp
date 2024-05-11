@@ -27,6 +27,14 @@ void GDLlava::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_temperature", "p_temperature"), &GDLlava::set_temperature);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::FLOAT, "temperature", PROPERTY_HINT_NONE), "set_temperature", "get_temperature");
 
+    ClassDB::bind_method(D_METHOD("get_n_threads"), &GDLlava::get_n_threads);
+    ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlava::set_n_threads);
+    ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
+
+	ClassDB::bind_method(D_METHOD("get_escape"), &GDLlava::get_escape);
+	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlava::set_escape);
+    ClassDB::add_property("GDLlava", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
+
     ClassDB::bind_method(D_METHOD("get_n_batch"), &GDLlava::get_n_batch);
     ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDLlava::set_n_batch);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
@@ -138,6 +146,22 @@ float GDLlava::get_temperature() const {
 
 void GDLlava::set_temperature(const float p_temperature) {
     params.sparams.temp = p_temperature;
+}
+
+int32_t GDLlava::get_n_threads() const {
+    return params.n_threads;
+}
+
+void GDLlava::set_n_threads(const int32_t p_n_threads) {
+    params.n_threads = p_n_threads;
+}
+
+bool GDLlava::get_escape() const {
+    return params.escape;
+}
+
+void GDLlava::set_escape(const bool p_escape) {
+    params.escape = p_escape;
 }
 
 int32_t GDLlava::get_n_batch() const {

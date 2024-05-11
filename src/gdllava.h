@@ -42,6 +42,10 @@ class GDLlava : public Node {
         void set_n_predict(const int32_t p_n_predict);
         float get_temperature() const;
         void set_temperature(const float p_temperature);
+        int32_t get_n_threads() const;
+        void set_n_threads(const int32_t n_threads);
+        bool get_escape() const;
+        void set_escape(const bool p_escape);
         int32_t get_n_batch() const;
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();
