@@ -162,7 +162,7 @@ Each type of node owns a set of properties which affect the computational perfor
 * `Reverse Prompt`: AI stops to wait for user input after seeing this prompt being generated, a good example is "User:"
 * `Input Prefix`: append before every user input
 * `Input Suffix`: append after every user input
-* `Should Output prompt`: whether the input prompt should be included in the output
+* `Should Output Prompt`: whether the input prompt should be included in the output
 * `Should Output Bos`: whether the special bos (beginning of sequence) token should be included in the output
 * `Should Output Eos`: whether the special eos (ending of sequence) token should be included in the output
 * `Context Size`: number of tokens the model can process at a time
