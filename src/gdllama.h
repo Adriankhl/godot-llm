@@ -33,6 +33,8 @@ class GDLlama : public Node {
         String generate_text_simple_internal(String prompt);
         String generate_text_grammar_internal(String prompt, String grammar);
         String generate_text_json_internal(String prompt, String json);
+        std::function<void(std::string)> glog;
+        std::function<void(std::string)> glog_verbose;
 
     protected:
 	    static void _bind_methods();
