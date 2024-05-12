@@ -1,11 +1,13 @@
 #include "embedding_runner.h"
 #include "common.h"
-#include "log.h"
 #include <functional>
 #include <string>
 #include <vector>
 
-EmbeddingRunner::EmbeddingRunner() {}
+EmbeddingRunner::EmbeddingRunner(
+    std::function<void(std::string)> glog
+) : glog {glog} {}
+
 EmbeddingRunner::~EmbeddingRunner() {}
 
 std::vector<std::string> EmbeddingRunner::split_lines(const std::string & s) {
@@ -88,6 +90,9 @@ std::vector<float> EmbeddingRunner::compute_embedding(
     std::tie(model, ctx) = llama_init_from_gpt_params(params);
     if (model == NULL) {
         fprintf(stderr, "%s: error: unable to load model\n", __func__);
+        std::string msg = std::string(__func__) + ": error: unable to load model";
+        glog(msg);
+        on_compute_finished(std::vector<float> {});
         return std::vector<float> {};
     }
 
@@ -120,6 +125,9 @@ std::vector<float> EmbeddingRunner::compute_embedding(
         if (inp.size() > n_batch) {
             fprintf(stderr, "%s: error: number of tokens in input line (%lld) exceeds batch size (%lld), increase batch size and re-run\n",
                     __func__, (long long int) inp.size(), (long long int) n_batch);
+            std::string msg = std::string(__func__) + ": error: number of tokens in input line (" + std::to_string((long long int) inp.size()) + ") exceeds batch size (" + std::to_string((long long int) n_batch) + "), increase batch size and re-run";
+            glog(msg);
+            on_compute_finished(std::vector<float> {});
             return std::vector<float> {};
         }
         inputs.push_back(inp);
@@ -203,7 +211,7 @@ std::vector<float> EmbeddingRunner::compute_embedding(
 
 float EmbeddingRunner::similarity_cos(std::vector<float> embd1, std::vector<float> embd2) {
     if (embd1.size() != embd2.size()) {
-        LOG("Error: embedding sizes don't match");
+        glog("Error: embedding sizes don't match");
         return 0.0;
     }
 

@@ -213,7 +213,7 @@ float GDEmbedding::similarity_cos_string_internal(String s1, String s2) {
         [](auto a){}
     );
 
-    float similarity = EmbeddingRunner::similarity_cos(vec1, vec2);
+    float similarity = embedding_runner->similarity_cos(vec1, vec2);
 
     call_deferred("emit_signal", "similarity_cos_string_finished", similarity);
 
