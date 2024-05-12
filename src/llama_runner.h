@@ -13,12 +13,14 @@ class LlamaRunner {
         bool should_output_bos;
         bool should_output_eos;
         std::string input;
+        std::function<void(std::string)> glog;
 
     public:
         LlamaRunner(
             bool should_output_prompt = true,
             bool should_output_bos = true,
-            bool should_output_eos = true
+            bool should_output_eos = true,
+            std::function<void(std::string)> glog = [](auto s){}
         );
         ~LlamaRunner();
         static bool file_exists(const std::string &path);

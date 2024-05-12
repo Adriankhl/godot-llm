@@ -21,13 +21,15 @@
 LlamaRunner::LlamaRunner(
     bool should_output_prompt,
     bool should_output_bos,
-    bool should_output_eos
+    bool should_output_eos,
+    std::function<void(std::string)> glog
 ) : should_stop_generation {false},
     is_waiting_input {false},
     input {""},
     should_output_prompt {should_output_prompt},
     should_output_bos {should_output_bos},
-    should_output_eos {should_output_eos}
+    should_output_eos {should_output_eos},
+    glog {glog}
 {
     log_set_target("llama.log");
 }
@@ -86,7 +88,10 @@ std::string LlamaRunner::llama_generate_text(
         printf("%s: please use the 'perplexity' tool for perplexity calculations\n", __func__);
         printf("************\n\n");
 
-        return 0;
+        std::string msg = std::string(__func__) + ": please use the 'perplexity' tool for perplexity calculations";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     if (params.embedding) {
@@ -94,7 +99,10 @@ std::string LlamaRunner::llama_generate_text(
         printf("%s: please use the 'embedding' tool for embedding calculations\n", __func__);
         printf("************\n\n");
 
-        return 0;
+        std::string msg = std::string(__func__) + ": please use the 'embedding' tool for embedding calculations";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     if (params.n_ctx != 0 && params.n_ctx < 8) {
@@ -142,7 +150,10 @@ std::string LlamaRunner::llama_generate_text(
 
     if (model == NULL) {
         LOG("%s: error: unable to load model\n", __func__);
-        return "Error: unable to load model";
+        std::string msg = std::string(__func__) + ": error: unable to load model";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     const int n_ctx_train = llama_n_ctx_train(model);
@@ -175,7 +186,10 @@ std::string LlamaRunner::llama_generate_text(
             size_t n_token_count_out = 0;
             if (!llama_state_load_file(ctx, path_session.c_str(), session_tokens.data(), session_tokens.capacity(), &n_token_count_out)) {
                 LOG("%s: error: failed to load session file '%s'\n", __func__, path_session.c_str());
-                return std::string(__func__) + ": error: failed to load session file " + path_session + "\n";
+                std::string msg = std::string(__func__) + ": error: failed to load session file " + path_session;
+                glog(msg);
+                on_generate_text_finished(msg);
+                return msg;
             }
             session_tokens.resize(n_token_count_out);
             LOG("%s: loaded a session with prompt size of %d tokens\n", __func__, (int)session_tokens.size());
@@ -229,7 +243,10 @@ std::string LlamaRunner::llama_generate_text(
 
     if ((int) embd_inp.size() > n_ctx - 4) {
         LOG("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int) embd_inp.size(), n_ctx - 4);
-        return std::string(__func__) + ": error: prompt is too long (" + std::to_string((int) embd_inp.size()) + " tokens, max " + std::to_string(n_ctx - 4) + ")\n";
+        std::string msg = std::string(__func__) + ": error: prompt is too long (" + std::to_string((int) embd_inp.size()) + " tokens, max " + std::to_string(n_ctx - 4) + ")";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     // debug message about similarity of saved session, if applicable
@@ -462,7 +479,10 @@ std::string LlamaRunner::llama_generate_text(
     struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling) {
         fprintf(stderr, "%s: failed to initialize sampling subsystem\n", __func__);
-        return std::string(__func__) + ": failed to initialize sampling subsystem";
+        std::string msg = std::string(__func__) + ": failed to initialize sampling subsystem";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     while (!should_stop_generation && ((n_remain != 0 && !is_antiprompt) || params.interactive)) {
@@ -595,7 +615,10 @@ std::string LlamaRunner::llama_generate_text(
                     int n_eval = std::min(input_size - i, params.n_batch);
                     if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
                         LOG("%s : failed to eval\n", __func__);
-                        return std::string(__func__) + ": failed to eval\n";
+                        std::string msg = std::string(__func__) + ": failed to eval";
+                        glog(msg);
+                        on_generate_text_finished(msg);
+                        return msg;
                     }
 
                     n_past_guidance += n_eval;
@@ -612,7 +635,10 @@ std::string LlamaRunner::llama_generate_text(
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0))) {
                     LOG("%s : failed to eval\n", __func__);
-                    return std::string(__func__) + ": failed to eval\n";
+                    std::string msg = std::string(__func__) + ": failed to eval";
+                    glog(msg);
+                    on_generate_text_finished(msg);
+                    return msg;
                 }
 
                 n_past += n_eval;
