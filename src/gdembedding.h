@@ -23,6 +23,8 @@ class GDEmbedding : public Node {
         Ref<Thread> compute_embedding_thread;
         PackedFloat32Array compute_embedding_internal(String prompt);
         float similarity_cos_string_internal(String s1, String s2);
+        std::function<void(std::string)> glog;
+        std::function<void(std::string)> glog_verbose;
 
     protected:
 	    static void _bind_methods();
