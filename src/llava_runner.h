@@ -42,10 +42,12 @@ class LlavaRunner {
         static void llava_free(struct llava_context * ctx_llava);
         static void llama_log_callback_logTee(ggml_log_level level, const char * text, void * user_data);
         bool should_stop_generation;
-        
+        std::function<void(std::string)> glog;
 
     public:
-        LlavaRunner();
+        LlavaRunner(
+            std::function<void(std::string)> glog = [](auto s){}
+        );
         ~LlavaRunner();
         std::string llava_generate_text_base64(
             std::string prompt,

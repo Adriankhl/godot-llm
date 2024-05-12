@@ -8,7 +8,10 @@
 #include <string>
 
 
-LlavaRunner::LlavaRunner() : should_stop_generation {false}
+LlavaRunner::LlavaRunner(
+    std::function<void(std::string)> glog
+) : should_stop_generation {false},
+    glog {glog}
 {
     log_set_target("llava.log");
 };
@@ -313,12 +316,18 @@ std::string LlavaRunner::llava_generate_text_base64(
     if (params.mmproj.empty() || (params.image.empty() && !prompt_contains_image(params.prompt))) {
     //    gpt_print_usage(argc, argv, params);
     //    show_additional_info(argc, argv);
-        return "";
+        std::string msg = std::string(__func__) + ": error: no mmproj or image";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
     auto model = llava_init(&params);
     if (model == NULL) {
         fprintf(stderr, "%s: error: failed to init llava model\n", __func__);
-        return "";
+        std::string msg = std::string(__func__) + ": error: failed to init llava model";
+        glog(msg);
+        on_generate_text_finished(msg);
+        return msg;
     }
 
     for (auto & image : params.image) {
@@ -327,7 +336,10 @@ std::string LlavaRunner::llava_generate_text_base64(
         auto image_embed = load_image(ctx_llava, &params, image);
         if (!image_embed) {
             std::cerr << "error: failed to load image " << image << ". Terminating\n\n";
-            return "";
+            std::string msg = "error: failed to load image " + image + ". Terminating";
+            glog(msg);
+            on_generate_text_finished(msg);
+            return msg;
         }
 
         // process the prompt
