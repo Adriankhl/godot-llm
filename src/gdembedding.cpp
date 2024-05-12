@@ -1,7 +1,6 @@
 #include "conversion.h"
 #include "gdembedding.h"
 #include "embedding_runner.h"
-#include "log.h"
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -38,7 +37,6 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
 {
-    log_set_target(stdout);
     glog_verbose("Instantiate GDEmbedding mutex");
 
     func_mutex.instantiate();

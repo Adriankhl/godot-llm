@@ -1,7 +1,6 @@
 #include "gdllama.h"
 #include "conversion.h"
 #include "llama_runner.h"
-#include "log.h"
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/thread.hpp>
@@ -10,11 +9,11 @@
 #include <godot_cpp/variant/callable_method_pointer.hpp>
 #include <godot_cpp/variant/quaternion.hpp>
 #include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #include <common/common.h>
 #include <common/json.hpp>
 #include <common/json-schema-to-grammar.h>
 #include <cstdint>
-#include <godot_cpp/variant/utility_functions.hpp>
 #include <memory>
 #include <string>
 
@@ -145,7 +144,6 @@ GDLlama::GDLlama() : params {gpt_params()},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
 {
-    log_set_target(stdout);
     glog_verbose("Instantiate GDLlama mutex");
     func_mutex.instantiate();
     generate_text_mutex.instantiate();

@@ -1,8 +1,8 @@
 #include "gdllava.h"
 #include "conversion.h"
 #include "llava_runner.h"
-#include "log.h"
 #include <godot_cpp/classes/marshalls.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot {
 
@@ -54,23 +54,24 @@ void GDLlava::_bind_methods() {
 void GDLlava::dummy() {}
 
 GDLlava::GDLlava() : params {gpt_params()},
-    llava_runner {new LlavaRunner()}
+    llava_runner {new LlavaRunner()},
+    glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
+    glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
 {
-    log_set_target(stdout);
-    LOG("Instantiate GDLlava mutex\n");
+    glog_verbose("Instantiate GDLlava mutex");
     func_mutex.instantiate();
     generate_text_mutex.instantiate();
 
-    LOG("Instantiate GDLlava thread\n");
+    glog_verbose("Instantiate GDLlava thread");
     generate_text_thread.instantiate();
     generate_text_thread->start(callable_mp_static(&GDLlava::dummy));
     generate_text_thread->wait_to_finish();
 
-    LOG("Instantiate GDLlava thread -- done\n");
+    glog_verbose("Instantiate GDLlava thread -- done");
 }
 
 GDLlava::~GDLlava() {
-    LOG("GDLlava destructor\n");
+    glog_verbose("GDLlava destructor");
 
     if (!func_mutex->try_lock()) {
         func_mutex->lock();
@@ -83,18 +84,18 @@ GDLlava::~GDLlava() {
 
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {
-        LOG("GDLlava destructor waiting thread to finish\n");
+        glog_verbose("GDLlava destructor waiting thread to finish");
         generate_text_thread->wait_to_finish();
     }
-    LOG("GDLlava destructor -- done\n");
+    glog_verbose("GDLlava destructor -- done");
 }
 
 void GDLlava::_exit_tree() {
-    LOG("GDLlava exit tree\n");
+    glog_verbose("GDLlava exit tree");
 
     func_mutex->lock();
 
-    LOG("func_mutex locked\n");
+    glog_verbose("func_mutex locked");
 
     while (!generate_text_mutex->try_lock()) {
         stop_generate_text();
@@ -103,7 +104,7 @@ void GDLlava::_exit_tree() {
 
     //is_started instead of is_alive to properly clean up all threads
     if (generate_text_thread->is_started()) {
-        LOG("Waiting thread to finish\n");
+        glog_verbose("Waiting thread to finish");
         generate_text_thread->wait_to_finish();
     }
 }
@@ -173,7 +174,7 @@ void GDLlava::set_n_batch(const int32_t p_n_batch) {
 }
 
 String GDLlava::generate_text_common(String prompt, String image_base64) {
-    LOG("generate_text_common");
+    glog_verbose("generate_text_common");
 
     llava_runner.reset(new LlavaRunner());
 
@@ -191,55 +192,55 @@ String GDLlava::generate_text_common(String prompt, String image_base64) {
         }
     );
 
-    LOG("generate_text_common -- done");
+    glog_verbose("generate_text_common -- done");
 
     return string_std_to_gd(generated_text);
 }
 
 String GDLlava::generate_text_base64_internal(String prompt, String image_base64) {
-    LOG("generate_text_base64_internal");
+    glog_verbose("generate_text_base64_internal");
 
     String full_generated_text = generate_text_common(prompt, image_base64);
 
     generate_text_mutex->unlock();
-    LOG("generate_text_mutex unlocked\n");
+    glog_verbose("generate_text_mutex unlocked");
 
-    LOG("generate_text_base64_internal -- done");
+    glog_verbose("generate_text_base64_internal -- done");
 
     return full_generated_text;
 }
 
 String GDLlava::generate_text_base64(String prompt, String image_base64) {
-    LOG("generate_text_base64");
+    glog_verbose("generate_text_base64");
 
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlava is busy\n");
+        glog("GDLlava is busy");
     }
 
     generate_text_mutex->lock();
-    LOG("generate_text_mutex locked\n");
+    glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
 
     String full_generated_text = generate_text_base64_internal(prompt, image_base64);
 
-    LOG("generate_text_base64 -- done");
+    glog_verbose("generate_text_base64 -- done");
 
     return full_generated_text;
 }
 
 Error GDLlava::run_generate_text_base64(String prompt, String image_base64) {
-    LOG("run_generate_text_base64\n");
+    glog_verbose("run_generate_text_base64");
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlava is busy\n");
+        glog("GDLlava is busy");
     }
 
     generate_text_mutex->lock();
-    LOG("generate_text_mutex locked\n");
+    glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
 
@@ -249,62 +250,62 @@ Error GDLlava::run_generate_text_base64(String prompt, String image_base64) {
     }
 
     generate_text_thread.instantiate();
-    LOG("generate_text_thread instantiated\n");
+    glog_verbose("generate_text_thread instantiated");
 
     Callable c = callable_mp(this, &GDLlava::generate_text_base64_internal);
     Error error = generate_text_thread->start(c.bind(prompt, image_base64));
 
-    LOG("run_generate_text_base64 -- done\n");
+    glog_verbose("run_generate_text_base64 -- done");
     return error;
 }
 
 
 String GDLlava::generate_text_image_internal(String prompt, Image* image) {
-    LOG("generate_text_image_internal");
+    glog_verbose("generate_text_image_internal");
 
     String image_base64 = Marshalls::get_singleton()->raw_to_base64(image->save_jpg_to_buffer());
 
     String full_generated_text = generate_text_common(prompt, image_base64);
 
     generate_text_mutex->unlock();
-    LOG("generate_text_mutex unlocked\n");
+    glog_verbose("generate_text_mutex unlocked");
 
-    LOG("generate_text_image_internal -- done");
+    glog_verbose("generate_text_image_internal -- done");
 
     return full_generated_text;
 }
 
 String GDLlava::generate_text_image(String prompt, Image* image) {
-    LOG("generate_text_image");
+    glog_verbose("generate_text_image");
 
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlava is busy\n");
+        glog("GDLlava is busy");
     }
 
     generate_text_mutex->lock();
-    LOG("generate_text_mutex locked\n");
+    glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
 
     String full_generated_text = generate_text_image_internal(prompt, image);
 
-    LOG("generate_text_image -- done");
+    glog_verbose("generate_text_image -- done");
 
     return full_generated_text;
 }
 
 Error GDLlava::run_generate_text_image(String prompt, Image* image) {
-    LOG("run_generate_text_image\n");
+    glog_verbose("run_generate_text_image");
     func_mutex->lock();
 
     if (!generate_text_mutex->try_lock()) {
-        LOG("GDLlava is busy\n");
+        glog("GDLlava is busy");
     }
 
     generate_text_mutex->lock();
-    LOG("generate_text_mutex locked\n");
+    glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
 
@@ -314,12 +315,12 @@ Error GDLlava::run_generate_text_image(String prompt, Image* image) {
     }
 
     generate_text_thread.instantiate();
-    LOG("generate_text_thread instantiated\n");
+    glog_verbose("generate_text_thread instantiated");
 
     Callable c = callable_mp(this, &GDLlava::generate_text_image_internal);
     Error error = generate_text_thread->start(c.bind(prompt, image));
 
-    LOG("run_generate_text_image -- done\n");
+    glog_verbose("run_generate_text_image -- done");
     return error;
 }
 
@@ -328,7 +329,7 @@ bool GDLlava::is_running() {
 }
 
 void GDLlava::stop_generate_text() {
-    LOG("Stopping llava_runner\n");
+    glog_verbose("Stopping llava_runner");
     llava_runner->llava_stop_generate_text();
 }
 

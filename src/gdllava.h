@@ -24,6 +24,8 @@ class GDLlava : public Node {
         String generate_text_common(String prompt, String image_base64);
         String generate_text_base64_internal(String prompt, String image_base64);
         String generate_text_image_internal(String prompt, Image* image);
+        std::function<void(std::string)> glog;
+        std::function<void(std::string)> glog_verbose;
 
     protected:
 	    static void _bind_methods();
