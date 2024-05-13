@@ -149,3 +149,21 @@ add_test(
   NAME llava_runner_test
   COMMAND llava_runner_test
 )
+
+set(sqlite_test_files
+  "test/src/sqlite_test.cpp"
+  "src/sqlite3.c"
+  "src/sqlite3.h"
+  "src/sqlite3ext.h"
+  "src/sqlite-vec.c"
+  "src/sqlite-vec.h"
+)
+
+add_executable(sqlite_test ${sqlite_test_files})
+
+target_link_libraries(sqlite_test)
+
+add_test(
+  NAME sqlite_test
+  COMMAND sqlite_test
+)

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "sqlite3ext.h"
 
 #define SQLITE_VEC_VERSION "v0.0.1-alpha.9"
@@ -9,3 +13,7 @@ int sqlite3_vec_init(sqlite3 *db, char **pzErrMsg,
                      const sqlite3_api_routines *pApi);
 int sqlite3_vec_fs_read_init(sqlite3 *db, char **pzErrMsg,
                              const sqlite3_api_routines *pApi);
+
+#ifdef __cplusplus
+}  /* end of the 'extern "C"' block */
+#endif

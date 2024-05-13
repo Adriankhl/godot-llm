@@ -42,5 +42,13 @@
             "args": [],
             "cwd": "${workspaceFolder}/build"
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug sqlite test",
+            "program": "${workspaceFolder}/build/sqlite_test.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/build"
+        },
     ]
 }
