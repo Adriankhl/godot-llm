@@ -15,29 +15,24 @@ set(src_files
   "src/sqlite3ext.h"
   "src/sqlite-vec.c"
   "src/sqlite-vec.h"
-  "src/conversion.h"
+  "src/conversion.hpp"
   "src/conversion.cpp"
-  "src/gdembedding.h"
+  "src/gdembedding.hpp"
   "src/gdembedding.cpp"
-  "src/gdllama.h"
+  "src/gdllama.hpp"
   "src/gdllama.cpp"
-  "src/gdllava.h"
+  "src/gdllava.hpp"
   "src/gdllava.cpp"
-  "src/embedding_runner.h"
+  "src/embedding_runner.hpp"
   "src/embedding_runner.cpp"
-  "src/llama_runner.h"
+  "src/llama_runner.hpp"
   "src/llama_runner.cpp"
-  "src/llava_runner.h"
+  "src/llava_runner.hpp"
   "src/llava_runner.cpp"
-  "src/register_types.h"
+  "src/register_types.hpp"
   "src/register_types.cpp"
 )
 
-
-file(GLOB sqlite_src_files
-     "sqlite/src/*.h"
-     "sqlite/src/*.c"
-)
 
 add_compile_options(-DSQLITE_CORE)
 
