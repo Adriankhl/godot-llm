@@ -1,7 +1,7 @@
-#ifndef GDLLAMA_H
-#define GDLLAMA_H
+#ifndef GDLLAMA_HPP
+#define GDLLAMA_HPP
 
-#include "llama_runner.h"
+#include "llama_runner.hpp"
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>

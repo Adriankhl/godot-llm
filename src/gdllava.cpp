@@ -1,6 +1,6 @@
-#include "gdllava.h"
-#include "conversion.h"
-#include "llava_runner.h"
+#include "gdllava.hpp"
+#include "conversion.hpp"
+#include "llava_runner.hpp"
 #include <godot_cpp/classes/marshalls.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 

@@ -1,8 +1,8 @@
-#ifndef GDEMBEDDING_H
-#define GDEMBEDDING_H
+#ifndef GDEMBEDDING_HPP
+#define GDEMBEDDING_HPP
 
 #include "common.h"
-#include "embedding_runner.h"
+#include "embedding_runner.hpp"
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>

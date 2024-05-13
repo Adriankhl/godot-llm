@@ -1,8 +1,8 @@
-#ifndef GDLLAVA_H
-#define GDLLAVA_H
+#ifndef GDLLAVA_HPP
+#define GDLLAVA_HPP
 
 #include "common.h"
-#include "llava_runner.h"
+#include "llava_runner.hpp"
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>

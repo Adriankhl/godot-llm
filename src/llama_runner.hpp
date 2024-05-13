@@ -1,5 +1,5 @@
-#ifndef LLAMA_RUNNER_H
-#define LLAMA_RUNNER_H
+#ifndef LLAMA_RUNNER_HPP
+#define LLAMA_RUNNER_HPP
 
 #include <common.h>
 #include <functional>

@@ -1,5 +1,5 @@
-#ifndef LLAVA_RUNNER_H
-#define LLAVA_RUNNER_H
+#ifndef LLAVA_RUNNER_HPP
+#define LLAVA_RUNNER_HPP
 
 #include "common.h"
 #include "llama.h"

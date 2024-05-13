@@ -1,6 +1,6 @@
-#include "conversion.h"
-#include "gdembedding.h"
-#include "embedding_runner.h"
+#include "conversion.hpp"
+#include "gdembedding.hpp"
+#include "embedding_runner.hpp"
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>

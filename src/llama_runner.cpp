@@ -1,4 +1,4 @@
-#include "llama_runner.h"
+#include "llama_runner.hpp"
 #include "llama.h"
 #include <chrono>
 #include <common.h>

@@ -1,6 +1,6 @@
-#include "gdllama.h"
-#include "conversion.h"
-#include "llama_runner.h"
+#include "gdllama.hpp"
+#include "conversion.hpp"
+#include "llama_runner.hpp"
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/thread.hpp>

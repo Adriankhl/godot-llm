@@ -1,5 +1,5 @@
-#ifndef CONVERSION_H
-#define CONVERSION_H
+#ifndef CONVERSION_HPP
+#define CONVERSION_HPP
 
 #include <vector>
 #include <string>

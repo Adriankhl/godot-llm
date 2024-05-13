@@ -1,8 +1,8 @@
 #include "register_types.h"
 
-#include "gdllama.h"
-#include "gdembedding.h"
-#include "gdllava.h"
+#include "gdllama.hpp"
+#include "gdembedding.hpp"
+#include "gdllava.hpp"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>

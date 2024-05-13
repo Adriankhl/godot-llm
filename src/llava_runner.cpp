@@ -1,4 +1,4 @@
-#include "llava_runner.h"
+#include "llava_runner.hpp"
 #include <llama.h>
 #include <llava.h>
 #include <clip.h>
