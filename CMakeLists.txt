@@ -10,6 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set(src_files
+  "src/sqlite3.c"
+  "src/sqlite3.h"
+  "src/sqlite3ext.h"
+  "src/sqlite-vec.c"
+  "src/sqlite-vec.h"
   "src/conversion.h"
   "src/conversion.cpp"
   "src/gdembedding.h"
@@ -27,6 +32,15 @@ set(src_files
   "src/register_types.h"
   "src/register_types.cpp"
 )
+
+
+file(GLOB sqlite_src_files
+     "sqlite/src/*.h"
+     "sqlite/src/*.c"
+)
+
+add_compile_options(-DSQLITE_CORE)
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
