@@ -1,5 +1,5 @@
-#ifndef REGISTER_TYPES_H
-#define REGISTER_TYPES_H
+#ifndef REGISTER_TYPES_HPP
+#define REGISTER_TYPES_HPP
 
 #include <godot_cpp/core/class_db.hpp>
 

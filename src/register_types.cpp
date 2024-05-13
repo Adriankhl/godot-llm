@@ -1,4 +1,4 @@
-#include "register_types.h"
+#include "register_types.hpp"
 
 #include "gdllama.hpp"
 #include "gdembedding.hpp"
