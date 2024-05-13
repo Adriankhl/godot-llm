@@ -402,8 +402,17 @@ String GDLlama::generate_text_common(String prompt) {
         params.antiprompt.emplace_back(reverse_prompt);
     }
 
+    std::string s_prompt;
+    if (!params.instruct && !params.interactive) {
+        // Llama only append prefix and suffix when it is interactive
+        // Append the prefix and suffix her for simple text generation
+        s_prompt = params.input_prefix + string_gd_to_std(prompt) + params.input_suffix;
+    } else {
+        s_prompt = string_gd_to_std(prompt);
+    }
+
     std::string generated_text = llama_runner->llama_generate_text(
-        string_gd_to_std(prompt),
+        s_prompt,
         params,
         [this](std::string s) {
             String new_text = string_std_to_gd(s);
