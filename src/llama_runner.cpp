@@ -791,8 +791,6 @@ std::string LlamaRunner::llama_generate_text(
             }
 
             if (n_past > 0 && is_interacting) {
-                LOG("waiting for user input\n");
-
                 if (params.conversation || params.instruct || params.chatml) {
                     printf("\n> ");
                 }
@@ -810,9 +808,12 @@ std::string LlamaRunner::llama_generate_text(
 
                 is_waiting_input = true;
                 on_input_wait_started();
+
+                LOG("Waiting for user input\n");
                 while(is_waiting_input && !should_stop_generation) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 }
+                LOG("Ending user input\n");
 
                 buffer = input;
                 // color user input only

@@ -197,7 +197,7 @@ Each type of node owns a set of properties which affect the computational perfor
 ### Signals
 * `generate_text_finished(text: String) `: emitted with the full generated text when a text generation is completed. When either `Instruct` or `Interactive` enabled, this signal is emitted after the whole interaction is finished
 * `generate_text_updated(new_text: String)`: instead of waiting the full generated text, this signal is emited whenever a new token (part of the text sequence) is generated, which forms a stream of strings
-* `input_wait_started()`: the model is now starting to wait for user input (with either `Instruct` or `Interactive` enabled)
+* `input_wait_started()`: the model is now starting to wait for user input, happens when either `Instruct` or `Interactive` are enabled and the model stop generating text in the middle of the conversation to wait for further input from the user.
 
 ## GDEmbedding functions and signals
 ### Functions
