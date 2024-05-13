@@ -1,4 +1,4 @@
-#include "../../src/llava_runner.h"
+#include "../../src/llava_runner.hpp"
 #include "common.h"
 #include <iostream>
 #include <ostream>

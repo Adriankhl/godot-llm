@@ -1,4 +1,4 @@
-#include "../../src/llama_runner.h"
+#include "../../src/llama_runner.hpp"
 #include "common.h"
 #include <iostream>
 #include <ostream>
