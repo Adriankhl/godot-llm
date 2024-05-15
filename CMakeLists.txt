@@ -36,6 +36,9 @@ set(src_files
 
 add_compile_options(-DSQLITE_CORE)
 
+# Disable MSVC fopen warning
+add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
+
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
