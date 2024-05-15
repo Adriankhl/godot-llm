@@ -56,7 +56,8 @@ void GDLlava::dummy() {}
 GDLlava::GDLlava() : params {gpt_params()},
     llava_runner {new LlavaRunner()},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
-    glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
+    glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}},
+    generate_text_buffer {""}
 {
     glog_verbose("Instantiate GDLlava mutex");
     func_mutex.instantiate();
@@ -183,8 +184,17 @@ String GDLlava::generate_text_common(String prompt, String image_base64) {
         string_gd_to_std(image_base64),
         params,
         [this](std::string s) {
-            String new_text = string_std_to_gd(s);
-            call_deferred("emit_signal", "generate_text_updated", new_text);
+            if (generate_text_buffer.empty() && is_utf8(s.data())){
+                String new_text = string_std_to_gd(s);
+                call_deferred("emit_signal", "generate_text_updated", new_text);
+            } else {
+                generate_text_buffer.append(s);
+                if (is_utf8(generate_text_buffer.data())) {
+                    String new_text = string_std_to_gd(generate_text_buffer);
+                    generate_text_buffer.clear();
+                    call_deferred("emit_signal", "generate_text_updated", new_text);
+                }
+            }
         },
         [this](std::string s) {
             String text {string_std_to_gd(s)};

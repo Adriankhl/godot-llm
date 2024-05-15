@@ -15,6 +15,8 @@ PackedFloat32Array float32_vec_to_array(std::vector<float> vec);
 std::string string_gd_to_std(String s);
 String string_std_to_gd(std::string s);
 
+bool is_utf8(const char * string);
+
 } //namespace godot
 
 #endif

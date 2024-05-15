@@ -142,7 +142,8 @@ GDLlama::GDLlama() : params {gpt_params()},
     should_output_bos {true},
     should_output_eos {true},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
-    glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
+    glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}},
+    generate_text_buffer {""}
 {
     glog_verbose("Instantiate GDLlama mutex");
     func_mutex.instantiate();
@@ -415,8 +416,17 @@ String GDLlama::generate_text_common(String prompt) {
         s_prompt,
         params,
         [this](std::string s) {
-            String new_text = string_std_to_gd(s);
-            call_deferred("emit_signal", "generate_text_updated", new_text);
+            if (generate_text_buffer.empty() && is_utf8(s.data())){
+                String new_text = string_std_to_gd(s);
+                call_deferred("emit_signal", "generate_text_updated", new_text);
+            } else {
+                generate_text_buffer.append(s);
+                if (is_utf8(generate_text_buffer.data())) {
+                    String new_text = string_std_to_gd(generate_text_buffer);
+                    generate_text_buffer.clear();
+                    call_deferred("emit_signal", "generate_text_updated", new_text);
+                }
+            }
         },
         [this]() {
             call_deferred("emit_signal", "input_wait_started");
