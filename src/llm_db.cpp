@@ -3,10 +3,12 @@
 #include "sqlite-vec.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
@@ -91,12 +93,19 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_db_file", "p_db_file"), &LlmDB::set_db_file);
     ClassDB::add_property("LlmDB", PropertyInfo(Variant::STRING, "db_file", PROPERTY_HINT_GLOBAL_FILE), "set_db_file", "get_db_file");
 
+    ClassDB::bind_method(D_METHOD("get_table_name"), &LlmDB::get_table_name);
+    ClassDB::bind_method(D_METHOD("set_table_name", "p_table_name"), &LlmDB::set_table_name);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::STRING, "table_name", PROPERTY_HINT_GLOBAL_FILE), "set_table_name", "get_table_name");
+
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
+    ClassDB::bind_method(D_METHOD("create_table"), &LlmDB::create_table);
+    ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
-    db_file("llm.db")
+    db_file {"llm.db"},
+    table_name {"llm_table"}
 {
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
@@ -131,6 +140,14 @@ void LlmDB::set_db_file(const String p_db_file) {
     db_file = p_db_file;
 }
 
+String LlmDB::get_table_name() const {
+    return table_name;
+}
+
+void LlmDB::set_table_name(const String p_table_name) {
+    table_name = p_table_name;
+}
+
 void LlmDB::open_db() {
     if (db != nullptr) {
         UtilityFunctions::printerr("Cannot open_db when db is already openned");
@@ -151,12 +168,76 @@ void LlmDB::close_db() {
     if (db != nullptr) {
         int rc = SQLITE_OK;
         rc = sqlite3_close_v2(db);
+        db = nullptr;
         if (rc != SQLITE_OK) {
             UtilityFunctions::printerr("Failed to close database");
         }
     } else {
         UtilityFunctions::printerr("Cannot close_db when no db is opened");
     }
+}
+
+int print_all_callback(void *unused, int count, char **data, char **columns) {
+
+    UtilityFunctions::print_verbose("print_all_callback called");
+
+    UtilityFunctions::print_verbose("There are " + String::num_int64(count) + " column(s)");
+
+    for (int idx = 0; idx < count; idx++) {
+        UtilityFunctions::print_verbose("The data in column" + String::utf8(columns[idx]) + " is: " + String::utf8(data[idx]));
+    }
+
+    return 0;
+}
+
+void LlmDB::execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params) {
+    int rc = SQLITE_OK;
+    char* errmsg;
+    sqlite3_exec(db, statement.utf8().get_data(), callback, params, &errmsg);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("LlmDB execute fail: " + String(errmsg));
+    }
+}
+
+void LlmDB::execute(String statement) {
+    execute_internal(statement, print_all_callback, nullptr);
+}
+
+void LlmDB::create_table() {
+    UtilityFunctions::print_verbose("create_table " + table_name);
+    String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
+    for (int i = 0; i < schema.size(); i++) {
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        statement += " '" + sd->get_name() + "' ";
+        switch (sd->get_type()) {
+            case 0:
+                statement += "INT";
+                break;
+            case 1:
+                statement += "REAL";
+                break;
+            case 2:
+                statement += "TEXT";
+                break;
+            case 3:
+                statement += "";
+                break;
+            default:
+                UtilityFunctions::printerr("Wrong schema type: " + String::num_int64(sd->get_type()));
+        }
+
+        if (i != schema.size() - 1) {
+            statement += ", ";
+        }
+    }
+
+    statement += ")";
+
+    UtilityFunctions::print_verbose("Create table statement: " + statement);
+
+    execute(statement);
+
+    UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
 }
 
 } // namespace godot

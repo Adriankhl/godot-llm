@@ -43,6 +43,8 @@ class LlmDB : public GDEmbedding {
         TypedArray<LlmDBSchemaData> schema;
         String db_dir;
         String db_file;
+        String table_name;
+        void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
 
     protected:
 	    static void _bind_methods();
@@ -56,8 +58,13 @@ class LlmDB : public GDEmbedding {
         void set_db_dir(const String p_db_dir);
         String get_db_file() const;
         void set_db_file(const String p_db_file);
+        String get_table_name() const;
+        void set_table_name(const String p_table_name);
         void open_db();
         void close_db();
+        void execute(String statement);
+        void create_table();
+        void is_table_exist(String p_table_name);
 };
 
 } // namespace godot
