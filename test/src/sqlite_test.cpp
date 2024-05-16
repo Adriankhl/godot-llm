@@ -1,7 +1,6 @@
 #include "../../src/sqlite3.h"
 #include "../../src/sqlite-vec.h"
-#include <iostream>
-#include <ostream>
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
     int rc = SQLITE_OK;

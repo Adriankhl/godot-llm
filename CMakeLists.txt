@@ -29,6 +29,8 @@ set(src_files
   "src/llama_runner.cpp"
   "src/llava_runner.hpp"
   "src/llava_runner.cpp"
+  "src/llm_db.hpp"
+  "src/llm_db.cpp"
   "src/register_types.hpp"
   "src/register_types.cpp"
 )

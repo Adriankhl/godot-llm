@@ -3,6 +3,7 @@
 #include "gdllama.hpp"
 #include "gdembedding.hpp"
 #include "gdllava.hpp"
+#include "llm_db.hpp"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -19,6 +20,8 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<GDLlama>();
 	ClassDB::register_class<GDEmbedding>();
 	ClassDB::register_class<GDLlava>();
+	ClassDB::register_class<LlmDB>();
+	ClassDB::register_class<LlmDBSchemaData>();
 }
 
 void uninitialize_llm_module(ModuleInitializationLevel p_level) {
