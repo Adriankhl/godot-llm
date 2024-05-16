@@ -101,6 +101,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
     ClassDB::bind_method(D_METHOD("create_table"), &LlmDB::create_table);
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
+    ClassDB::bind_method(D_METHOD("is_table_exist", "p_table_name"), &LlmDB::is_table_exist);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
 }
 
@@ -242,6 +243,35 @@ void LlmDB::create_table() {
 }
 
 bool LlmDB::is_table_exist(String p_table_name) {
+    UtilityFunctions::print_verbose("is_table_exist");
+
+    sqlite3_stmt *stmt;
+
+    String statement = "SELECT count(name) FROM sqlite_master WHERE type='table' AND name='" + p_table_name + "';";
+    UtilityFunctions::print_verbose("statement: " + statement);
+
+    int rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        UtilityFunctions::printerr("Error: not a row");
+        return false;
+    }
+
+    int num = sqlite3_column_int64(stmt, 0);
+
+    sqlite3_finalize(stmt);
+
+    UtilityFunctions::print_verbose("is_table_exist -- done");
+
+    if (num == 0) {
+        return false;
+    }
+
     return true;
 }
 
