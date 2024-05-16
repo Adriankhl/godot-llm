@@ -101,6 +101,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
     ClassDB::bind_method(D_METHOD("create_table"), &LlmDB::create_table);
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
+    ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -203,29 +204,29 @@ void LlmDB::execute(String statement) {
     execute_internal(statement, print_all_callback, nullptr);
 }
 
+String LlmDB::type_int_to_string(int schema_data_type) {
+    switch (schema_data_type) {
+        case LlmDBSchemaDataType::INTEGER:
+            return  "INT";
+        case LlmDBSchemaDataType::REAL:
+            return  "REAL";
+        case LlmDBSchemaDataType::TEXT:
+            return "TEXT";
+        case LlmDBSchemaDataType::BLOB:
+            return "";
+        default:
+            UtilityFunctions::printerr("Wrong schema type: " + String::num_int64(schema_data_type));
+            return "";
+    }
+}
+
 void LlmDB::create_table() {
     UtilityFunctions::print_verbose("create_table " + table_name);
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
     for (int i = 0; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
         statement += " '" + sd->get_name() + "' ";
-        switch (sd->get_type()) {
-            case 0:
-                statement += "INT";
-                break;
-            case 1:
-                statement += "REAL";
-                break;
-            case 2:
-                statement += "TEXT";
-                break;
-            case 3:
-                statement += "";
-                break;
-            default:
-                UtilityFunctions::printerr("Wrong schema type: " + String::num_int64(sd->get_type()));
-        }
-
+        statement += type_int_to_string(sd->get_type());
         if (i != schema.size() - 1) {
             statement += ", ";
         }
@@ -238,6 +239,55 @@ void LlmDB::create_table() {
     execute(statement);
 
     UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
+}
+
+bool LlmDB::is_table_exist(String p_table_name) {
+    return true;
+}
+
+
+bool LlmDB::is_table_valid(String p_table_name) {
+    UtilityFunctions::print_verbose("is_table_valid");
+
+    sqlite3_stmt *stmt;
+
+    String statement = "PRAGMA table_info(" + p_table_name + ");";
+    UtilityFunctions::print_verbose("statement: " + statement);
+
+    int rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
+        return false;
+    }
+
+    for (int i = 0; i < schema.size(); i++) {
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW) {
+            UtilityFunctions::printerr("Error: not a row");
+            return false;
+        }
+        String name = String::utf8((char *) sqlite3_column_text(stmt, 1));
+        String type = String::utf8((char *) sqlite3_column_text(stmt, 2));
+
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+
+        if (name != sd->get_name()) {
+            UtilityFunctions::printerr("Column name wrong, table : " + name + ", schema: " + sd->get_name());
+            return false;
+        }
+
+        if (type != type_int_to_string(sd->get_type())) {
+            UtilityFunctions::printerr("Column type wrong, table : " + type + ", schema: " + type_int_to_string(sd->get_type()));
+            return false;
+
+        }
+    }
+
+    sqlite3_finalize(stmt);
+
+    UtilityFunctions::print_verbose("is_table_valid -- done");
+
+    return true;
 }
 
 } // namespace godot

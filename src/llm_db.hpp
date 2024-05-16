@@ -12,6 +12,12 @@
 
 namespace godot {
 
+enum LlmDBSchemaDataType {
+    INTEGER = 0,
+    REAL = 1,
+    TEXT = 2,
+    BLOB = 3
+};
 
 class LlmDBSchemaData : public Resource {
     GDCLASS(LlmDBSchemaData, Resource)
@@ -45,6 +51,7 @@ class LlmDB : public GDEmbedding {
         String db_file;
         String table_name;
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
+        String type_int_to_string(int schema_data_type);
 
     protected:
 	    static void _bind_methods();
@@ -64,7 +71,8 @@ class LlmDB : public GDEmbedding {
         void close_db();
         void execute(String statement);
         void create_table();
-        void is_table_exist(String p_table_name);
+        bool is_table_exist(String p_table_name);
+        bool is_table_valid(String p_table_name);
 };
 
 } // namespace godot
