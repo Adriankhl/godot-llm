@@ -41,6 +41,8 @@ class LlmDB : public GDEmbedding {
     private:
         sqlite3* db;
         TypedArray<LlmDBSchemaData> schema;
+        String db_dir;
+        String db_file;
 
     protected:
 	    static void _bind_methods();
@@ -50,6 +52,12 @@ class LlmDB : public GDEmbedding {
         ~LlmDB();
         TypedArray<LlmDBSchemaData> get_schema() const;
         void set_schema(const TypedArray<LlmDBSchemaData> p_schema);
+        String get_db_dir() const;
+        void set_db_dir(const String p_db_dir);
+        String get_db_file() const;
+        void set_db_file(const String p_db_file);
+        void open_db();
+        void close_db();
 };
 
 } // namespace godot
