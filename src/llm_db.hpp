@@ -50,6 +50,7 @@ class LlmDB : public GDEmbedding {
         String db_dir;
         String db_file;
         String table_name;
+        int n_embd;
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
 

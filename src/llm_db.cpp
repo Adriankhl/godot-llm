@@ -107,7 +107,8 @@ void LlmDB::_bind_methods() {
 
 LlmDB::LlmDB() : db_dir {"."},
     db_file {"llm.db"},
-    table_name {"llm_table"}
+    table_name {"llm_table"},
+    n_embd {384}
 {
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
@@ -195,7 +196,7 @@ int print_all_callback(void *unused, int count, char **data, char **columns) {
 void LlmDB::execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params) {
     int rc = SQLITE_OK;
     char* errmsg;
-    sqlite3_exec(db, statement.utf8().get_data(), callback, params, &errmsg);
+    rc = sqlite3_exec(db, statement.utf8().get_data(), callback, params, &errmsg);
     if (rc != SQLITE_OK) {
         UtilityFunctions::printerr("LlmDB execute fail: " + String(errmsg));
     }
@@ -228,10 +229,11 @@ void LlmDB::create_table() {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
         statement += " '" + sd->get_name() + "' ";
         statement += type_int_to_string(sd->get_type());
-        if (i != schema.size() - 1) {
-            statement += ", ";
-        }
+        statement += ", ";
     }
+    statement += "llm_text TEXT, ";
+
+    statement += String("embedding") + " float[" + String::num_int64(n_embd)+ "]";
 
     statement += ")";
 
