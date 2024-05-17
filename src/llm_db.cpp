@@ -115,6 +115,7 @@ void LlmDB::_bind_methods() {
 }
 
 LlmDB::LlmDB() : db_dir {"."},
+    db {nullptr},
     db_file {"llm.db"},
     table_name {"llm_table"},
     embedding_size {384}
