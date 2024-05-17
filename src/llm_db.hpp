@@ -100,6 +100,7 @@ class LlmDB : public GDEmbedding {
         bool has_id(String id, String p_table_name);
         PackedStringArray split_text(String text);
         void store_text(String id, String text);
+        PackedStringArray retrieve_similar_texts(String text, String where, int n_results);
 };
 
 } // namespace godot

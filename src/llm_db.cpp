@@ -132,6 +132,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
     ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text);
+    ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -421,6 +422,12 @@ void LlmDB::create_llm_tables() {
     UtilityFunctions::print_verbose("Create meta table statement: " + statement_meta);
 
     execute(statement_meta);
+
+    String statement_virtual = "CREATE VIRTUAL TABLE IF NOT EXISTS " + table_name + "_virtual USING vec0(embedding float[" + String::num_int64(embedding_size) + "]);";
+
+    UtilityFunctions::print_verbose("Create virtual table statement: " + statement_virtual);
+
+    execute(statement_virtual);
 
     UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
 
@@ -723,10 +730,14 @@ void LlmDB::insert_text(String id, String text) {
 
     UtilityFunctions::print_verbose("insert_text statement: " + statement);
     execute(statement);
+
+    String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
+    UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
+    execute(statement_virtual);
 }
 
 void LlmDB::store_text(String id, String text) {
-    UtilityFunctions::print_verbose("store text");
+    UtilityFunctions::print_verbose("store_text");
 
     PackedStringArray text_array = split_text(text);
 
@@ -739,7 +750,65 @@ void LlmDB::store_text(String id, String text) {
         insert_text(id, s);
     }
 
-    UtilityFunctions::print_verbose("store text -- done");
+    UtilityFunctions::print_verbose("store_text -- done");
 };
+
+PackedStringArray LlmDB::retrieve_similar_texts(String text, String where, int n_results) {
+    UtilityFunctions::print_verbose("retrieve_similar_texts");
+    PackedFloat32Array embedding = compute_embedding(text);
+
+    String statement_filter = "SELECT rowid FROM " + table_name;
+    if (!where.is_empty()) {
+        statement_filter += " WHERE " + where;
+    }
+
+
+    String statement_virtual = "SELECT rowid FROM " + table_name + "_virtual WHERE embedding MATCH '[";
+
+    for (float f : embedding) {
+        statement_virtual += String::num_real(f) + ", ";
+    }
+
+    statement_virtual = statement_virtual.trim_suffix(", ");
+    statement_virtual += "]' ";
+
+    statement_virtual += "AND rowid in (" + statement_filter + ") ";
+
+    statement_virtual += "ORDER BY distance LIMIT " + String::num_int64(n_results);
+
+    String statement_final = "SELECT llm_text FROM " + table_name + " WHERE rowid IN (" + statement_virtual + ");";
+
+    UtilityFunctions::print_verbose("retrieve_text_array statement: " + statement_final);
+
+    PackedStringArray array {PackedStringArray()};
+
+    int rc = SQLITE_OK;
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, statement_final.utf8().get_data(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Failed to prepare statement");
+        return array;
+    }
+
+    while (true) {
+        rc = sqlite3_step(stmt);
+        if(rc == SQLITE_DONE) break;
+        if (rc != SQLITE_ROW) {
+            UtilityFunctions::print_verbose("Error: return early");
+            return array;
+        }
+        const char* c = (char*) sqlite3_column_text(stmt, 0);
+
+        String retrieved_text = String::utf8(c);
+        UtilityFunctions::print_verbose("retrieved text: " + retrieved_text);
+        array.append(retrieved_text);
+    }
+
+    sqlite3_finalize(stmt);
+
+    UtilityFunctions::print_verbose("retrieve_similar_texts -- done");
+
+    return array;
+}
 
 } // namespace godot
