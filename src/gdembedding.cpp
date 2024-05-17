@@ -53,9 +53,7 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
 GDEmbedding::~GDEmbedding() {
     glog_verbose("GDEmbedding destructor");
 
-    if (!func_mutex->try_lock()) {
-        func_mutex->lock();
-    }
+    func_mutex->try_lock();
 
     while (!compute_embedding_mutex->try_lock()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -77,6 +75,7 @@ void GDEmbedding::_exit_tree() {
     glog_verbose("func_mutex locked");
 
     while (!compute_embedding_mutex->try_lock()) {
+        glog_verbose("Waiting for lock");
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
@@ -85,6 +84,8 @@ void GDEmbedding::_exit_tree() {
         glog_verbose("Waiting thread to finish");
         compute_embedding_thread->wait_to_finish();
     }
+
+    glog_verbose("GDEmbedding exit tree -- done");
 }
 
 String GDEmbedding::get_model_path() const {
@@ -104,7 +105,7 @@ void GDEmbedding::set_n_batch(const int32_t p_n_batch) {
 }
 
 bool GDEmbedding::is_running() {
-    return !compute_embedding_mutex->try_lock() || compute_embedding_thread->is_alive();
+    return compute_embedding_thread->is_alive();
 }
 
 PackedFloat32Array GDEmbedding::compute_embedding_internal(String prompt) {
@@ -122,6 +123,9 @@ PackedFloat32Array GDEmbedding::compute_embedding_internal(String prompt) {
 
     PackedFloat32Array array = float32_vec_to_array(vec);
 
+    compute_embedding_mutex->unlock();
+    glog_verbose("compute_embedding_mutex unlocked");
+
     glog_verbose("compute_embedding_internal -- done");
 
     return array;
@@ -131,18 +135,16 @@ PackedFloat32Array GDEmbedding::compute_embedding(String prompt) {
     glog_verbose("compute_embedding");
     func_mutex->lock();
 
-    if (compute_embedding_mutex->try_lock()) {
+    if (!compute_embedding_mutex->try_lock()) {
         glog("GDEmbedding is busy");
+        compute_embedding_mutex->lock();
     }
 
-    compute_embedding_mutex->lock();
     glog_verbose("compute_embedding_mutex locked");
 
     func_mutex->unlock();
 
     PackedFloat32Array pfa = compute_embedding_internal(prompt);
-
-    compute_embedding_mutex->unlock();
 
     glog_verbose("compute_embedding -- done");
 
@@ -153,11 +155,10 @@ Error GDEmbedding::run_compute_embedding(String prompt) {
     glog_verbose("run_compute_embedding");
     func_mutex->lock();
     
-    if (compute_embedding_mutex->try_lock()) {
+    if (!compute_embedding_mutex->try_lock()) {
         glog("GDEmbedding is busy");
+        compute_embedding_mutex->lock();
     }
-
-    compute_embedding_mutex->lock();
     glog_verbose("compute_embedding_mutex locked");
 
     func_mutex->unlock();
@@ -218,6 +219,7 @@ float GDEmbedding::similarity_cos_string_internal(String s1, String s2) {
     call_deferred("emit_signal", "similarity_cos_string_finished", similarity);
 
     compute_embedding_mutex->unlock();
+    glog_verbose("compute_embedding_mutex unlocked");
 
     glog_verbose("similarity_cos_string_internal -- done");
 
@@ -228,11 +230,11 @@ float GDEmbedding::similarity_cos_string(String s1, String s2) {
     glog_verbose("similarity_cos_string");
     func_mutex->lock();
 
-    if (compute_embedding_mutex->try_lock()) {
+    if (!compute_embedding_mutex->try_lock()) {
         glog("GDEmbedding is busy");
+        compute_embedding_mutex->lock();
     }
 
-    compute_embedding_mutex->lock();
     glog_verbose("compute_embedding_mutex locked");
 
     func_mutex->unlock();
@@ -249,11 +251,11 @@ Error GDEmbedding::run_similarity_cos_string(String s1, String s2) {
     glog_verbose("run_similarity_cos_string");
     func_mutex->lock();
 
-    if (compute_embedding_mutex->try_lock()) {
+    if (!compute_embedding_mutex->try_lock()) {
         glog("GDEmbedding is busy");
+        compute_embedding_mutex->lock();
     }
 
-    compute_embedding_mutex->lock();
     glog_verbose("compute_embedding_mutex locked");
 
     func_mutex->unlock();

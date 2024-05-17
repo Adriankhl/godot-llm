@@ -3,12 +3,14 @@
 
 #include "gdembedding.hpp"
 #include "sqlite3.h"
+#include <functional>
 #include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/classes/wrapped.hpp>
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
+#include <queue>
 
 namespace godot {
 
@@ -55,13 +57,19 @@ class LlmDB : public GDEmbedding {
         PackedStringArray chunk_separators;
         int chunk_size;
         int chunk_overlap;
+        Ref<Mutex> store_text_mutex;
+        Ref<Thread> store_text_thread;
+        std::queue<std::function<void()>> store_text_queue;
+        Ref<Mutex> func_mutex;
 
+        static void dummy();
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
         Variant::Type type_int_to_variant(int schema_data_type);
         PackedStringArray absolute_split_text(String text, int index);
         PackedStringArray chunk_split_text(String text, int index);
         void insert_text(String id, String text);
+        void store_text_process();
 
     protected:
 	    static void _bind_methods();
@@ -69,6 +77,7 @@ class LlmDB : public GDEmbedding {
     public:
         LlmDB();
         ~LlmDB();
+        void _exit_tree() override;
         TypedArray<LlmDBSchemaData> get_schema() const;
         void set_schema(TypedArray<LlmDBSchemaData> p_schema);
         String get_db_dir() const;
@@ -100,6 +109,7 @@ class LlmDB : public GDEmbedding {
         bool has_id(String id, String p_table_name);
         PackedStringArray split_text(String text);
         void store_text(String id, String text);
+        void run_store_text(String id, String text);
         PackedStringArray retrieve_similar_texts(String text, String where, int n_results);
 };
 

@@ -1,4 +1,5 @@
 #include "llm_db.hpp"
+#include "gdembedding.hpp"
 #include "sqlite3.h"
 #include "sqlite-vec.h"
 #include <gdextension_interface.h>
@@ -7,6 +8,7 @@
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
+#include <godot_cpp/variant/callable_method_pointer.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
@@ -14,7 +16,7 @@
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
-
+#include <queue>
 
 namespace godot {
 
@@ -35,7 +37,7 @@ void LlmDBSchemaData::_bind_methods() {
 
 LlmDBSchemaData::LlmDBSchemaData() : data_name {"default_name"},
     data_type {0}
-{}
+{ }
 
 LlmDBSchemaData::~LlmDBSchemaData() {}
 
@@ -132,8 +134,12 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
     ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text);
+    ClassDB::bind_method(D_METHOD("run_store_text", "id", "text"), &LlmDB::run_store_text);
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
 }
+
+// A dummy function for instantiating the state of generate_text_thread
+void LlmDB::dummy() {}
 
 LlmDB::LlmDB() : db_dir {"."},
     db {nullptr},
@@ -144,8 +150,21 @@ LlmDB::LlmDB() : db_dir {"."},
     chunk_size {100},
     chunk_overlap {20},
     absolute_separators {PackedStringArray()},
-    chunk_separators {PackedStringArray()}
+    chunk_separators {PackedStringArray()},
+    store_text_queue {std::queue<std::function<void()>>()}
 {
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
+    store_text_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiate GDLlava mutex");
+    func_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
+    store_text_thread.instantiate();
+
+    store_text_thread->start(callable_mp_static(&LlmDB::dummy));
+    store_text_thread->wait_to_finish();
+
     schema.append(LlmDBSchemaData::create_text("id"));
 
     absolute_separators.append("\n\n");
@@ -172,6 +191,31 @@ LlmDB::~LlmDB() {
     if (db != nullptr) {
         close_db();
     }
+
+    func_mutex->try_lock();
+
+    if (store_text_thread->is_started()) {
+        UtilityFunctions::print_verbose("Waiting thread to finish");
+        store_text_thread->wait_to_finish();
+    }
+}
+
+void LlmDB::_exit_tree() {
+    UtilityFunctions::print_verbose("LlmDB exit tree");
+
+    GDEmbedding::_exit_tree();
+
+    func_mutex->lock();
+
+    UtilityFunctions::print_verbose("func_mutex locked");
+
+    //is_started instead of is_alive to properly clean up all threads
+    if (store_text_thread->is_started()) {
+        UtilityFunctions::print_verbose("Waiting thread to finish");
+        store_text_thread->wait_to_finish();
+    }
+
+    UtilityFunctions::print_verbose("LlmDB exit tree -- done");
 }
 
 TypedArray<LlmDBSchemaData> LlmDB::get_schema() const {
@@ -739,6 +783,9 @@ void LlmDB::insert_text(String id, String text) {
 void LlmDB::store_text(String id, String text) {
     UtilityFunctions::print_verbose("store_text");
 
+    store_text_mutex->lock();
+    UtilityFunctions::print_verbose("store_text_mutex locked");
+
     PackedStringArray text_array = split_text(text);
 
     if (!has_id(id, table_name + "_meta")) {
@@ -751,6 +798,40 @@ void LlmDB::store_text(String id, String text) {
     }
 
     UtilityFunctions::print_verbose("store_text -- done");
+
+    store_text_mutex->unlock();
+    UtilityFunctions::print_verbose("store_text_mutex unlocked");
+};
+
+void LlmDB::store_text_process() {
+    UtilityFunctions::print_verbose("store_text_process");
+    while (!store_text_queue.empty()) {
+        std::function<void()> f = store_text_queue.front();
+
+        f();
+
+        store_text_queue.pop();
+    }
+    UtilityFunctions::print_verbose("store_text_process -- done");
+}
+
+void LlmDB::run_store_text(String id, String text) {
+    func_mutex->lock();
+
+    store_text_queue.push([this, text, id](){ store_text(id, text); });
+
+    if (store_text_thread->is_started()) {
+        if (!store_text_thread->is_alive()) {
+            store_text_thread->wait_to_finish();
+            store_text_thread.instantiate();
+            store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+        }
+    } else {
+        store_text_thread.instantiate();
+        store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+    }
+
+    func_mutex->unlock();
 };
 
 PackedStringArray LlmDB::retrieve_similar_texts(String text, String where, int n_results) {

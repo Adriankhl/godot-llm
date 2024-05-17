@@ -74,9 +74,7 @@ GDLlava::GDLlava() : params {gpt_params()},
 GDLlava::~GDLlava() {
     glog_verbose("GDLlava destructor");
 
-    if (!func_mutex->try_lock()) {
-        func_mutex->lock();
-    }
+    func_mutex->try_lock();
 
     while (!generate_text_mutex->try_lock()) {
         stop_generate_text();
@@ -227,9 +225,10 @@ String GDLlava::generate_text_base64(String prompt, String image_base64) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlava is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -247,9 +246,10 @@ Error GDLlava::run_generate_text_base64(String prompt, String image_base64) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlava is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -292,9 +292,10 @@ String GDLlava::generate_text_image(String prompt, Image* image) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlava is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -312,9 +313,10 @@ Error GDLlava::run_generate_text_image(String prompt, Image* image) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlava is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -335,7 +337,7 @@ Error GDLlava::run_generate_text_image(String prompt, Image* image) {
 }
 
 bool GDLlava::is_running() {
-    return !generate_text_mutex->try_lock() || generate_text_thread->is_alive();
+    return generate_text_thread->is_alive();
 }
 
 void GDLlava::stop_generate_text() {

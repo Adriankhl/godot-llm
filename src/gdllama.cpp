@@ -160,9 +160,7 @@ GDLlama::GDLlama() : params {gpt_params()},
 GDLlama::~GDLlama() {
     glog_verbose("GDLlama destructor");
 
-    if (!func_mutex->try_lock()) {
-        func_mutex->lock();
-    }
+    func_mutex->try_lock();
 
     while (!generate_text_mutex->try_lock()) {
         stop_generate_text();
@@ -462,9 +460,10 @@ String GDLlama::generate_text_simple(String prompt) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlama is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -498,9 +497,10 @@ String GDLlama::generate_text_grammar(String prompt, String grammar) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlama is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -535,9 +535,10 @@ String GDLlama::generate_text_json(String prompt, String json) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlama is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -554,9 +555,10 @@ String GDLlama::generate_text(String prompt, String grammar, String json) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlama is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -580,9 +582,10 @@ Error GDLlama::run_generate_text(String prompt, String grammar, String json) {
 
     if (!generate_text_mutex->try_lock()) {
         glog("GDLlama is busy");
+
+        generate_text_mutex->lock();
     }
 
-    generate_text_mutex->lock();
     glog_verbose("generate_text_mutex locked");
 
     func_mutex->unlock();
@@ -623,7 +626,7 @@ void GDLlama::input_text(String input) {
 }
 
 bool GDLlama::is_running() {
-    return !generate_text_mutex->try_lock() || generate_text_thread->is_alive();
+    return generate_text_thread->is_alive();
 }
 
 bool GDLlama::is_waiting_input() {
