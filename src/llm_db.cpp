@@ -11,6 +11,7 @@
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 
 namespace godot {
@@ -104,6 +105,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("drop_table", "p_table_name"), &LlmDB::drop_table);
     ClassDB::bind_method(D_METHOD("is_table_exist", "p_table_name"), &LlmDB::is_table_exist);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
+    ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -258,9 +260,27 @@ String LlmDB::type_int_to_string(int schema_data_type) {
             return "TEXT";
         case LlmDBSchemaDataType::BLOB:
             return "";
-        default:
+        default: {
             UtilityFunctions::printerr("Wrong schema type: " + String::num_int64(schema_data_type));
             return "";
+        }
+    }
+}
+
+Variant::Type LlmDB::type_int_to_variant(int schema_data_type) {
+    switch (schema_data_type) {
+        case LlmDBSchemaDataType::INTEGER:
+            return  Variant::INT;
+        case LlmDBSchemaDataType::REAL:
+            return  Variant::FLOAT;
+        case LlmDBSchemaDataType::TEXT:
+            return Variant::STRING;
+        case LlmDBSchemaDataType::BLOB:
+            return Variant::VARIANT_MAX;
+        default: {
+            UtilityFunctions::printerr("Wrong schema type for variant: " + String::num_int64(schema_data_type));
+            return Variant::NIL;
+        }
     }
 }
 
@@ -393,6 +413,58 @@ bool LlmDB::is_table_valid(String p_table_name) {
     UtilityFunctions::print_verbose("is_table_valid -- done");
 
     return true;
+}
+
+void LlmDB::insert_meta(Dictionary meta_dict) {
+    UtilityFunctions::print_verbose("insert_meta");
+
+    String statement_1 = "INSERT OR REPLACE INTO " + table_name + "_meta";
+    String statement_2 = "(";
+    String statement_3 = "(";
+    Dictionary p_meta_dict = meta_dict.duplicate(false);
+    for (int i = 0; i < schema.size(); i++) {
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        if(p_meta_dict.has(sd->get_data_name())) {
+            Variant v = p_meta_dict.get(sd->get_data_name(), nullptr);
+            if (v.get_type() != type_int_to_variant(sd->get_data_type())) {
+                UtilityFunctions::printerr("Wrong data type for key " + sd->get_data_name() + " : " + v.get_type_name(v.get_type()) + " instead of " + sd->get_data_type());
+            }
+
+            switch (sd->get_data_type()) {
+                case LlmDBSchemaDataType::INTEGER: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    int k = v;
+                    statement_3 += String::num_int64(k) + ", ";
+                    break;
+                }
+                case LlmDBSchemaDataType::REAL: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    float f = v;
+                    statement_3 += String::num_real(f) + ", ";
+                    break;
+                }
+                case LlmDBSchemaDataType::TEXT: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    String s = v;
+                    statement_3 += "'" + s + "', ";
+                    break;
+                }
+                case LlmDBSchemaDataType::BLOB: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    String s = v.stringify();
+                    statement_3 += "'" + s + "', ";
+                    break;
+                }
+            }
+        }
+    }
+    statement_2 = statement_2.trim_suffix(", ") + ")";
+    statement_3 = statement_3.trim_suffix(", ") + ")";
+    String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
+    UtilityFunctions::print_verbose("insert_meta statement: " + statement);
+    execute(statement);
+
+    UtilityFunctions::print_verbose("insert_meta -- done");
 }
 
 } // namespace godot

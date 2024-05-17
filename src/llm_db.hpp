@@ -53,6 +53,7 @@ class LlmDB : public GDEmbedding {
         int n_embd;
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
+        Variant::Type type_int_to_variant(int schema_data_type);
 
     protected:
 	    static void _bind_methods();
