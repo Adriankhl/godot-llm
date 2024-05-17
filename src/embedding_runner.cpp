@@ -217,3 +217,31 @@ float EmbeddingRunner::similarity_cos(std::vector<float> embd1, std::vector<floa
 
     return llama_embd_similarity_cos(embd1.data(), embd2.data(), embd1.size());
 }
+
+int EmbeddingRunner::get_n_embd(gpt_params params) {
+    params.embedding = true;
+    // For non-causal models, batch size must be equal to ubatch size
+    params.n_ubatch = params.n_batch;
+
+    llama_backend_init();
+    llama_numa_init(params.numa);
+
+    llama_model * model;
+    llama_context * ctx;
+
+    // load the model
+    std::tie(model, ctx) = llama_init_from_gpt_params(params);
+    if (model == NULL) {
+        std::string msg = std::string(__func__) + ": error: unable to load model";
+        return -1;
+    }
+
+    const int n_embd = llama_n_embd(model);
+
+
+    llama_free(ctx);
+    llama_free_model(model);
+    llama_backend_free();
+
+    return n_embd;
+}

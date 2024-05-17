@@ -50,7 +50,7 @@ class LlmDB : public GDEmbedding {
         String db_dir;
         String db_file;
         String table_name;
-        int n_embd;
+        int embedding_size;
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
         Variant::Type type_int_to_variant(int schema_data_type);
@@ -69,6 +69,9 @@ class LlmDB : public GDEmbedding {
         void set_db_file(const String p_db_file);
         String get_table_name() const;
         void set_table_name(const String p_table_name);
+        int get_embedding_size() const;
+        void set_embedding_size(const int p_embedding_size);
+        void calibrate_embedding_size();
         void open_db();
         void close_db();
         void execute(String statement);

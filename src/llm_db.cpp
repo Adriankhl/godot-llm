@@ -98,6 +98,11 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_table_name", "p_table_name"), &LlmDB::set_table_name);
     ClassDB::add_property("LlmDB", PropertyInfo(Variant::STRING, "table_name", PROPERTY_HINT_GLOBAL_FILE), "set_table_name", "get_table_name");
 
+    ClassDB::bind_method(D_METHOD("get_embedding_size"), &LlmDB::get_embedding_size);
+    ClassDB::bind_method(D_METHOD("set_embedding_size", "p_embedding_size"), &LlmDB::set_embedding_size);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::INT, "embedding_size", PROPERTY_HINT_GLOBAL_FILE), "set_embedding_size", "get_embedding_size");
+
+    ClassDB::bind_method(D_METHOD("calibrate_embedding_size"), &LlmDB::calibrate_embedding_size);
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
@@ -111,7 +116,7 @@ void LlmDB::_bind_methods() {
 LlmDB::LlmDB() : db_dir {"."},
     db_file {"llm.db"},
     table_name {"llm_table"},
-    n_embd {384}
+    embedding_size {384}
 {
     schema.append(LlmDBSchemaData::create_text("id"));
     int rc = SQLITE_OK;
@@ -195,7 +200,20 @@ void LlmDB::set_table_name(const String p_table_name) {
     table_name = p_table_name;
 }
 
+int LlmDB::get_embedding_size() const {
+    return embedding_size;
+}
+
+void LlmDB::set_embedding_size(const int p_embedding_size) {
+    embedding_size = p_embedding_size;
+}
+
+void LlmDB::calibrate_embedding_size() {
+    embedding_size = get_n_embd();
+}
+
 void LlmDB::open_db() {
+    UtilityFunctions::print_verbose("open_db");
     if (db != nullptr) {
         UtilityFunctions::printerr("Cannot open_db when db is already openned");
         return;
@@ -209,9 +227,12 @@ void LlmDB::open_db() {
     if (rc != SQLITE_OK) {
         UtilityFunctions::printerr("Failed to open database: " + String::utf8(sqlite3_errmsg(db)));
     }
+
+    UtilityFunctions::print_verbose("open_db -- done");
 }
 
 void LlmDB::close_db() {
+    UtilityFunctions::print_verbose("close_db");
     if (db != nullptr) {
         int rc = SQLITE_OK;
         rc = sqlite3_close_v2(db);
@@ -222,6 +243,7 @@ void LlmDB::close_db() {
     } else {
         UtilityFunctions::printerr("Cannot close_db when no db is opened");
     }
+    UtilityFunctions::print_verbose("close_db -- done");
 }
 
 int print_all_callback(void *unused, int count, char **data, char **columns) {
@@ -295,7 +317,7 @@ void LlmDB::create_llm_tables() {
     }
     statement += "llm_text TEXT, ";
 
-    statement += String("embedding") + " float[" + String::num_int64(n_embd)+ "]";
+    statement += String("embedding") + " float[" + String::num_int64(embedding_size)+ "]";
 
     statement += ");";
 

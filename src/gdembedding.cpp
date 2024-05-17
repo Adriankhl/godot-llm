@@ -274,4 +274,8 @@ Error GDEmbedding::run_similarity_cos_string(String s1, String s2) {
     return error;
 }
 
+int GDEmbedding::get_n_embd() {
+    return embedding_runner->get_n_embd(params);
+}
+
 } //namespace godot

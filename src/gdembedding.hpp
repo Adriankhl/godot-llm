@@ -44,7 +44,7 @@ class GDEmbedding : public Node {
         float similarity_cos_array(PackedFloat32Array array1, PackedFloat32Array array2);
         float similarity_cos_string(String s1, String s2);
         Error run_similarity_cos_string(String s1, String s2);
-        int embedding_size();
+        int get_n_embd();
 };
 
 } //namespace godot
