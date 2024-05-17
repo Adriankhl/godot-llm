@@ -8,6 +8,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/packed_string_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
@@ -130,6 +131,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
+    ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -409,11 +411,11 @@ void LlmDB::create_llm_tables() {
         if (i == 0) {
             statement_meta += " PRIMARY KEY";
         }
-        
-        if (i != schema.size() - 1) {
-            statement_meta += ", ";
-        }
+
+        statement_meta += ", ";
     }
+
+    statement_meta = statement_meta.trim_suffix(", ");
     statement_meta += ") WITHOUT ROWID;";
 
     UtilityFunctions::print_verbose("Create meta table statement: " + statement_meta);
@@ -691,6 +693,53 @@ PackedStringArray LlmDB::split_text(String text) {
     }
 
     return array;
+};
+
+void LlmDB::insert_text(String id, String text) {
+    PackedFloat32Array embedding = compute_embedding(text);
+
+    String statement = "INSERT INTO " + table_name + "(";
+
+    for (int i = 0; i < schema.size(); i++) {
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        statement += sd->get_data_name() + ", ";
+    }
+
+    statement += "llm_text, embedding) VALUES (";
+    
+    for (int i = 0; i < schema.size(); i++) {
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id='" + id + "'), ";
+    }
+    
+    statement += " '" + text + "', '[";
+
+    for (float f : embedding) {
+        statement += String::num_real(f) + ", ";
+    }
+
+    statement = statement.trim_suffix(", ");
+    statement += "]')";
+
+    UtilityFunctions::print_verbose("insert_text statement: " + statement);
+    execute(statement);
+}
+
+void LlmDB::store_text(String id, String text) {
+    UtilityFunctions::print_verbose("store text");
+
+    PackedStringArray text_array = split_text(text);
+
+    if (!has_id(id, table_name + "_meta")) {
+        UtilityFunctions::printerr("No id " + id + " in " + table_name + "_meta");
+        return;
+    }
+
+    for (String s : text_array) {
+        insert_text(id, s);
+    }
+
+    UtilityFunctions::print_verbose("store text -- done");
 };
 
 } // namespace godot

@@ -61,6 +61,7 @@ class LlmDB : public GDEmbedding {
         Variant::Type type_int_to_variant(int schema_data_type);
         PackedStringArray absolute_split_text(String text, int index);
         PackedStringArray chunk_split_text(String text, int index);
+        void insert_text(String id, String text);
 
     protected:
 	    static void _bind_methods();
@@ -98,6 +99,7 @@ class LlmDB : public GDEmbedding {
         void insert_meta(Dictionary meta_dict);
         bool has_id(String id, String p_table_name);
         PackedStringArray split_text(String text);
+        void store_text(String id, String text);
 };
 
 } // namespace godot
