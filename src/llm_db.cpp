@@ -8,6 +8,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/packed_string_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -128,27 +129,31 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
     ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
+    ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
     db {nullptr},
+    schema {TypedArray<LlmDBSchemaData>()},
     db_file {"llm.db"},
     table_name {"llm_table"},
     embedding_size {384},
     chunk_size {100},
-    chunk_overlap {20}
+    chunk_overlap {20},
+    absolute_separators {PackedStringArray()},
+    chunk_separators {PackedStringArray()}
 {
     schema.append(LlmDBSchemaData::create_text("id"));
 
     absolute_separators.append("\n\n");
     absolute_separators.append("\n");
-    absolute_separators.append(".");
-    absolute_separators.append(",");
-    absolute_separators.append(String::utf8("\uff0c"));
-    absolute_separators.append(String::utf8("\u3001"));
-    absolute_separators.append(String::utf8("\uff0e"));
-    absolute_separators.append(String::utf8("\u3002"));
 
+    chunk_separators.append(".");
+    chunk_separators.append(",");
+    chunk_separators.append(String::utf8("\uff0c"));
+    chunk_separators.append(String::utf8("\u3001"));
+    chunk_separators.append(String::utf8("\uff0e"));
+    chunk_separators.append(String::utf8("\u3002"));
     chunk_separators.append("\u200b");
     chunk_separators.append(" ");
     chunk_separators.append("");
@@ -246,19 +251,19 @@ void LlmDB::calibrate_embedding_size() {
     embedding_size = get_n_embd();
 }
 
-TypedArray<String> LlmDB::get_absolute_separators() const {
+PackedStringArray LlmDB::get_absolute_separators() const {
     return absolute_separators;
 };
 
-void LlmDB::set_absolute_separators(const TypedArray<String> p_absolute_separators) {
+void LlmDB::set_absolute_separators(const PackedStringArray p_absolute_separators) {
     absolute_separators = p_absolute_separators;
 };
 
-TypedArray<String> LlmDB::get_chunk_separators() const {
+PackedStringArray LlmDB::get_chunk_separators() const {
     return chunk_separators;
 };
 
-void LlmDB::set_chunk_separators(const TypedArray<String> p_chunk_separators) {
+void LlmDB::set_chunk_separators(const PackedStringArray p_chunk_separators) {
     chunk_separators = p_chunk_separators;
 };
 
@@ -587,5 +592,103 @@ bool LlmDB::has_id(String id, String p_table_name) {
 
     return true;
 }
+
+PackedStringArray LlmDB::absolute_split_text(String text, int index) {
+    if ((index >= absolute_separators.size()) || (text.length() <= chunk_size)) {
+        PackedStringArray array {PackedStringArray()};
+        array.append(text);
+        return array;
+    } else {
+        PackedStringArray array {PackedStringArray()};
+        PackedStringArray subarray = text.split(absolute_separators[index], false);
+        for (String s : subarray) {
+            array.append_array(absolute_split_text(s, index + 1));
+        }
+
+        return array;
+    }
+}
+
+PackedStringArray LlmDB::chunk_split_text(String text, int index) {
+    if (index >= chunk_separators.size()) {
+        UtilityFunctions::printerr("Failed to split text in chunk");
+        PackedStringArray array {PackedStringArray()};
+        array.append(text);
+        return array;
+    } else {
+        PackedStringArray array = text.split(chunk_separators[index], false);
+        bool is_chunk_fit = true;
+        for (String s : array) {
+            if (s.length() > chunk_size) {
+                is_chunk_fit = false;
+            }
+        }
+
+        if (!is_chunk_fit) {
+            return chunk_split_text(text, index + 1);
+        } else {
+            PackedStringArray chunk_array {PackedStringArray()};
+
+            String separator = chunk_separators[index];
+            int separator_size = separator.length();
+
+            UtilityFunctions::print_verbose("Using separator '" + separator + "'");
+            UtilityFunctions::print_verbose("Separator size: " + String::num_int64(separator_size));
+            UtilityFunctions::print_verbose("array size: " + String::num_int64(array.size()));
+
+            int end_index = 0;
+            String s = array[end_index];
+
+            while (end_index < array.size()) {
+                end_index += 1;
+                while ((end_index < array.size()) && (s.length() + separator_size + array[end_index].length() < chunk_size)) {
+                    s += separator + array[end_index];
+                    end_index += 1;
+                }
+
+                UtilityFunctions::print_verbose("Chunk: " + s);
+                chunk_array.append(s);
+
+                // Add overlap
+                if (end_index < array.size()) {
+                    s = array[end_index];
+                    int start_index = end_index - 1;
+                    while ((start_index >= 0) && (array[start_index].length() + separator_size + s.length() < chunk_overlap)) {
+                        s = array[start_index] + separator + s;
+                        start_index -= 1;
+                    }
+                    UtilityFunctions::print_verbose("Overlap: " + s);
+                }
+            }
+
+            return chunk_array;
+        }
+    }
+}
+
+
+PackedStringArray LlmDB::split_text(String text) {
+    if (text.is_empty()) {
+        return PackedStringArray();
+    }
+
+    if (absolute_separators.is_empty()) {
+        UtilityFunctions::printerr("Empty absolute_separators");
+    }
+
+    PackedStringArray separated_array_a = absolute_split_text(text, 0);
+
+    if (chunk_separators.is_empty()) {
+        UtilityFunctions::printerr("Empty chunk_separators");
+    }
+
+    PackedStringArray array {PackedStringArray()};
+
+    for (String s : separated_array_a) {
+        array.append_array(chunk_split_text(s, 0));
+    }
+
+    return array;
+};
 
 } // namespace godot

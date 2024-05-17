@@ -51,14 +51,16 @@ class LlmDB : public GDEmbedding {
         String db_file;
         String table_name;
         int embedding_size;
-        TypedArray<String> absolute_separators;
-        TypedArray<String> chunk_separators;
+        PackedStringArray absolute_separators;
+        PackedStringArray chunk_separators;
         int chunk_size;
         int chunk_overlap;
 
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
         Variant::Type type_int_to_variant(int schema_data_type);
+        PackedStringArray absolute_split_text(String text, int index);
+        PackedStringArray chunk_split_text(String text, int index);
 
     protected:
 	    static void _bind_methods();
@@ -76,10 +78,10 @@ class LlmDB : public GDEmbedding {
         void set_table_name(const String p_table_name);
         int get_embedding_size() const;
         void set_embedding_size(const int p_embedding_size);
-        TypedArray<String> get_absolute_separators() const;
-        void set_absolute_separators(const TypedArray<String> p_absolute_separators);
-        TypedArray<String> get_chunk_separators() const;
-        void set_chunk_separators(const TypedArray<String> p_chunk_separators);
+        PackedStringArray get_absolute_separators() const;
+        void set_absolute_separators(const PackedStringArray p_absolute_separators);
+        PackedStringArray get_chunk_separators() const;
+        void set_chunk_separators(const PackedStringArray p_chunk_separators);
         int get_chunk_size() const;
         void set_chunk_size(const int p_chunk_size);
         int get_chunk_overlap() const;
@@ -95,7 +97,7 @@ class LlmDB : public GDEmbedding {
         bool is_table_valid(String p_table_name);
         void insert_meta(Dictionary meta_dict);
         bool has_id(String id, String p_table_name);
-        TypedArray<String> split_text(String text);
+        PackedStringArray split_text(String text);
 };
 
 } // namespace godot
