@@ -102,6 +102,11 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_embedding_size", "p_embedding_size"), &LlmDB::set_embedding_size);
     ClassDB::add_property("LlmDB", PropertyInfo(Variant::INT, "embedding_size", PROPERTY_HINT_GLOBAL_FILE), "set_embedding_size", "get_embedding_size");
 
+    ClassDB::bind_method(D_METHOD("get_separators"), &LlmDB::get_separators);
+    ClassDB::bind_method(D_METHOD("set_separators", "p_separators"), &LlmDB::set_separators);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "separators", PROPERTY_HINT_ARRAY_TYPE, "String"), "set_separators", "get_separators");
+
+
     ClassDB::bind_method(D_METHOD("calibrate_embedding_size"), &LlmDB::calibrate_embedding_size);
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
@@ -121,6 +126,19 @@ LlmDB::LlmDB() : db_dir {"."},
     embedding_size {384}
 {
     schema.append(LlmDBSchemaData::create_text("id"));
+
+    separators.append("\n\n");
+    separators.append("\n");
+    separators.append(" ");
+    separators.append(".");
+    separators.append(",");
+    separators.append(String::utf8("\u200b"));
+    separators.append(String::utf8("\uff0c"));
+    separators.append(String::utf8("\u3001"));
+    separators.append(String::utf8("\uff0e"));
+    separators.append(String::utf8("\u3002"));
+    separators.append(String::utf8(""));
+
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
     if (rc != SQLITE_OK) {
@@ -213,6 +231,15 @@ void LlmDB::set_embedding_size(const int p_embedding_size) {
 void LlmDB::calibrate_embedding_size() {
     embedding_size = get_n_embd();
 }
+
+TypedArray<String> LlmDB::get_separators() const {
+    return separators;
+};
+
+void LlmDB::set_separators(const TypedArray<String> p_separators) {
+    separators = p_separators;
+};
+
 
 void LlmDB::open_db() {
     UtilityFunctions::print_verbose("open_db");
