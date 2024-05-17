@@ -77,9 +77,10 @@ class LlmDB : public GDEmbedding {
         void execute(String statement);
         void create_llm_tables();
         void drop_table(String p_table_name);
-        bool is_table_exist(String p_table_name);
+        bool has_table(String p_table_name);
         bool is_table_valid(String p_table_name);
         void insert_meta(Dictionary meta_dict);
+        bool has_id(String id, String p_table_name);
 };
 
 } // namespace godot

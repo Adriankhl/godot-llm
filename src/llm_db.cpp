@@ -108,9 +108,10 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
     ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
     ClassDB::bind_method(D_METHOD("drop_table", "p_table_name"), &LlmDB::drop_table);
-    ClassDB::bind_method(D_METHOD("is_table_exist", "p_table_name"), &LlmDB::is_table_exist);
+    ClassDB::bind_method(D_METHOD("has_table", "p_table_name"), &LlmDB::has_table);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
     ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
+    ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -253,7 +254,7 @@ int print_all_callback(void *unused, int count, char **data, char **columns) {
     UtilityFunctions::print_verbose("There are " + String::num_int64(count) + " column(s)");
 
     for (int idx = 0; idx < count; idx++) {
-        UtilityFunctions::print_verbose("The data in column" + String::utf8(columns[idx]) + " is: " + String::utf8(data[idx]));
+        UtilityFunctions::print_verbose("The data in column " + String::utf8(columns[idx]) + " is: " + String::utf8(data[idx]));
     }
 
     return 0;
@@ -359,8 +360,8 @@ void LlmDB::drop_table(String p_table_name) {
     execute(statement);
 }
 
-bool LlmDB::is_table_exist(String p_table_name) {
-    UtilityFunctions::print_verbose("is_table_exist");
+bool LlmDB::has_table(String p_table_name) {
+    UtilityFunctions::print_verbose("has_table");
 
     sqlite3_stmt *stmt;
 
@@ -383,7 +384,7 @@ bool LlmDB::is_table_exist(String p_table_name) {
 
     sqlite3_finalize(stmt);
 
-    UtilityFunctions::print_verbose("is_table_exist -- done");
+    UtilityFunctions::print_verbose("has_table -- done");
 
     if (num == 0) {
         return false;
@@ -487,6 +488,39 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
     execute(statement);
 
     UtilityFunctions::print_verbose("insert_meta -- done");
+}
+
+bool LlmDB::has_id(String id, String p_table_name) {
+    UtilityFunctions::print_verbose("has_id");
+
+    sqlite3_stmt *stmt;
+
+    String statement = "SELECT COUNT(1) FROM " + p_table_name + " WHERE " + p_table_name + ".id" " = '" + id + "';";
+    UtilityFunctions::print_verbose("statement: " + statement);
+
+    int rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        UtilityFunctions::printerr("Error: not a row");
+        return false;
+    }
+
+    int num = sqlite3_column_int64(stmt, 0);
+
+    sqlite3_finalize(stmt);
+
+    UtilityFunctions::print_verbose("has_id -- done");
+
+    if (num == 0) {
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace godot
