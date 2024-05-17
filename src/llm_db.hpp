@@ -75,6 +75,7 @@ class LlmDB : public GDEmbedding {
         void drop_table(String p_table_name);
         bool is_table_exist(String p_table_name);
         bool is_table_valid(String p_table_name);
+        void insert_meta(Dictionary meta_dict);
 };
 
 } // namespace godot

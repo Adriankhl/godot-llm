@@ -293,12 +293,15 @@ void LlmDB::create_llm_tables() {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
         statement_meta += " '" + sd->get_data_name() + "' ";
         statement_meta += type_int_to_string(sd->get_data_type());
+        if (i == 0) {
+            statement_meta += " PRIMARY KEY";
+        }
         
         if (i != schema.size() - 1) {
             statement_meta += ", ";
         }
     }
-    statement_meta += ");";
+    statement_meta += ") WITHOUT ROWID;";
 
     UtilityFunctions::print_verbose("Create meta table statement: " + statement_meta);
 
