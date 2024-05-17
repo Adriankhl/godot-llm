@@ -102,9 +102,13 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_embedding_size", "p_embedding_size"), &LlmDB::set_embedding_size);
     ClassDB::add_property("LlmDB", PropertyInfo(Variant::INT, "embedding_size", PROPERTY_HINT_GLOBAL_FILE), "set_embedding_size", "get_embedding_size");
 
-    ClassDB::bind_method(D_METHOD("get_separators"), &LlmDB::get_separators);
-    ClassDB::bind_method(D_METHOD("set_separators", "p_separators"), &LlmDB::set_separators);
-    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "separators", PROPERTY_HINT_ARRAY_TYPE, "String"), "set_separators", "get_separators");
+    ClassDB::bind_method(D_METHOD("get_absolute_separators"), &LlmDB::get_absolute_separators);
+    ClassDB::bind_method(D_METHOD("set_absolute_separators", "p_absolute_separators"), &LlmDB::set_absolute_separators);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "absolute_separators", PROPERTY_HINT_ARRAY_TYPE, "String"), "set_absolute_separators", "get_absolute_separators");
+
+    ClassDB::bind_method(D_METHOD("get_chunk_separators"), &LlmDB::get_chunk_separators);
+    ClassDB::bind_method(D_METHOD("set_chunk_separators", "p_chunk_separators"), &LlmDB::set_chunk_separators);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "chunk_separators", PROPERTY_HINT_ARRAY_TYPE, "String"), "set_chunk_separators", "get_chunk_separators");
 
     ClassDB::bind_method(D_METHOD("get_chunk_size"), &LlmDB::get_chunk_size);
     ClassDB::bind_method(D_METHOD("set_chunk_size", "p_chunk_size"), &LlmDB::set_chunk_size);
@@ -130,21 +134,24 @@ LlmDB::LlmDB() : db_dir {"."},
     db {nullptr},
     db_file {"llm.db"},
     table_name {"llm_table"},
-    embedding_size {384}
+    embedding_size {384},
+    chunk_size {100},
+    chunk_overlap {20}
 {
     schema.append(LlmDBSchemaData::create_text("id"));
 
-    separators.append("\n\n");
-    separators.append("\n");
-    separators.append(" ");
-    separators.append(".");
-    separators.append(",");
-    separators.append(String::utf8("\u200b"));
-    separators.append(String::utf8("\uff0c"));
-    separators.append(String::utf8("\u3001"));
-    separators.append(String::utf8("\uff0e"));
-    separators.append(String::utf8("\u3002"));
-    separators.append(String::utf8(""));
+    absolute_separators.append("\n\n");
+    absolute_separators.append("\n");
+    absolute_separators.append(".");
+    absolute_separators.append(",");
+    absolute_separators.append(String::utf8("\uff0c"));
+    absolute_separators.append(String::utf8("\u3001"));
+    absolute_separators.append(String::utf8("\uff0e"));
+    absolute_separators.append(String::utf8("\u3002"));
+
+    chunk_separators.append("\u200b");
+    chunk_separators.append(" ");
+    chunk_separators.append("");
 
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
@@ -239,12 +246,20 @@ void LlmDB::calibrate_embedding_size() {
     embedding_size = get_n_embd();
 }
 
-TypedArray<String> LlmDB::get_separators() const {
-    return separators;
+TypedArray<String> LlmDB::get_absolute_separators() const {
+    return absolute_separators;
 };
 
-void LlmDB::set_separators(const TypedArray<String> p_separators) {
-    separators = p_separators;
+void LlmDB::set_absolute_separators(const TypedArray<String> p_absolute_separators) {
+    absolute_separators = p_absolute_separators;
+};
+
+TypedArray<String> LlmDB::get_chunk_separators() const {
+    return chunk_separators;
+};
+
+void LlmDB::set_chunk_separators(const TypedArray<String> p_chunk_separators) {
+    chunk_separators = p_chunk_separators;
 };
 
 int LlmDB::get_chunk_size() const {
