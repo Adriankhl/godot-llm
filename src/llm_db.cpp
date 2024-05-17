@@ -99,8 +99,9 @@ void LlmDB::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
-    ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
+    ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
+    ClassDB::bind_method(D_METHOD("drop_table", "p_table_name"), &LlmDB::drop_table);
     ClassDB::bind_method(D_METHOD("is_table_exist", "p_table_name"), &LlmDB::is_table_exist);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
 }
@@ -276,7 +277,7 @@ void LlmDB::create_llm_tables() {
 
     statement += String("embedding") + " float[" + String::num_int64(n_embd)+ "]";
 
-    statement += ")";
+    statement += ");";
 
     UtilityFunctions::print_verbose("Create table statement: " + statement);
 
@@ -297,7 +298,7 @@ void LlmDB::create_llm_tables() {
             statement_meta += ", ";
         }
     }
-    statement_meta += ")";
+    statement_meta += ");";
 
     UtilityFunctions::print_verbose("Create meta table statement: " + statement_meta);
 
@@ -305,6 +306,12 @@ void LlmDB::create_llm_tables() {
 
     UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
 
+}
+
+void LlmDB::drop_table(String p_table_name) {
+    String statement = "DROP TABLE  " + p_table_name + ";";
+    UtilityFunctions::print_verbose("Drop table statement: " + statement);
+    execute(statement);
 }
 
 bool LlmDB::is_table_exist(String p_table_name) {
