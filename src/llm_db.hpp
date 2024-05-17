@@ -23,8 +23,8 @@ class LlmDBSchemaData : public Resource {
     GDCLASS(LlmDBSchemaData, Resource)
 
     private:
-        String name;
-        int type; //0: integer, 1: real, 2: text, 3: blob
+        String data_name;
+        int data_type; //0: integer, 1: real, 2: text, 3: blob
 
     protected:
 	    static void _bind_methods();
@@ -32,14 +32,14 @@ class LlmDBSchemaData : public Resource {
     public:
         LlmDBSchemaData();
         ~LlmDBSchemaData();
-        static LlmDBSchemaData* create_int(String name);
-        static LlmDBSchemaData* create_real(String name);
-        static LlmDBSchemaData* create_text(String name);
-        static LlmDBSchemaData* create_blob(String name);
-        String get_name() const;
-        void set_name(const String p_name);
-        int get_type() const;
-        void set_type(const int p_type);
+        static LlmDBSchemaData* create_int(String data_name);
+        static LlmDBSchemaData* create_real(String data_name);
+        static LlmDBSchemaData* create_text(String data_name);
+        static LlmDBSchemaData* create_blob(String data_name);
+        String get_data_name() const;
+        void set_data_name(const String p_data_name);
+        int get_data_type() const;
+        void set_data_type(const int p_data_type);
 };
 
 class LlmDB : public GDEmbedding {

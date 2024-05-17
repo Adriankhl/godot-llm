@@ -16,68 +16,68 @@
 namespace godot {
 
 void LlmDBSchemaData::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("get_name"), &LlmDBSchemaData::get_name);
-    ClassDB::bind_method(D_METHOD("set_name", "p_name"), &LlmDBSchemaData::set_name);
-    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::STRING, "name", PROPERTY_HINT_NONE), "set_name", "get_name");
+    ClassDB::bind_method(D_METHOD("get_data_name"), &LlmDBSchemaData::get_data_name);
+    ClassDB::bind_method(D_METHOD("set_data_name", "p_data_name"), &LlmDBSchemaData::set_data_name);
+    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::STRING, "data_name", PROPERTY_HINT_NONE), "set_data_name", "get_data_name");
 
-    ClassDB::bind_method(D_METHOD("get_type"), &LlmDBSchemaData::get_type);
-    ClassDB::bind_method(D_METHOD("set_type", "p_type"), &LlmDBSchemaData::set_type);
-    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::INT, "type", PROPERTY_HINT_ENUM, "INTEGER, REAL, TEXT, BLOB"), "set_type", "get_type");
+    ClassDB::bind_method(D_METHOD("get_data_type"), &LlmDBSchemaData::get_data_type);
+    ClassDB::bind_method(D_METHOD("set_data_type", "p_data_type"), &LlmDBSchemaData::set_data_type);
+    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::INT, "data_type", PROPERTY_HINT_ENUM, "INTEGER, REAL, TEXT, BLOB"), "set_data_type", "get_data_type");
 
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_int"), &LlmDBSchemaData::create_int);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_real"), &LlmDBSchemaData::create_real);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_text"), &LlmDBSchemaData::create_text);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_blob"), &LlmDBSchemaData::create_blob);
+    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_int", "data_name"), &LlmDBSchemaData::create_int);
+    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_real", "data_name"), &LlmDBSchemaData::create_real);
+    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_text", "data_name"), &LlmDBSchemaData::create_text);
+    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_blob", "data_name"), &LlmDBSchemaData::create_blob);
 }
 
-LlmDBSchemaData::LlmDBSchemaData() : name {"default_name"},
-    type {0}
+LlmDBSchemaData::LlmDBSchemaData() : data_name {"default_name"},
+    data_type {0}
 {}
 
 LlmDBSchemaData::~LlmDBSchemaData() {}
 
-LlmDBSchemaData* LlmDBSchemaData::create_int(String name) {
+LlmDBSchemaData* LlmDBSchemaData::create_int(String data_name) {
     LlmDBSchemaData* data = memnew(LlmDBSchemaData());
-    data->set_name(name);
-    data->set_type(0);
+    data->set_data_name(data_name);
+    data->set_data_type(0);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_real(String name) {
+LlmDBSchemaData* LlmDBSchemaData::create_real(String data_name) {
     LlmDBSchemaData* data = memnew(LlmDBSchemaData());
-    data->set_name(name);
-    data->set_type(1);
+    data->set_data_name(data_name);
+    data->set_data_type(1);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_text(String name) {
+LlmDBSchemaData* LlmDBSchemaData::create_text(String data_name) {
     LlmDBSchemaData* data = memnew(LlmDBSchemaData());
-    data->set_name(name);
-    data->set_type(2);
+    data->set_data_name(data_name);
+    data->set_data_type(2);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_blob(String name) {
+LlmDBSchemaData* LlmDBSchemaData::create_blob(String data_name) {
     LlmDBSchemaData* data = memnew(LlmDBSchemaData());
-    data->set_name(name);
-    data->set_type(2);
+    data->set_data_name(data_name);
+    data->set_data_type(2);
     return data;
 }
 
-String LlmDBSchemaData::get_name() const {
-    return name;
+String LlmDBSchemaData::get_data_name() const {
+    return data_name;
 };
 
-void LlmDBSchemaData::set_name(const String p_name) {
-    name = p_name;
+void LlmDBSchemaData::set_data_name(const String p_data_name) {
+    data_name = p_data_name;
 };
 
-int LlmDBSchemaData::get_type() const {
-    return type;
+int LlmDBSchemaData::get_data_type() const {
+    return data_type;
 }
 
-void LlmDBSchemaData::set_type(const int p_type) {
-    type = p_type;
+void LlmDBSchemaData::set_data_type(const int p_data_type) {
+    data_type = p_data_type;
 }
 
 void LlmDB::_bind_methods() {
@@ -108,9 +108,9 @@ void LlmDB::_bind_methods() {
 LlmDB::LlmDB() : db_dir {"."},
     db_file {"llm.db"},
     table_name {"llm_table"},
-    n_embd {384},
-    schema {TypedArray<LlmDBSchemaData> (LlmDBSchemaData::create_text("id"))}
+    n_embd {384}
 {
+    schema.append(LlmDBSchemaData::create_text("id"));
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
     if (rc != SQLITE_OK) {
@@ -133,7 +133,7 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
         // Remove any id column that is not the first row
         for (int i = 1; i < p_schema.size(); i++) {
             LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
-            if (sd->get_name() == "id") {
+            if (sd->get_data_name() == "id") {
                 UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
                 col_to_remove = i;
             }
@@ -144,14 +144,14 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
         }
 
         LlmDBSchemaData* sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
-        if (sd0->get_name() == "id" && sd0->get_type() != 2) {
+        if (sd0->get_data_name() == "id" && sd0->get_data_type() != 2) {
             UtilityFunctions::printerr("Id column should be TEXT type, removing");
             p_schema.remove_at(0);
         }
 
         // Get again since it might get removed
         sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
-        if (sd0->get_name() != "id") {
+        if (sd0->get_data_name() != "id") {
             UtilityFunctions::printerr("First column is not id");
             is_id_valid = false;
         }
@@ -264,8 +264,8 @@ void LlmDB::create_llm_tables() {
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
     for (int i = 0; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
-        statement += " '" + sd->get_name() + "' ";
-        statement += type_int_to_string(sd->get_type());
+        statement += " '" + sd->get_data_name() + "' ";
+        statement += type_int_to_string(sd->get_data_type());
         statement += ", ";
     }
     statement += "llm_text TEXT, ";
@@ -286,8 +286,8 @@ void LlmDB::create_llm_tables() {
     String statement_meta = "CREATE TABLE IF NOT EXISTS " + meta_table_name + " (";
     for (int i = 0; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
-        statement_meta += " '" + sd->get_name() + "' ";
-        statement_meta += type_int_to_string(sd->get_type());
+        statement_meta += " '" + sd->get_data_name() + "' ";
+        statement_meta += type_int_to_string(sd->get_data_type());
         
         if (i != schema.size() - 1) {
             statement_meta += ", ";
@@ -362,13 +362,13 @@ bool LlmDB::is_table_valid(String p_table_name) {
 
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
 
-        if (name != sd->get_name()) {
-            UtilityFunctions::printerr("Column name wrong, table : " + name + ", schema: " + sd->get_name());
+        if (name != sd->get_data_name()) {
+            UtilityFunctions::printerr("Column name wrong, table : " + name + ", schema: " + sd->get_data_name());
             return false;
         }
 
-        if (type != type_int_to_string(sd->get_type())) {
-            UtilityFunctions::printerr("Column type wrong, table : " + type + ", schema: " + type_int_to_string(sd->get_type()));
+        if (type != type_int_to_string(sd->get_data_type())) {
+            UtilityFunctions::printerr("Column type wrong, table : " + type + ", schema: " + type_int_to_string(sd->get_data_type()));
             return false;
 
         }
