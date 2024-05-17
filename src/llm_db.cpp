@@ -118,7 +118,11 @@ LlmDB::LlmDB() : db_dir {"."},
     }
 }
 
-LlmDB::~LlmDB() {}
+LlmDB::~LlmDB() {
+    if (db != nullptr) {
+        close_db();
+    }
+}
 
 TypedArray<LlmDBSchemaData> LlmDB::get_schema() const {
     return schema;
