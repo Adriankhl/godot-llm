@@ -106,6 +106,13 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_separators", "p_separators"), &LlmDB::set_separators);
     ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "separators", PROPERTY_HINT_ARRAY_TYPE, "String"), "set_separators", "get_separators");
 
+    ClassDB::bind_method(D_METHOD("get_chunk_size"), &LlmDB::get_chunk_size);
+    ClassDB::bind_method(D_METHOD("set_chunk_size", "p_chunk_size"), &LlmDB::set_chunk_size);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::INT, "chunk_size", PROPERTY_HINT_GLOBAL_FILE), "set_chunk_size", "get_chunk_size");
+
+    ClassDB::bind_method(D_METHOD("get_chunk_overlap"), &LlmDB::get_chunk_overlap);
+    ClassDB::bind_method(D_METHOD("set_chunk_overlap", "p_chunk_overlap"), &LlmDB::set_chunk_overlap);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::INT, "chunk_overlap", PROPERTY_HINT_GLOBAL_FILE), "set_chunk_overlap", "get_chunk_overlap");
 
     ClassDB::bind_method(D_METHOD("calibrate_embedding_size"), &LlmDB::calibrate_embedding_size);
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
@@ -240,6 +247,21 @@ void LlmDB::set_separators(const TypedArray<String> p_separators) {
     separators = p_separators;
 };
 
+int LlmDB::get_chunk_size() const {
+    return chunk_size;
+}
+
+void LlmDB::set_chunk_size(const int p_chunk_size) {
+    chunk_size = p_chunk_size;
+}
+
+int LlmDB::get_chunk_overlap() const {
+    return chunk_overlap;
+}
+
+void LlmDB::set_chunk_overlap(const int p_chunk_overlap) {
+    chunk_overlap = p_chunk_overlap;
+}
 
 void LlmDB::open_db() {
     UtilityFunctions::print_verbose("open_db");

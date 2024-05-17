@@ -51,10 +51,13 @@ class LlmDB : public GDEmbedding {
         String db_file;
         String table_name;
         int embedding_size;
+        TypedArray<String> separators;
+        int chunk_size;
+        int chunk_overlap;
+
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int schema_data_type);
         Variant::Type type_int_to_variant(int schema_data_type);
-        TypedArray<String> separators;
 
     protected:
 	    static void _bind_methods();
@@ -74,6 +77,11 @@ class LlmDB : public GDEmbedding {
         void set_embedding_size(const int p_embedding_size);
         TypedArray<String> get_separators() const;
         void set_separators(const TypedArray<String> p_separators);
+        int get_chunk_size() const;
+        void set_chunk_size(const int p_chunk_size);
+        int get_chunk_overlap() const;
+        void set_chunk_overlap(const int p_chunk_overlap);
+
         void calibrate_embedding_size();
         void open_db();
         void close_db();
