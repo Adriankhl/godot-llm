@@ -99,7 +99,7 @@ void LlmDB::_bind_methods() {
 
     ClassDB::bind_method(D_METHOD("open_db"), &LlmDB::open_db);
     ClassDB::bind_method(D_METHOD("close_db"), &LlmDB::close_db);
-    ClassDB::bind_method(D_METHOD("create_table"), &LlmDB::create_table);
+    ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
     ClassDB::bind_method(D_METHOD("is_table_exist", "p_table_name"), &LlmDB::is_table_exist);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
@@ -108,7 +108,8 @@ void LlmDB::_bind_methods() {
 LlmDB::LlmDB() : db_dir {"."},
     db_file {"llm.db"},
     table_name {"llm_table"},
-    n_embd {384}
+    n_embd {384},
+    schema {TypedArray<LlmDBSchemaData> (LlmDBSchemaData::create_text("id"))}
 {
     int rc = SQLITE_OK;
     rc = sqlite3_auto_extension((void (*)())sqlite3_vec_init);
@@ -123,7 +124,43 @@ TypedArray<LlmDBSchemaData> LlmDB::get_schema() const {
     return schema;
 }
 
-void LlmDB::set_schema(const TypedArray<LlmDBSchemaData> p_schema) {
+void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
+    bool is_id_valid = true;
+    int col_to_remove = -1;
+
+
+    if (p_schema.size() != 0) {
+        // Remove any id column that is not the first row
+        for (int i = 1; i < p_schema.size(); i++) {
+            LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
+            if (sd->get_name() == "id") {
+                UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
+                col_to_remove = i;
+            }
+        }
+        if (col_to_remove != -1) {
+            UtilityFunctions::printerr("Removing column " + String::num(col_to_remove));
+            p_schema.remove_at(col_to_remove);
+        }
+
+        LlmDBSchemaData* sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
+        if (sd0->get_name() == "id" && sd0->get_type() != 2) {
+            UtilityFunctions::printerr("Id column should be TEXT type, removing");
+            p_schema.remove_at(0);
+        }
+
+        // Get again since it might get removed
+        sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
+        if (sd0->get_name() != "id") {
+            UtilityFunctions::printerr("First column is not id");
+            is_id_valid = false;
+        }
+    }
+
+    if (p_schema.size() == 0 || !is_id_valid) {
+        UtilityFunctions::printerr("Creating id as the first column");
+        p_schema.push_front(LlmDBSchemaData::create_text("id"));
+    }
     schema = p_schema;
 }
 
@@ -222,8 +259,8 @@ String LlmDB::type_int_to_string(int schema_data_type) {
     }
 }
 
-void LlmDB::create_table() {
-    UtilityFunctions::print_verbose("create_table " + table_name);
+void LlmDB::create_llm_tables() {
+    UtilityFunctions::print_verbose("create_llm_tables: " + table_name);
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
     for (int i = 0; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
@@ -242,6 +279,28 @@ void LlmDB::create_table() {
     execute(statement);
 
     UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
+
+    // Also create a table to store meta data
+    String meta_table_name = table_name + "_meta";
+
+    String statement_meta = "CREATE TABLE IF NOT EXISTS " + meta_table_name + " (";
+    for (int i = 0; i < schema.size(); i++) {
+        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        statement_meta += " '" + sd->get_name() + "' ";
+        statement_meta += type_int_to_string(sd->get_type());
+        
+        if (i != schema.size() - 1) {
+            statement_meta += ", ";
+        }
+    }
+    statement_meta += ")";
+
+    UtilityFunctions::print_verbose("Create meta table statement: " + statement_meta);
+
+    execute(statement_meta);
+
+    UtilityFunctions::print_verbose("create_table " + table_name + " -- done");
+
 }
 
 bool LlmDB::is_table_exist(String p_table_name) {

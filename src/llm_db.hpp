@@ -61,7 +61,7 @@ class LlmDB : public GDEmbedding {
         LlmDB();
         ~LlmDB();
         TypedArray<LlmDBSchemaData> get_schema() const;
-        void set_schema(const TypedArray<LlmDBSchemaData> p_schema);
+        void set_schema(TypedArray<LlmDBSchemaData> p_schema);
         String get_db_dir() const;
         void set_db_dir(const String p_db_dir);
         String get_db_file() const;
@@ -71,7 +71,8 @@ class LlmDB : public GDEmbedding {
         void open_db();
         void close_db();
         void execute(String statement);
-        void create_table();
+        void create_llm_tables();
+        void drop_llm_tables();
         bool is_table_exist(String p_table_name);
         bool is_table_valid(String p_table_name);
 };
