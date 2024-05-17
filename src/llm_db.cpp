@@ -647,6 +647,7 @@ PackedStringArray LlmDB::chunk_split_text(String text, int index) {
                 }
 
                 UtilityFunctions::print_verbose("Chunk: " + s);
+                UtilityFunctions::print_verbose("Chunk length: " + String::num_int64(s.length()));
                 chunk_array.append(s);
 
                 // Add overlap
@@ -658,6 +659,7 @@ PackedStringArray LlmDB::chunk_split_text(String text, int index) {
                         start_index -= 1;
                     }
                     UtilityFunctions::print_verbose("Overlap: " + s);
+                    UtilityFunctions::print_verbose("Overlap length: " + String::num_int64(s.length()));
                 }
             }
 
