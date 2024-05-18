@@ -776,9 +776,9 @@ void LlmDB::insert_text(String id, String text) {
         statement += sd->get_data_name() + ", ";
     }
 
-    statement += "llm_text, embedding) VALUES (";
+    statement += "llm_text, embedding) VALUES (?, ";
     
-    for (int i = 0; i < schema.size(); i++) {
+    for (int i = 1; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
         statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id='" + id + "'), ";
     }
@@ -799,7 +799,8 @@ void LlmDB::insert_text(String id, String text) {
     if (rc != SQLITE_OK) {
         UtilityFunctions::printerr("Failed to perpare statement");
     }
-    sqlite3_bind_text(stmt, 1, text.utf8().get_data(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, id.utf8().get_data(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, text.utf8().get_data(), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         UtilityFunctions::printerr("Failed to step statement");
@@ -818,11 +819,6 @@ void LlmDB::store_text(String id, String text) {
     UtilityFunctions::print_verbose("store_text_mutex locked");
 
     PackedStringArray text_array = split_text(text);
-
-    if (!has_id(id, table_name + "_meta")) {
-        UtilityFunctions::printerr("No id " + id + " in " + table_name + "_meta");
-        return;
-    }
 
     for (String s : text_array) {
         insert_text(id, s);
