@@ -2,6 +2,7 @@
 #include "gdembedding.hpp"
 #include "sqlite3.h"
 #include "sqlite-vec.h"
+#include <cstring>
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/object.hpp>
@@ -763,7 +764,7 @@ void LlmDB::insert_text(String id, String text) {
         statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id='" + id + "'), ";
     }
     
-    statement += " '" + text + "', '[";
+    statement += "?, '[";
 
     for (float f : embedding) {
         statement += String::num_real(f) + ", ";
@@ -773,7 +774,18 @@ void LlmDB::insert_text(String id, String text) {
     statement += "]')";
 
     UtilityFunctions::print_verbose("insert_text statement: " + statement);
-    execute(statement);
+    int rc = SQLITE_OK;
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Failed to perpare statement");
+    }
+    sqlite3_bind_text(stmt, 1, text.utf8().get_data(), -1, SQLITE_STATIC);
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        UtilityFunctions::printerr("Failed to step statement");
+    }
+    sqlite3_finalize(stmt);
 
     String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
     UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
