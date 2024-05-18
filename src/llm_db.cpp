@@ -569,6 +569,7 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
     String statement_2 = "(";
     String statement_3 = "(";
     Dictionary p_meta_dict = meta_dict.duplicate(false);
+    PackedStringArray array_bind {PackedStringArray()};
     for (int i = 0; i < schema.size(); i++) {
         LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
         if(p_meta_dict.has(sd->get_data_name())) {
@@ -576,6 +577,8 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
             if (v.get_type() != type_int_to_variant(sd->get_data_type())) {
                 UtilityFunctions::printerr("Wrong data type for key " + sd->get_data_name() + " : " + v.get_type_name(v.get_type()) + " instead of " + sd->get_data_type());
             }
+
+            p_meta_dict.erase(sd->get_data_name());
 
             switch (sd->get_data_type()) {
                 case LlmDBSchemaDataType::INTEGER: {
@@ -593,13 +596,15 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
                 case LlmDBSchemaDataType::TEXT: {
                     statement_2 += sd->get_data_name() + ", ";
                     String s = v;
-                    statement_3 += "'" + s + "', ";
+                    statement_3 += "?, ";
+                    array_bind.append(s);
                     break;
                 }
                 case LlmDBSchemaDataType::BLOB: {
                     statement_2 += sd->get_data_name() + ", ";
                     String s = v.stringify();
-                    statement_3 += "'" + s + "', ";
+                    statement_3 += "?, ";
+                    array_bind.append(s);
                     break;
                 }
             }
@@ -609,7 +614,21 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
     statement_3 = statement_3.trim_suffix(", ") + ")";
     String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
     UtilityFunctions::print_verbose("insert_meta statement: " + statement);
-    execute(statement);
+
+    int rc = SQLITE_OK;
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Failed to perpare statement");
+    }
+    for (int i = 0; i < array_bind.size(); i++) {
+        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_STATIC);
+    }
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        UtilityFunctions::printerr("Failed to step statement");
+    }
+    sqlite3_finalize(stmt);
 
     UtilityFunctions::print_verbose("insert_meta -- done");
 }
