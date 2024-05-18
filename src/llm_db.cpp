@@ -5,6 +5,7 @@
 #include <cstring>
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/json.hpp>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
@@ -565,6 +566,12 @@ bool LlmDB::is_table_valid(String p_table_name) {
 void LlmDB::insert_meta(Dictionary meta_dict) {
     UtilityFunctions::print_verbose("insert_meta");
 
+    //Check id
+    if (!meta_dict.has("id") || meta_dict.get("id", nullptr).get_type() != Variant::STRING) {
+        UtilityFunctions::printerr("insert_meta error: no id or id is not a string");
+        return;
+    }
+
     String statement_1 = "INSERT OR REPLACE INTO " + table_name + "_meta";
     String statement_2 = "(";
     String statement_3 = "(";
@@ -610,6 +617,11 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
             }
         }
     }
+
+    if (!p_meta_dict.is_empty()) {
+        UtilityFunctions::printerr("Some meta data has incorrect key or incorrect format, key: " + JSON::stringify(p_meta_dict.keys()));
+    }
+
     statement_2 = statement_2.trim_suffix(", ") + ")";
     statement_3 = statement_3.trim_suffix(", ") + ")";
     String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
