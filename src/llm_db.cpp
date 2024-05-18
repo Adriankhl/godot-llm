@@ -232,7 +232,7 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
     if (p_schema.size() != 0) {
         // Remove any id column that is not the first row
         for (int i = 1; i < p_schema.size(); i++) {
-            UtilityFunctions::print_verbose("Checking schema " + String::num_int64(i));
+            UtilityFunctions::print_verbose("Checking schema data " + String::num_int64(i));
             if (p_schema[i].get_type() != Variant::NIL) {
                 UtilityFunctions::print_verbose("Correct resource type");
                 LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
