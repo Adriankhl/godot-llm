@@ -501,7 +501,7 @@ bool LlmDB::has_table(String p_table_name) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
-        UtilityFunctions::printerr("Error: not a row");
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
         return false;
     }
 
@@ -536,7 +536,7 @@ bool LlmDB::is_table_valid(String p_table_name) {
     for (int i = 0; i < schema.size(); i++) {
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_ROW) {
-            UtilityFunctions::printerr("Error: not a row");
+            UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
             return false;
         }
         String name = String::utf8((char *) sqlite3_column_text(stmt, 1));
@@ -638,7 +638,7 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
     }
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        UtilityFunctions::printerr("Failed to step statement");
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
     }
     sqlite3_finalize(stmt);
 
@@ -661,7 +661,7 @@ bool LlmDB::has_id(String id, String p_table_name) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
-        UtilityFunctions::printerr("Error: not a row");
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
         return false;
     }
 
@@ -815,7 +815,7 @@ void LlmDB::insert_text(String id, String text) {
     sqlite3_bind_text(stmt, 2, text.utf8().get_data(), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        UtilityFunctions::printerr("Failed to step statement");
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
     }
     sqlite3_finalize(stmt);
 
@@ -914,7 +914,7 @@ PackedStringArray LlmDB::retrieve_similar_texts(String text, String where, int n
         rc = sqlite3_step(stmt);
         if(rc == SQLITE_DONE) break;
         if (rc != SQLITE_ROW) {
-            UtilityFunctions::print_verbose("Error: return early");
+            UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
             return array;
         }
         const char* c = (char*) sqlite3_column_text(stmt, 0);
