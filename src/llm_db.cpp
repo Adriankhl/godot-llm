@@ -90,7 +90,7 @@ void LlmDBSchemaData::set_data_type(const int p_data_type) {
 void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_schema"), &LlmDB::get_schema);
     ClassDB::bind_method(D_METHOD("set_schema", "p_schema"), &LlmDB::set_schema);
-    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "schema", PROPERTY_HINT_ARRAY_TYPE, "LlmDBSchemaData"), "set_schema", "get_schema");
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "schema", PROPERTY_HINT_ARRAY_TYPE, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "LlmDBSchemaData")), "set_schema", "get_schema");
 
     ClassDB::bind_method(D_METHOD("get_db_dir"), &LlmDB::get_db_dir);
     ClassDB::bind_method(D_METHOD("set_db_dir", "p_db_dir"), &LlmDB::set_db_dir);
@@ -232,10 +232,14 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
     if (p_schema.size() != 0) {
         // Remove any id column that is not the first row
         for (int i = 1; i < p_schema.size(); i++) {
-            LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
-            if (sd->get_data_name() == "id") {
-                UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
-                col_to_remove = i;
+            UtilityFunctions::print_verbose("Checking schema " + String::num_int64(i));
+            if (p_schema[i].get_type() != Variant::NIL) {
+                UtilityFunctions::print_verbose("Correct resource type");
+                LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
+                if (sd->get_data_name() == "id") {
+                    UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
+                    col_to_remove = i;
+                }
             }
         }
         if (col_to_remove != -1) {
@@ -244,7 +248,7 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
         }
 
         LlmDBSchemaData* sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
-        if (sd0->get_data_name() == "id" && sd0->get_data_type() != 2) {
+        if (sd0->get_data_name() == "id" && sd0->get_data_type() != LlmDBSchemaDataType::TEXT) {
             UtilityFunctions::printerr("Id column should be TEXT type, removing");
             p_schema.remove_at(0);
         }
