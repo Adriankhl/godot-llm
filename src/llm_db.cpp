@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/json.hpp>
 #include <godot_cpp/classes/object.hpp>
+#include <godot_cpp/classes/worker_thread_pool.hpp>
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/memory.hpp>
@@ -141,6 +142,9 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("store_text_by_meta", "meta_dict", "text"), &LlmDB::store_text_by_meta);
     ClassDB::bind_method(D_METHOD("run_store_text_by_meta", "meta_dict", "text"), &LlmDB::run_store_text_by_meta);
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
+    ClassDB::bind_method(D_METHOD("run_retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::run_retrieve_similar_texts);
+
+    ADD_SIGNAL(MethodInfo("retrieve_similar_text_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
@@ -156,7 +160,8 @@ LlmDB::LlmDB() : db_dir {"."},
     chunk_overlap {20},
     absolute_separators {PackedStringArray()},
     chunk_separators {PackedStringArray()},
-    store_text_queue {std::queue<std::function<void()>>()}
+    store_text_queue {std::queue<std::function<void()>>()},
+    retrieve_text_queue {std::queue<std::function<void()>>()}
 {
     UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
     store_text_mutex.instantiate();
@@ -169,6 +174,12 @@ LlmDB::LlmDB() : db_dir {"."},
 
     store_text_thread->start(callable_mp_static(&LlmDB::dummy));
     store_text_thread->wait_to_finish();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
+    retrieve_text_thread.instantiate();
+
+    retrieve_text_thread->start(callable_mp_static(&LlmDB::dummy));
+    retrieve_text_thread->wait_to_finish();
 
     meta.append(LlmDBMetaData::create_text("id"));
 
@@ -998,23 +1009,27 @@ void LlmDB::store_text_by_meta(Dictionary meta_dict, String text) {
     UtilityFunctions::print_verbose("store_text_by_meta -- done");
 };
 
-void LlmDB::run_store_text_by_meta(Dictionary meta_dict, String text) {
+Error LlmDB::run_store_text_by_meta(Dictionary meta_dict, String text) {
     func_mutex->lock();
 
     store_text_queue.push([this, text, meta_dict](){ store_text_by_meta(meta_dict, text); });
+
+    Error error = OK;
 
     if (store_text_thread->is_started()) {
         if (!store_text_thread->is_alive()) {
             store_text_thread->wait_to_finish();
             store_text_thread.instantiate();
-            store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+            error = store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
         }
     } else {
         store_text_thread.instantiate();
-        store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+        error = store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
     }
 
     func_mutex->unlock();
+
+    return error;
 };
 
 PackedStringArray LlmDB::retrieve_similar_texts(String text, String where, int n_results) {
@@ -1074,5 +1089,43 @@ PackedStringArray LlmDB::retrieve_similar_texts(String text, String where, int n
 
     return array;
 }
+
+void LlmDB::retrieve_text_process() {
+    UtilityFunctions::print_verbose("retrieve_text_process");
+    while (!retrieve_text_queue.empty()) {
+        std::function<void()> f = retrieve_text_queue.front();
+
+        f();
+
+        retrieve_text_queue.pop();
+    }
+    UtilityFunctions::print_verbose("retrieve_text_process -- done");
+}
+
+Error LlmDB::run_retrieve_similar_texts(String text, String where, int n_results) {
+    UtilityFunctions::print_verbose("run_retrieve_similar_texts");
+
+    func_mutex->lock();
+
+    retrieve_text_queue.push(
+        [this, text, where, n_results](){ 
+            PackedStringArray array = retrieve_similar_texts(text, where, n_results); 
+            call_deferred("emit_signal", "retrieve_similar_text_finished", array);
+        }
+    );
+
+    if (retrieve_text_thread->is_started()) {
+        retrieve_text_thread->wait_to_finish();
+    }
+
+    retrieve_text_thread.instantiate();
+    Error error = retrieve_text_thread->start(callable_mp(this, &LlmDB::retrieve_text_process));
+
+    func_mutex->unlock();
+
+    UtilityFunctions::print_verbose("run_retrieve_similar_texts -- done");
+
+    return error;
+};
 
 } // namespace godot

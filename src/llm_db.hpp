@@ -60,6 +60,8 @@ class LlmDB : public GDEmbedding {
         Ref<Mutex> store_text_mutex;
         Ref<Thread> store_text_thread;
         std::queue<std::function<void()>> store_text_queue;
+        Ref<Thread> retrieve_text_thread;
+        std::queue<std::function<void()>> retrieve_text_queue;
         Ref<Mutex> func_mutex;
 
         static void dummy();
@@ -71,6 +73,7 @@ class LlmDB : public GDEmbedding {
         void insert_text_by_id(String id, String text);
         void insert_text_by_meta(Dictionary meta_dict, String text);
         void store_text_process();
+        void retrieve_text_process();
 
     protected:
 	    static void _bind_methods();
@@ -113,8 +116,9 @@ class LlmDB : public GDEmbedding {
         void store_text_by_id(String id, String text);
         void run_store_text_by_id(String id, String text);
         void store_text_by_meta(Dictionary meta_dict, String text);
-        void run_store_text_by_meta(Dictionary meta_dict, String text);
+        Error run_store_text_by_meta(Dictionary meta_dict, String text);
         PackedStringArray retrieve_similar_texts(String text, String where, int n_results);
+        Error run_retrieve_similar_texts(String text, String where, int n_results);
 };
 
 } // namespace godot
