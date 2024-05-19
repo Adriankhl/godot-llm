@@ -330,17 +330,10 @@ std::string LlavaRunner::llava_generate_text_base64(
         return msg;
     }
 
-    for (auto & image : params.image) {
+    if (prompt_contains_image(params.prompt)) {
         auto ctx_llava = llava_init_context(&params, model);
 
-        auto image_embed = load_image(ctx_llava, &params, image);
-        if (!image_embed) {
-            std::cerr << "error: failed to load image " << image << ". Terminating\n\n";
-            std::string msg = "error: failed to load image " + image + ". Terminating";
-            glog(msg);
-            on_generate_text_finished(msg);
-            return msg;
-        }
+        auto image_embed = load_image(ctx_llava, &params, "");
 
         // process the prompt
         generated_text = process_prompt(
@@ -355,7 +348,35 @@ std::string LlavaRunner::llava_generate_text_base64(
         llava_image_embed_free(image_embed);
         ctx_llava->model = NULL;
         llava_free(ctx_llava);
+    } else {
+        for (auto & image : params.image) {
+            auto ctx_llava = llava_init_context(&params, model);
+
+            auto image_embed = load_image(ctx_llava, &params, image);
+            if (!image_embed) {
+                std::cerr << "error: failed to load image " << image << ". Terminating\n\n";
+                std::string msg = "error: failed to load image " + image + ". Terminating";
+                glog(msg);
+                on_generate_text_finished(msg);
+                return msg;
+            }
+
+            // process the prompt
+            generated_text = process_prompt(
+                ctx_llava,
+                image_embed,
+                &params,
+                params.prompt,
+                on_generate_text_updated
+            );
+
+            llama_print_timings(ctx_llava->ctx_llama);
+            llava_image_embed_free(image_embed);
+            ctx_llava->model = NULL;
+            llava_free(ctx_llava);
+        }
     }
+
     llama_free_model(model);
 
     on_generate_text_finished(generated_text);

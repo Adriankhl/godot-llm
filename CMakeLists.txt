@@ -35,12 +35,16 @@ set(src_files
   "src/register_types.cpp"
 )
 
+add_definitions(-DSQLITE_CORE)
 
-add_compile_options(-DSQLITE_CORE)
 
-# Disable MSVC fopen warning
-add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
+if (MSVC)
+  # Disable MSVC fopen warning
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
+  # Fix debug build iterator bound check bug https://stackoverflow.com/questions/74748276/visual-studio-no-displays-the-correct-length-of-stdvector
+  add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
