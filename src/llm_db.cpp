@@ -130,6 +130,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
     ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
     ClassDB::bind_method(D_METHOD("drop_table", "p_table_name"), &LlmDB::drop_table);
+    ClassDB::bind_method(D_METHOD("drop_llm_table", "p_table_name"), &LlmDB::drop_llm_table);
     ClassDB::bind_method(D_METHOD("has_table", "p_table_name"), &LlmDB::has_table);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
     ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
@@ -487,6 +488,12 @@ void LlmDB::drop_table(String p_table_name) {
     String statement = "DROP TABLE  " + p_table_name + ";";
     UtilityFunctions::print_verbose("Drop table statement: " + statement);
     execute(statement);
+}
+
+void LlmDB::drop_llm_tables(String p_table_name) {
+    drop_table(p_table_name);
+    drop_table(p_table_name + "_virtual");
+    drop_table(p_table_name + "_meta");
 }
 
 bool LlmDB::has_table(String p_table_name) {
