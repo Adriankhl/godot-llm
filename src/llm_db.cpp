@@ -138,6 +138,8 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
     ClassDB::bind_method(D_METHOD("store_text_by_id", "id", "text"), &LlmDB::store_text_by_id);
     ClassDB::bind_method(D_METHOD("run_store_text_by_id", "id", "text"), &LlmDB::run_store_text_by_id);
+    ClassDB::bind_method(D_METHOD("store_text_by_meta", "meta_dict", "text"), &LlmDB::store_text_by_meta);
+    ClassDB::bind_method(D_METHOD("run_store_text_by_meta", "meta_dict", "text"), &LlmDB::run_store_text_by_meta);
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
 }
 
@@ -789,7 +791,8 @@ PackedStringArray LlmDB::split_text(String text) {
     return array;
 };
 
-void LlmDB::insert_text(String id, String text) {
+void LlmDB::insert_text_by_id(String id, String text) {
+    UtilityFunctions::print_verbose("insert_text_by_id");
     PackedFloat32Array embedding = compute_embedding(text);
 
     String statement = "INSERT INTO " + table_name + "(";
@@ -833,10 +836,12 @@ void LlmDB::insert_text(String id, String text) {
     String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
     UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
     execute(statement_virtual);
+
+    UtilityFunctions::print_verbose("insert_text_by_id -- done");
 }
 
 void LlmDB::store_text_by_id(String id, String text) {
-    UtilityFunctions::print_verbose("store_text");
+    UtilityFunctions::print_verbose("store_text_by_id");
 
     store_text_mutex->lock();
     UtilityFunctions::print_verbose("store_text_mutex locked");
@@ -844,13 +849,13 @@ void LlmDB::store_text_by_id(String id, String text) {
     PackedStringArray text_array = split_text(text);
 
     for (String s : text_array) {
-        insert_text(id, s);
+        insert_text_by_id(id, s);
     }
-
-    UtilityFunctions::print_verbose("store_text -- done");
 
     store_text_mutex->unlock();
     UtilityFunctions::print_verbose("store_text_mutex unlocked");
+
+    UtilityFunctions::print_verbose("store_text_by_id -- done");
 };
 
 void LlmDB::store_text_process() {
@@ -869,6 +874,134 @@ void LlmDB::run_store_text_by_id(String id, String text) {
     func_mutex->lock();
 
     store_text_queue.push([this, text, id](){ store_text_by_id(id, text); });
+
+    if (store_text_thread->is_started()) {
+        if (!store_text_thread->is_alive()) {
+            store_text_thread->wait_to_finish();
+            store_text_thread.instantiate();
+            store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+        }
+    } else {
+        store_text_thread.instantiate();
+        store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+    }
+
+    func_mutex->unlock();
+};
+
+void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
+    UtilityFunctions::print_verbose("insert_text_by_meta");
+
+    PackedFloat32Array embedding = compute_embedding(text);
+
+    String statement_1 = "INSERT INTO " + table_name + " ";
+    String statement_2 = "(";
+    String statement_3 = "(";
+    Dictionary p_meta_dict = meta_dict.duplicate(false);
+    PackedStringArray array_bind {PackedStringArray()};
+    for (int i = 0; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        if(p_meta_dict.has(sd->get_data_name())) {
+            Variant v = p_meta_dict.get(sd->get_data_name(), nullptr);
+            if (v.get_type() != type_int_to_variant(sd->get_data_type())) {
+                UtilityFunctions::printerr("Wrong data type for key " + sd->get_data_name() + " : " + v.get_type_name(v.get_type()) + " instead of " + sd->get_data_type());
+            }
+
+            p_meta_dict.erase(sd->get_data_name());
+
+            switch (sd->get_data_type()) {
+                case LlmDBMetaDataType::INTEGER: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    int k = v;
+                    statement_3 += String::num_int64(k) + ", ";
+                    break;
+                }
+                case LlmDBMetaDataType::REAL: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    float f = v;
+                    statement_3 += String::num_real(f) + ", ";
+                    break;
+                }
+                case LlmDBMetaDataType::TEXT: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    String s = v;
+                    statement_3 += "?, ";
+                    array_bind.append(s);
+                    break;
+                }
+                case LlmDBMetaDataType::BLOB: {
+                    statement_2 += sd->get_data_name() + ", ";
+                    String s = v.stringify();
+                    statement_3 += "?, ";
+                    array_bind.append(s);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!p_meta_dict.is_empty()) {
+        UtilityFunctions::printerr("Some meta data has incorrect key or incorrect format, key: " + JSON::stringify(p_meta_dict.keys()));
+    }
+
+    statement_2 = statement_2 + "llm_text, embedding)";
+    statement_3 = statement_3 + "?, '[";
+    array_bind.append(text);
+
+    for (float f : embedding) {
+        statement_3 += String::num_real(f) + ", ";
+    }
+
+    statement_3 = statement_3.trim_suffix(", ");
+    statement_3 += "]')";
+
+    String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
+    UtilityFunctions::print_verbose("insert_meta statement: " + statement);
+
+    int rc = SQLITE_OK;
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Failed to perpare statement");
+    }
+    for (int i = 0; i < array_bind.size(); i++) {
+        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_STATIC);
+    }
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
+    }
+    sqlite3_finalize(stmt);
+
+    String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
+    UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
+    execute(statement_virtual);
+
+    UtilityFunctions::print_verbose("insert_text_by_meta -- done");
+}
+
+void LlmDB::store_text_by_meta(Dictionary meta_dict, String text) {
+    UtilityFunctions::print_verbose("store_text_by_meta");
+
+    store_text_mutex->lock();
+    UtilityFunctions::print_verbose("store_text_mutex locked");
+
+    PackedStringArray text_array = split_text(text);
+
+    for (String s : text_array) {
+        insert_text_by_meta(meta_dict, s);
+    }
+
+    store_text_mutex->unlock();
+    UtilityFunctions::print_verbose("store_text_mutex unlocked");
+
+    UtilityFunctions::print_verbose("store_text_by_meta -- done");
+};
+
+void LlmDB::run_store_text_by_meta(Dictionary meta_dict, String text) {
+    func_mutex->lock();
+
+    store_text_queue.push([this, text, meta_dict](){ store_text_by_meta(meta_dict, text); });
 
     if (store_text_thread->is_started()) {
         if (!store_text_thread->is_alive()) {

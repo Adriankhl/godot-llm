@@ -68,7 +68,8 @@ class LlmDB : public GDEmbedding {
         Variant::Type type_int_to_variant(int meta_data_type);
         PackedStringArray absolute_split_text(String text, int index);
         PackedStringArray chunk_split_text(String text, int index);
-        void insert_text(String id, String text);
+        void insert_text_by_id(String id, String text);
+        void insert_text_by_meta(Dictionary meta_dict, String text);
         void store_text_process();
 
     protected:
@@ -111,6 +112,8 @@ class LlmDB : public GDEmbedding {
         PackedStringArray split_text(String text);
         void store_text_by_id(String id, String text);
         void run_store_text_by_id(String id, String text);
+        void store_text_by_meta(Dictionary meta_dict, String text);
+        void run_store_text_by_meta(Dictionary meta_dict, String text);
         PackedStringArray retrieve_similar_texts(String text, String where, int n_results);
 };
 
