@@ -133,11 +133,11 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("drop_llm_tables", "p_table_name"), &LlmDB::drop_llm_tables);
     ClassDB::bind_method(D_METHOD("has_table", "p_table_name"), &LlmDB::has_table);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
-    ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
+    ClassDB::bind_method(D_METHOD("store_meta", "meta_dict"), &LlmDB::store_meta);
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
-    ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text_by_id);
-    ClassDB::bind_method(D_METHOD("run_store_text", "id", "text"), &LlmDB::run_store_text_by_id);
+    ClassDB::bind_method(D_METHOD("store_text_by_id", "id", "text"), &LlmDB::store_text_by_id);
+    ClassDB::bind_method(D_METHOD("run_store_text_by_id", "id", "text"), &LlmDB::run_store_text_by_id);
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
 }
 
@@ -574,7 +574,7 @@ bool LlmDB::is_table_valid(String p_table_name) {
     return true;
 }
 
-void LlmDB::insert_meta(Dictionary meta_dict) {
+void LlmDB::store_meta(Dictionary meta_dict) {
     UtilityFunctions::print_verbose("insert_meta");
 
     //Check id
