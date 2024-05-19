@@ -14,15 +14,15 @@
 
 namespace godot {
 
-enum LlmDBSchemaDataType {
+enum LlmDBMetaDataType {
     INTEGER = 0,
     REAL = 1,
     TEXT = 2,
     BLOB = 3
 };
 
-class LlmDBSchemaData : public Resource {
-    GDCLASS(LlmDBSchemaData, Resource)
+class LlmDBMetaData : public Resource {
+    GDCLASS(LlmDBMetaData, Resource)
 
     private:
         String data_name;
@@ -32,12 +32,12 @@ class LlmDBSchemaData : public Resource {
 	    static void _bind_methods();
 
     public:
-        LlmDBSchemaData();
-        ~LlmDBSchemaData();
-        static LlmDBSchemaData* create_int(String data_name);
-        static LlmDBSchemaData* create_real(String data_name);
-        static LlmDBSchemaData* create_text(String data_name);
-        static LlmDBSchemaData* create_blob(String data_name);
+        LlmDBMetaData();
+        ~LlmDBMetaData();
+        static LlmDBMetaData* create_int(String data_name);
+        static LlmDBMetaData* create_real(String data_name);
+        static LlmDBMetaData* create_text(String data_name);
+        static LlmDBMetaData* create_blob(String data_name);
         String get_data_name() const;
         void set_data_name(const String p_data_name);
         int get_data_type() const;
@@ -48,7 +48,7 @@ class LlmDB : public GDEmbedding {
     GDCLASS(LlmDB, GDEmbedding)
     private:
         sqlite3* db;
-        TypedArray<LlmDBSchemaData> schema;
+        TypedArray<LlmDBMetaData> meta;
         String db_dir;
         String db_file;
         String table_name;
@@ -64,8 +64,8 @@ class LlmDB : public GDEmbedding {
 
         static void dummy();
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
-        String type_int_to_string(int schema_data_type);
-        Variant::Type type_int_to_variant(int schema_data_type);
+        String type_int_to_string(int meta_data_type);
+        Variant::Type type_int_to_variant(int meta_data_type);
         PackedStringArray absolute_split_text(String text, int index);
         PackedStringArray chunk_split_text(String text, int index);
         void insert_text(String id, String text);
@@ -78,8 +78,8 @@ class LlmDB : public GDEmbedding {
         LlmDB();
         ~LlmDB();
         void _exit_tree() override;
-        TypedArray<LlmDBSchemaData> get_schema() const;
-        void set_schema(TypedArray<LlmDBSchemaData> p_schema);
+        TypedArray<LlmDBMetaData> get_meta() const;
+        void set_meta(TypedArray<LlmDBMetaData> p_meta);
         String get_db_dir() const;
         void set_db_dir(const String p_db_dir);
         String get_db_file() const;
@@ -109,8 +109,8 @@ class LlmDB : public GDEmbedding {
         void insert_meta(Dictionary meta_dict);
         bool has_id(String id, String p_table_name);
         PackedStringArray split_text(String text);
-        void store_text(String id, String text);
-        void run_store_text(String id, String text);
+        void store_text_by_id(String id, String text);
+        void run_store_text_by_id(String id, String text);
         PackedStringArray retrieve_similar_texts(String text, String where, int n_results);
 };
 

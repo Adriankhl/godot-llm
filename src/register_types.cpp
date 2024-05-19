@@ -21,7 +21,7 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<GDEmbedding>();
 	ClassDB::register_class<GDLlava>();
 	ClassDB::register_class<LlmDB>();
-	ClassDB::register_class<LlmDBSchemaData>();
+	ClassDB::register_class<LlmDBMetaData>();
 }
 
 void uninitialize_llm_module(ModuleInitializationLevel p_level) {

@@ -22,75 +22,75 @@
 
 namespace godot {
 
-void LlmDBSchemaData::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("get_data_name"), &LlmDBSchemaData::get_data_name);
-    ClassDB::bind_method(D_METHOD("set_data_name", "p_data_name"), &LlmDBSchemaData::set_data_name);
-    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::STRING, "data_name", PROPERTY_HINT_NONE), "set_data_name", "get_data_name");
+void LlmDBMetaData::_bind_methods() {
+    ClassDB::bind_method(D_METHOD("get_data_name"), &LlmDBMetaData::get_data_name);
+    ClassDB::bind_method(D_METHOD("set_data_name", "p_data_name"), &LlmDBMetaData::set_data_name);
+    ClassDB::add_property("LlmDBMetaData", PropertyInfo(Variant::STRING, "data_name", PROPERTY_HINT_NONE), "set_data_name", "get_data_name");
 
-    ClassDB::bind_method(D_METHOD("get_data_type"), &LlmDBSchemaData::get_data_type);
-    ClassDB::bind_method(D_METHOD("set_data_type", "p_data_type"), &LlmDBSchemaData::set_data_type);
-    ClassDB::add_property("LlmDBSchemaData", PropertyInfo(Variant::INT, "data_type", PROPERTY_HINT_ENUM, "INTEGER, REAL, TEXT, BLOB"), "set_data_type", "get_data_type");
+    ClassDB::bind_method(D_METHOD("get_data_type"), &LlmDBMetaData::get_data_type);
+    ClassDB::bind_method(D_METHOD("set_data_type", "p_data_type"), &LlmDBMetaData::set_data_type);
+    ClassDB::add_property("LlmDBMetaData", PropertyInfo(Variant::INT, "data_type", PROPERTY_HINT_ENUM, "INTEGER, REAL, TEXT, BLOB"), "set_data_type", "get_data_type");
 
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_int", "data_name"), &LlmDBSchemaData::create_int);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_real", "data_name"), &LlmDBSchemaData::create_real);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_text", "data_name"), &LlmDBSchemaData::create_text);
-    ClassDB::bind_static_method("LlmDBSchemaData", D_METHOD("create_blob", "data_name"), &LlmDBSchemaData::create_blob);
+    ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_int", "data_name"), &LlmDBMetaData::create_int);
+    ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_real", "data_name"), &LlmDBMetaData::create_real);
+    ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_text", "data_name"), &LlmDBMetaData::create_text);
+    ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_blob", "data_name"), &LlmDBMetaData::create_blob);
 }
 
-LlmDBSchemaData::LlmDBSchemaData() : data_name {"default_name"},
+LlmDBMetaData::LlmDBMetaData() : data_name {"default_name"},
     data_type {0}
 { }
 
-LlmDBSchemaData::~LlmDBSchemaData() {}
+LlmDBMetaData::~LlmDBMetaData() {}
 
-LlmDBSchemaData* LlmDBSchemaData::create_int(String data_name) {
-    LlmDBSchemaData* data = memnew(LlmDBSchemaData());
+LlmDBMetaData* LlmDBMetaData::create_int(String data_name) {
+    LlmDBMetaData* data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(0);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_real(String data_name) {
-    LlmDBSchemaData* data = memnew(LlmDBSchemaData());
+LlmDBMetaData* LlmDBMetaData::create_real(String data_name) {
+    LlmDBMetaData* data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(1);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_text(String data_name) {
-    LlmDBSchemaData* data = memnew(LlmDBSchemaData());
+LlmDBMetaData* LlmDBMetaData::create_text(String data_name) {
+    LlmDBMetaData* data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(2);
     return data;
 }
 
-LlmDBSchemaData* LlmDBSchemaData::create_blob(String data_name) {
-    LlmDBSchemaData* data = memnew(LlmDBSchemaData());
+LlmDBMetaData* LlmDBMetaData::create_blob(String data_name) {
+    LlmDBMetaData* data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(2);
     return data;
 }
 
-String LlmDBSchemaData::get_data_name() const {
+String LlmDBMetaData::get_data_name() const {
     return data_name;
 };
 
-void LlmDBSchemaData::set_data_name(const String p_data_name) {
+void LlmDBMetaData::set_data_name(const String p_data_name) {
     data_name = p_data_name;
 };
 
-int LlmDBSchemaData::get_data_type() const {
+int LlmDBMetaData::get_data_type() const {
     return data_type;
 }
 
-void LlmDBSchemaData::set_data_type(const int p_data_type) {
+void LlmDBMetaData::set_data_type(const int p_data_type) {
     data_type = p_data_type;
 }
 
 void LlmDB::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("get_schema"), &LlmDB::get_schema);
-    ClassDB::bind_method(D_METHOD("set_schema", "p_schema"), &LlmDB::set_schema);
-    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "schema", PROPERTY_HINT_ARRAY_TYPE, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "LlmDBSchemaData")), "set_schema", "get_schema");
+    ClassDB::bind_method(D_METHOD("get_meta"), &LlmDB::get_meta);
+    ClassDB::bind_method(D_METHOD("set_meta", "p_meta"), &LlmDB::set_meta);
+    ClassDB::add_property("LlmDB", PropertyInfo(Variant::ARRAY, "meta", PROPERTY_HINT_ARRAY_TYPE, vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, "LlmDBMetaData")), "set_meta", "get_meta");
 
     ClassDB::bind_method(D_METHOD("get_db_dir"), &LlmDB::get_db_dir);
     ClassDB::bind_method(D_METHOD("set_db_dir", "p_db_dir"), &LlmDB::set_db_dir);
@@ -130,14 +130,14 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("execute", "statement"), &LlmDB::execute);
     ClassDB::bind_method(D_METHOD("create_llm_tables"), &LlmDB::create_llm_tables);
     ClassDB::bind_method(D_METHOD("drop_table", "p_table_name"), &LlmDB::drop_table);
-    ClassDB::bind_method(D_METHOD("drop_llm_table", "p_table_name"), &LlmDB::drop_llm_table);
+    ClassDB::bind_method(D_METHOD("drop_llm_tables", "p_table_name"), &LlmDB::drop_llm_tables);
     ClassDB::bind_method(D_METHOD("has_table", "p_table_name"), &LlmDB::has_table);
     ClassDB::bind_method(D_METHOD("is_table_valid", "p_table_name"), &LlmDB::is_table_valid);
     ClassDB::bind_method(D_METHOD("insert_meta", "meta_dict"), &LlmDB::insert_meta);
     ClassDB::bind_method(D_METHOD("has_id", "id", "p_table_name"), &LlmDB::has_id);
     ClassDB::bind_method(D_METHOD("split_text", "text"), &LlmDB::split_text);
-    ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text);
-    ClassDB::bind_method(D_METHOD("run_store_text", "id", "text"), &LlmDB::run_store_text);
+    ClassDB::bind_method(D_METHOD("store_text", "id", "text"), &LlmDB::store_text_by_id);
+    ClassDB::bind_method(D_METHOD("run_store_text", "id", "text"), &LlmDB::run_store_text_by_id);
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
 }
 
@@ -146,7 +146,7 @@ void LlmDB::dummy() {}
 
 LlmDB::LlmDB() : db_dir {"."},
     db {nullptr},
-    schema {TypedArray<LlmDBSchemaData>()},
+    meta {TypedArray<LlmDBMetaData>()},
     db_file {"llm.db"},
     table_name {"llm_table"},
     embedding_size {384},
@@ -168,7 +168,7 @@ LlmDB::LlmDB() : db_dir {"."},
     store_text_thread->start(callable_mp_static(&LlmDB::dummy));
     store_text_thread->wait_to_finish();
 
-    schema.append(LlmDBSchemaData::create_text("id"));
+    meta.append(LlmDBMetaData::create_text("id"));
 
     absolute_separators.append("\n\n");
     absolute_separators.append("\n");
@@ -221,22 +221,22 @@ void LlmDB::_exit_tree() {
     UtilityFunctions::print_verbose("LlmDB exit tree -- done");
 }
 
-TypedArray<LlmDBSchemaData> LlmDB::get_schema() const {
-    return schema;
+TypedArray<LlmDBMetaData> LlmDB::get_meta() const {
+    return meta;
 }
 
-void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
+void LlmDB::set_meta(TypedArray<LlmDBMetaData> p_meta) {
     bool is_id_valid = true;
     int col_to_remove = -1;
 
 
-    if (p_schema.size() != 0) {
+    if (p_meta.size() != 0) {
         // Remove any id column that is not the first row
-        for (int i = 1; i < p_schema.size(); i++) {
-            UtilityFunctions::print_verbose("Checking schema data " + String::num_int64(i));
-            if (p_schema[i].get_type() != Variant::NIL) {
+        for (int i = 1; i < p_meta.size(); i++) {
+            UtilityFunctions::print_verbose("Checking meta data " + String::num_int64(i));
+            if (p_meta[i].get_type() != Variant::NIL) {
                 UtilityFunctions::print_verbose("Correct resource type");
-                LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(p_schema[i]);
+                LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(p_meta[i]);
                 if (sd->get_data_name() == "id") {
                     UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
                     col_to_remove = i;
@@ -245,28 +245,28 @@ void LlmDB::set_schema(TypedArray<LlmDBSchemaData> p_schema) {
         }
         if (col_to_remove != -1) {
             UtilityFunctions::printerr("Removing column " + String::num(col_to_remove));
-            p_schema.remove_at(col_to_remove);
+            p_meta.remove_at(col_to_remove);
         }
 
-        LlmDBSchemaData* sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
-        if (sd0->get_data_name() == "id" && sd0->get_data_type() != LlmDBSchemaDataType::TEXT) {
+        LlmDBMetaData* sd0 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
+        if (sd0->get_data_name() == "id" && sd0->get_data_type() != LlmDBMetaDataType::TEXT) {
             UtilityFunctions::printerr("Id column should be TEXT type, removing");
-            p_schema.remove_at(0);
+            p_meta.remove_at(0);
         }
 
         // Get again since it might get removed
-        sd0 = Object::cast_to<LlmDBSchemaData>(p_schema[0]);
+        sd0 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
         if (sd0->get_data_name() != "id") {
             UtilityFunctions::printerr("First column is not id");
             is_id_valid = false;
         }
     }
 
-    if (p_schema.size() == 0 || !is_id_valid) {
+    if (p_meta.size() == 0 || !is_id_valid) {
         UtilityFunctions::printerr("Creating id as the first column");
-        p_schema.push_front(LlmDBSchemaData::create_text("id"));
+        p_meta.push_front(LlmDBMetaData::create_text("id"));
     }
-    schema = p_schema;
+    meta = p_meta;
 }
 
 String LlmDB::get_db_dir() const {
@@ -397,35 +397,35 @@ void LlmDB::execute(String statement) {
     execute_internal(statement, print_all_callback, nullptr);
 }
 
-String LlmDB::type_int_to_string(int schema_data_type) {
-    switch (schema_data_type) {
-        case LlmDBSchemaDataType::INTEGER:
+String LlmDB::type_int_to_string(int meta_data_type) {
+    switch (meta_data_type) {
+        case LlmDBMetaDataType::INTEGER:
             return  "INT";
-        case LlmDBSchemaDataType::REAL:
+        case LlmDBMetaDataType::REAL:
             return  "REAL";
-        case LlmDBSchemaDataType::TEXT:
+        case LlmDBMetaDataType::TEXT:
             return "TEXT";
-        case LlmDBSchemaDataType::BLOB:
+        case LlmDBMetaDataType::BLOB:
             return "";
         default: {
-            UtilityFunctions::printerr("Wrong schema type: " + String::num_int64(schema_data_type));
+            UtilityFunctions::printerr("Wrong meta type: " + String::num_int64(meta_data_type));
             return "";
         }
     }
 }
 
-Variant::Type LlmDB::type_int_to_variant(int schema_data_type) {
-    switch (schema_data_type) {
-        case LlmDBSchemaDataType::INTEGER:
+Variant::Type LlmDB::type_int_to_variant(int meta_data_type) {
+    switch (meta_data_type) {
+        case LlmDBMetaDataType::INTEGER:
             return  Variant::INT;
-        case LlmDBSchemaDataType::REAL:
+        case LlmDBMetaDataType::REAL:
             return  Variant::FLOAT;
-        case LlmDBSchemaDataType::TEXT:
+        case LlmDBMetaDataType::TEXT:
             return Variant::STRING;
-        case LlmDBSchemaDataType::BLOB:
+        case LlmDBMetaDataType::BLOB:
             return Variant::VARIANT_MAX;
         default: {
-            UtilityFunctions::printerr("Wrong schema type for variant: " + String::num_int64(schema_data_type));
+            UtilityFunctions::printerr("Wrong meta type for variant: " + String::num_int64(meta_data_type));
             return Variant::NIL;
         }
     }
@@ -434,8 +434,8 @@ Variant::Type LlmDB::type_int_to_variant(int schema_data_type) {
 void LlmDB::create_llm_tables() {
     UtilityFunctions::print_verbose("create_llm_tables: " + table_name);
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
-    for (int i = 0; i < schema.size(); i++) {
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+    for (int i = 0; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += " '" + sd->get_data_name() + "' ";
         statement += type_int_to_string(sd->get_data_type());
         statement += ", ";
@@ -456,8 +456,8 @@ void LlmDB::create_llm_tables() {
     String meta_table_name = table_name + "_meta";
 
     String statement_meta = "CREATE TABLE IF NOT EXISTS " + meta_table_name + " (";
-    for (int i = 0; i < schema.size(); i++) {
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+    for (int i = 0; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement_meta += " '" + sd->get_data_name() + "' ";
         statement_meta += type_int_to_string(sd->get_data_type());
         if (i == 0) {
@@ -544,7 +544,7 @@ bool LlmDB::is_table_valid(String p_table_name) {
         return false;
     }
 
-    for (int i = 0; i < schema.size(); i++) {
+    for (int i = 0; i < meta.size(); i++) {
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_ROW) {
             UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
@@ -553,15 +553,15 @@ bool LlmDB::is_table_valid(String p_table_name) {
         String name = String::utf8((char *) sqlite3_column_text(stmt, 1));
         String type = String::utf8((char *) sqlite3_column_text(stmt, 2));
 
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
 
         if (name != sd->get_data_name()) {
-            UtilityFunctions::printerr("Column name wrong, table : " + name + ", schema: " + sd->get_data_name());
+            UtilityFunctions::printerr("Column name wrong, table : " + name + ", meta: " + sd->get_data_name());
             return false;
         }
 
         if (type != type_int_to_string(sd->get_data_type())) {
-            UtilityFunctions::printerr("Column type wrong, table : " + type + ", schema: " + type_int_to_string(sd->get_data_type()));
+            UtilityFunctions::printerr("Column type wrong, table : " + type + ", meta: " + type_int_to_string(sd->get_data_type()));
             return false;
 
         }
@@ -588,8 +588,8 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
     String statement_3 = "(";
     Dictionary p_meta_dict = meta_dict.duplicate(false);
     PackedStringArray array_bind {PackedStringArray()};
-    for (int i = 0; i < schema.size(); i++) {
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+    for (int i = 0; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         if(p_meta_dict.has(sd->get_data_name())) {
             Variant v = p_meta_dict.get(sd->get_data_name(), nullptr);
             if (v.get_type() != type_int_to_variant(sd->get_data_type())) {
@@ -599,26 +599,26 @@ void LlmDB::insert_meta(Dictionary meta_dict) {
             p_meta_dict.erase(sd->get_data_name());
 
             switch (sd->get_data_type()) {
-                case LlmDBSchemaDataType::INTEGER: {
+                case LlmDBMetaDataType::INTEGER: {
                     statement_2 += sd->get_data_name() + ", ";
                     int k = v;
                     statement_3 += String::num_int64(k) + ", ";
                     break;
                 }
-                case LlmDBSchemaDataType::REAL: {
+                case LlmDBMetaDataType::REAL: {
                     statement_2 += sd->get_data_name() + ", ";
                     float f = v;
                     statement_3 += String::num_real(f) + ", ";
                     break;
                 }
-                case LlmDBSchemaDataType::TEXT: {
+                case LlmDBMetaDataType::TEXT: {
                     statement_2 += sd->get_data_name() + ", ";
                     String s = v;
                     statement_3 += "?, ";
                     array_bind.append(s);
                     break;
                 }
-                case LlmDBSchemaDataType::BLOB: {
+                case LlmDBMetaDataType::BLOB: {
                     statement_2 += sd->get_data_name() + ", ";
                     String s = v.stringify();
                     statement_3 += "?, ";
@@ -794,15 +794,15 @@ void LlmDB::insert_text(String id, String text) {
 
     String statement = "INSERT INTO " + table_name + "(";
 
-    for (int i = 0; i < schema.size(); i++) {
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+    for (int i = 0; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += sd->get_data_name() + ", ";
     }
 
     statement += "llm_text, embedding) VALUES (?, ";
     
-    for (int i = 1; i < schema.size(); i++) {
-        LlmDBSchemaData* sd = Object::cast_to<LlmDBSchemaData>(schema[i]);
+    for (int i = 1; i < meta.size(); i++) {
+        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id='" + id + "'), ";
     }
     
@@ -835,7 +835,7 @@ void LlmDB::insert_text(String id, String text) {
     execute(statement_virtual);
 }
 
-void LlmDB::store_text(String id, String text) {
+void LlmDB::store_text_by_id(String id, String text) {
     UtilityFunctions::print_verbose("store_text");
 
     store_text_mutex->lock();
@@ -865,10 +865,10 @@ void LlmDB::store_text_process() {
     UtilityFunctions::print_verbose("store_text_process -- done");
 }
 
-void LlmDB::run_store_text(String id, String text) {
+void LlmDB::run_store_text_by_id(String id, String text) {
     func_mutex->lock();
 
-    store_text_queue.push([this, text, id](){ store_text(id, text); });
+    store_text_queue.push([this, text, id](){ store_text_by_id(id, text); });
 
     if (store_text_thread->is_started()) {
         if (!store_text_thread->is_alive()) {
