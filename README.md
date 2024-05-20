@@ -192,7 +192,18 @@ Note that your `.meta` property should always match the metadata columns in the 
 ## Template/Demo
 The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provides a rather complete demonstration on different functionalities of this plugin
 
-# Retrieval-augmented generation (RAG)
+# Retrieval-Augmented Generation (RAG)
+
+This plugin now has all the essentaial components for simple Retrieval-Augmented Generation (RAG). You can store information about your game world or your character into the vector database, retrieve relevant texts to enrich your prompt, then generate text for your game, the generated text can be store back to the vector database to enrich future prompt. RAG complement the shortcoming of LLM - the limited context size force the model to forget earlier information, and with RAG, information can be stored in a database to become long-term memory, and only relevant information are retrieve to enrich the prompt to keep the prompt within the context size.
+
+To get started, you may try the following format for your prompt input:
+```
+Document:
+{retrieved text}
+
+Question:
+{your prompt}
+```
 
 ![](https://upload.wikimedia.org/wikipedia/commons/3/37/RAG_schema.svg)
 
