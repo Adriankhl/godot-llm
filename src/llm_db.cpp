@@ -658,7 +658,7 @@ void LlmDB::store_meta(Dictionary meta_dict) {
         UtilityFunctions::printerr("Failed to perpare statement");
     }
     for (int i = 0; i < array_bind.size(); i++) {
-        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_TRANSIENT);
     }
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -806,7 +806,7 @@ void LlmDB::insert_text_by_id(String id, String text) {
     UtilityFunctions::print_verbose("insert_text_by_id");
     PackedFloat32Array embedding = compute_embedding(text);
 
-    String statement = "INSERT INTO " + table_name + "(";
+    String statement = "INSERT INTO " + table_name + " (";
 
     for (int i = 0; i < meta.size(); i++) {
         LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
@@ -817,7 +817,7 @@ void LlmDB::insert_text_by_id(String id, String text) {
     
     for (int i = 1; i < meta.size(); i++) {
         LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
-        statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id='" + id + "'), ";
+        statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id=?), ";
     }
     
     statement += "?, '[";
@@ -836,8 +836,11 @@ void LlmDB::insert_text_by_id(String id, String text) {
     if (rc != SQLITE_OK) {
         UtilityFunctions::printerr("Failed to perpare statement");
     }
-    sqlite3_bind_text(stmt, 1, id.utf8().get_data(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, text.utf8().get_data(), -1, SQLITE_STATIC);
+
+    for (int i = 0; i < meta.size(); i++) {
+        sqlite3_bind_text(stmt, i + 1, id.utf8().get_data(), -1, SQLITE_TRANSIENT);
+    }
+    sqlite3_bind_text(stmt, meta.size() + 1, text.utf8().get_data(), -1, SQLITE_TRANSIENT);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
@@ -905,7 +908,7 @@ void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
 
     PackedFloat32Array embedding = compute_embedding(text);
 
-    String statement_1 = "INSERT INTO " + table_name + " ";
+    String statement_1 = "INSERT INTO " + table_name;
     String statement_2 = "(";
     String statement_3 = "(";
     Dictionary p_meta_dict = meta_dict.duplicate(false);
@@ -976,7 +979,7 @@ void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
         UtilityFunctions::printerr("Failed to perpare statement");
     }
     for (int i = 0; i < array_bind.size(); i++) {
-        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, i+1, array_bind[i].utf8().get_data(), -1, SQLITE_TRANSIENT);
     }
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
