@@ -449,7 +449,7 @@ void LlmDB::create_llm_tables() {
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
     for (int i = 0; i < meta.size(); i++) {
         LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
-        statement += " '" + sd->get_data_name() + "' ";
+        statement += "'" + sd->get_data_name() + "' ";
         statement += type_int_to_string(sd->get_data_type());
         statement += ", ";
     }
@@ -498,15 +498,44 @@ void LlmDB::create_llm_tables() {
 }
 
 void LlmDB::drop_table(String p_table_name) {
-    String statement = "DROP TABLE  " + p_table_name + ";";
+    String statement = "DROP TABLE IF EXISTS  " + p_table_name + ";";
     UtilityFunctions::print_verbose("Drop table statement: " + statement);
     execute(statement);
 }
 
 void LlmDB::drop_llm_tables(String p_table_name) {
-    drop_table(p_table_name);
-    drop_table(p_table_name + "_virtual");
+    PackedStringArray array {PackedStringArray()};
+
+    String statement = "SELECT name FROM sqlite_master WHERE name LIKE '%" + p_table_name + "_virtual%'";
+
+    int rc = SQLITE_OK;
+    sqlite3_stmt *stmt;
+    sqlite3_prepare_v2(db, statement.utf8().get_data(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        UtilityFunctions::printerr("Failed to prepare statement");
+    }
+
+    while (true) {
+        rc = sqlite3_step(stmt);
+        if(rc == SQLITE_DONE) break;
+        if (rc != SQLITE_ROW) {
+            UtilityFunctions::printerr("Error: " + String::utf8(sqlite3_errmsg(db)));
+        }
+        const char* c = (char*) sqlite3_column_text(stmt, 0);
+
+        String table_name = String::utf8(c);
+        UtilityFunctions::print_verbose("table name: " + table_name);
+        array.append(table_name);
+    }
+
+    sqlite3_finalize(stmt);
+
+    for (String s : array) {
+        drop_table(s);
+    }
+
     drop_table(p_table_name + "_meta");
+    drop_table(p_table_name);
 }
 
 bool LlmDB::has_table(String p_table_name) {
@@ -847,7 +876,7 @@ void LlmDB::insert_text_by_id(String id, String text) {
     }
     sqlite3_finalize(stmt);
 
-    String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
+    String statement_virtual = "INSERT OR REPLACE INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
     UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
     execute(statement_virtual);
 
@@ -990,7 +1019,7 @@ void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
     }
     sqlite3_finalize(stmt);
 
-    String statement_virtual = "INSERT INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
+    String statement_virtual = "INSERT OR REPLACE INTO " + table_name + "_virtual (rowid, embedding)" + " SELECT rowid, embedding FROM " + table_name + " WHERE rowid=last_insert_rowid()";
     UtilityFunctions::print_verbose("insert_text virtual statement: " + statement_virtual);
     execute(statement_virtual);
 
