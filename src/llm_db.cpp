@@ -649,7 +649,7 @@ void LlmDB::store_meta(Dictionary meta_dict) {
     statement_2 = statement_2.trim_suffix(", ") + ")";
     statement_3 = statement_3.trim_suffix(", ") + ")";
     String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
-    UtilityFunctions::print_verbose("insert_meta statement: " + statement);
+    UtilityFunctions::print_verbose("store_meta statement: " + statement);
 
     int rc = SQLITE_OK;
     sqlite3_stmt *stmt;
@@ -967,7 +967,7 @@ void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
     statement_3 += "]')";
 
     String statement = statement_1 + " " + statement_2 + " VALUES " + statement_3 + ";";
-    UtilityFunctions::print_verbose("insert_meta statement: " + statement);
+    UtilityFunctions::print_verbose("insert_text_by_meta statement: " + statement);
 
     int rc = SQLITE_OK;
     sqlite3_stmt *stmt;
