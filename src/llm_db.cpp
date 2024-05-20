@@ -884,23 +884,26 @@ void LlmDB::store_text_process() {
     UtilityFunctions::print_verbose("store_text_process -- done");
 }
 
-void LlmDB::run_store_text_by_id(String id, String text) {
+Error LlmDB::run_store_text_by_id(String id, String text) {
     func_mutex->lock();
 
     store_text_queue.push([this, text, id](){ store_text_by_id(id, text); });
 
+    Error error = OK;
     if (store_text_thread->is_started()) {
         if (!store_text_thread->is_alive()) {
             store_text_thread->wait_to_finish();
             store_text_thread.instantiate();
-            store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+            error = store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
         }
     } else {
         store_text_thread.instantiate();
-        store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
+        error = store_text_thread->start(callable_mp(this, &LlmDB::store_text_process));
     }
 
     func_mutex->unlock();
+
+    return error;
 };
 
 void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
