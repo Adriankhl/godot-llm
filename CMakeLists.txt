@@ -119,7 +119,7 @@ else()
   )
 endif()
 
-install(FILES "godot_llm.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/godot_llm/)
+install(FILES "godot_llm.gdextension" DESTINATION ${LLM_LIB_INSTALL_DIR})
 
 set(llama_runnner_test_files
   "test/src/llama_runner_test.cpp"

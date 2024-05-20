@@ -621,7 +621,7 @@ void GDLlama::stop_generate_text() {
 }
 
 void GDLlama::input_text(String input) {
-    glog_verbose("input_text: %s" +  string_gd_to_std(input));
+    glog_verbose("input_text: " +  string_gd_to_std(input));
     llama_runner->set_input(string_gd_to_std(input));
 }
 
