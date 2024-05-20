@@ -8,14 +8,19 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Text Generation: GDLlama node](#text-generation-gdllama-node)
     - [Text Embedding: GDEmbedding node](#text-embedding-gdembedding-node)
     - [Multimodal Text Generation: GDLlava node](#multimodal-text-generation-gdllava-node)
+    - [Vector Database: LlmDB node](#vector-database-llmdb-node)
     - [Template/Demo](#templatedemo)
 2. [Features](#features)
 3. [Documentation](#documentation)
-    - [Inspector Properties](#inspector-properties)
+    - [Inspector Properties: GDLlama, GDEmbedding, and GDLlava](#inspector-properties-gdllama-gdembedding-and-gdllava)
     - [GDLlama Functions and Signals](#gdllama-functions-and-signals)
     - [GDEmbedding Functions and Signals](#gdembedding-functions-and-signals)
     - [GDLlava Functions and Signals](#gdllava-functions-and-signals)
-4. [Compile from Source](#compile-from-source)
+    - [Text generation with Json schema](#text-generation-with-json-schema)
+    - [LlmDB Functions and Signals](#llmdb-functions-and-signals)
+    - [LlmDBMetaData](#llmdbmetadata)
+4. [FAQ](#faq)
+5. [Compile from Source](#compile-from-source)
 
 # Quick Start
 
@@ -25,7 +30,7 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
 
 ## Text Generation: GDLlama node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
-2. Setup your model with GDScript, point `model_path` to your GGUF file. The default `n_predict = -1` generates an infinite sequence, we want it to be shorter here
+2. Set up your model with GDScript, point `model_path` to your GGUF file. The default `n_predict = -1` generates an infinite sequence, we want it to be shorter here
 ```
 func _ready():
     var gdllama = GDLlama.new()
@@ -49,7 +54,7 @@ func _on_gdllama_updated(new_text: String):
 
 ## Text Embedding: GDEmbedding node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) embedding model in GGUF format (recommendation: [mxbai-embed-large-v1.Q5_K_M.gguf](https://huggingface.co/ChristianAzinn/mxbai-embed-large-v1-gguf/tree/main)), move the file to somewhere in your godot project
-2. Setup your model with GDScript, point `model_path` to your GGUF file
+2. Set up your model with GDScript, point `model_path` to your GGUF file
 ```
 func _ready():
     var gdembedding= GDEmbedding.new()
@@ -97,7 +102,7 @@ Instead, always wait for the finished signal or check `gdembedding.is_running()`
 
 ## Multimodal Text Generation: GDLlava node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) multimodal model in GGUF format (recommendation: [llava-phi-3-mini-int4.gguf](https://huggingface.co/xtuner/llava-phi-3-mini-gguf/tree/main)), be aware that there are two files needed - a `gguf` language model and a mmproj model (typical name `*mmproj*.gguf`), move the files to somewhere in your godot project
-2. Setup your model with GDScript, point `model_path` and `mmproj_path` to your corresponding GGUF files
+2. Set up your model with GDScript, point `model_path` and `mmproj_path` to your corresponding GGUF files
 ```
 func _ready():
     var gdllava = GDLlava.new()
@@ -126,33 +131,97 @@ func _on_gdllava_updated(new_text: String):
     print(new_text)
 ```
 
+## Vector database: LlmDB node
+
+1. LlmDB node extends GDEmbedding node, follow the [previous section](#text-embedding-gdembedding-node) to download a model and set up the `model_path`
+
+```
+func _ready():
+	var db = LlmDB.new()
+	db.model_path = "./models/mxbai-embed-large-v1.Q5_K_M.gguf"
+```
+
+2. Open a database, which creates a `llm.db` file and connect to it by default
+```
+	db.open_db()
+```
+
+3. Set up the structure of the metadata of your textual data, the first metadata should always be an `id` field with `String` as the data type, here we use the `LlmDBMetaData.create_text`, `LlmDBMetaData.create_int`, and `LlmDBMetaData.create_real` functions to define the structure of metadata with the corresponding data type.
+```
+	db.meta = [
+		LlmDBMetaData.create_text("id"),
+		LlmDBMetaData.create_int("year"),
+        LlmDBMetaData.create_real("attack")
+	]
+```
+
+4. Different models create embedding vectors of different sizes, calibrate the `embedding_size` property before creating tables
+
+```
+    db.calibrate_embedding_size()
+```
+
+5. Create tables based on the metadata, By default, 3 table are created:
+
+* `llm_table_meta`: which store the metadata for a particular id
+* `llm_table`: store texts with metadata and embedding
+* `llm_table_virtual`: a table for embedding similarity computation
+
+Note that your `.meta` property should always match the metadata columns in the database before any storing or retrieving operation, consider setting your `.meta` property within the `_ready()` function or within the inspector.
+
+```
+    db.create_llm_tables()
+```
+
+6. Store a piece of text with metadata dictionary specifying the `year`, note that you can leave out some of the metadata if it is not relevant to the text. If the input text is longer than `chunk_size`, the function will automatically break it down into smaller pieces to fit in the `chunk_size`.
+
+```
+    var text = "Godot is financially supported by the Godot Foundation, a non-profit organization formed on August 23rd, 2022 via the KVK (number 87351919) in the Netherlands. The Godot Foundation is responsible for managing donations made to Godot and ensuring that such donations are used to enhance Godot. The Godot Foundation is a legally independent organization and does not own Godot. In the past, the Godot existed as a member project of the Software Freedom Conservancy."
+
+    db.store_text_by_meta({"year": 2024}, text)
+```
+
+7. Retrieve 3 of the most similar text chunks to `godot` where the year is 2024:
+
+```
+    print(db.retrieve_similar_texts("godot", "year=2024", 3))
+```
+
+8. Depending on the embedding model, storing and retrieving can be slow, consider using the `run_store_text_by_meta` function, `run_retrieve_similar_texts` function, and the `retrieve_similar_text_finished` signal to store and retrieve texts in background. Also, call `close_db()` when the database is no longer in use.
+
 ## Template/Demo
 The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provides a rather complete demonstration on different functionalities of this plugin
 
+# Retrieval-augmented generation (RAG)
+
+![](https://upload.wikimedia.org/wikipedia/commons/3/37/RAG_schema.svg)
 
 # Features
 ## Already working
-* Windows, Linux, Android
-* [llama.cpp](https://github.com/ggerganov/llama.cpp)
+* Platform (backend): windows (cpu, vulkan), Linux (cpu, vulkan), Android (cpu)
+* [llama.cpp](https://github.com/ggerganov/llama.cpp)-based features
     - Text generation
     - Embedding
     - Multimodal
+* Vector database integration based on [sqlite](https://www.sqlite.org/) and [sqlite-vec](https://github.com/asg017/sqlite-vec)
+    - Split text to chunks
+    - Store text embedding
+    - Associate metadata with text
+    - Retrieve text by embedding similarity and sql constraints on metadata
 
 ## TODO
 * Add in-editor documentation, waiting for proper support in Godot 4.3
-* Vulken backend, need to resolve this [issue](https://github.com/ggerganov/llama.cpp/issues/7130)
 * Mac and ios
 * Automatically generate json schema from data classes in GDSCript
 * More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
 * [mlc-llm](https://github.com/mlc-ai/mlc-llm) integration
-* RAG framework, waiting for [sqlite-vec](https://github.com/asg017/sqlite-vec) (seems like this is the only one with proper mobile support in mind)
 * Any suggestion?
 
 
 # Documentation
 
-## Inspector Properties
-There are 3 nodes added by this plugin: `GdLlama`, `GdEmbedding`, and `GdLlava`.
+## Inspector Properties: GDLlama, GDEmbedding, and GDLlava
+There are 3 base nodes added by this plugin: `GdLlama`, `GdEmbedding`, and `GdLlava`.
 Each type of node owns a set of properties which affect the computational performance and the generated output. Some of the properties belong to more than one node, and they generally have similar meaning for all types of node.
 
 * `Model Path`: location of your GGUF model
@@ -295,6 +364,73 @@ if (error == OK):
 
 print(dict["name"]) ##Eryndor Thorne
 ```
+
+## Inspector properties: LlmDB
+LlmDB extends GDEmbedding and shares all its properties, check the section above for the relevant information. Additionally, LlmDB has
+* `Meta`: an array of LlmDBMetaData Resource which defines the structure of the metadata. LlmDBMetaData contains `Data Name` which define the name of a metadata, and `Data Type` (0=integer, 1=real, 2=text, 3=blob) to define the data type of the metadata. `Meta` should be non-empty, and the first element of `Meta` should always be an `id` with text as the `Data Type`.
+* `dB Dir`: the directory of the database file, default is the root directory of the project
+* `dB File`: the file name of the database file, default is `llm.db`
+* `Table Name`: defines the name of the tables created by the `create_llm_tables` function
+* `Embedding Size`: the vector size of the embedding computed by the model, used in the `create_llm_tables` function
+* `Absolute Separators`: an array of `String`. When storing a piece of text, the text will be first separated by the `String` defines here, the separation process will stop if the separated text is shorter than `Chunk Size` or all the separators here have been processed. The default are `\n` and `\n\n`, which are displayed as empty space in the inspector.
+* `Chunk Separators`: an array of `String`. After the `Absolute Separators` are processed, one of the separators (first one that works) here will be chosen to further separated the piece of texts, then the pieces are grouped up to chunks to fulfill the requirements of `Chunk Size` and `Chunk Overlap`
+* `Chunk Size`: any text chunk should not exceed this size, unless the separation function fails to fulfill the requirement after iteratoring through the iterators
+* `Chunk Overlap`: the maximum overlap between neighbouring text chunks, the algorithm will try to create the biggest overlap possible fulfilling this constraint
+
+## LlmDB Functions and Signals
+
+Besides the functions and signals from GDEmbedding, LlmDB has a few more functions and signals
+
+### Functions
+
+* `calibrate_embedding_size()`: calibrate `Embedding Size` to the correct number based on the model in `model_path`
+* `open_db()`: create a `dB_File` at `dB_Dir` if the file doesn't exist, then connect to the database
+* `close_db()`: terminate the connection to the database
+* `execute(statement: String)` execute an sql statement, turn on `Verbose stdout` in `Project Settings` to see the log generated by this statement
+* `create_llm_tables()`: create a table with name `Table Name` if the table doesn't exist, and two addtional `Table Name` + `_meta` and `Table Name` + `_virtual` tables
+* `drop_table(p_table_name: String)`: drop a table with a specific name
+* `drop_llm_tables(p_table_name: String)`: drop all three tables created by `create_llm_tables()`, where `p_table_name` is the `Table Name` when the creation function is called
+* `has_table(p_table_name: String) -> bool`: whether a table with this name exists
+* `is_table_valid(p_table_name: String) -> bool`: whether the table contains valid metadata, i.e., all elements in `.meta` properties exist in the table and the data types are correct
+* `store_meta(meta_dict: Dictionary)`: store a set of meta data to table `Table Name` + `_meta` with `id` as the primary key, such that you can call `store_text_by_id` by id instead of inputting the full metadata dictionary through `store_text_by_meta`
+* `has_id(id: String, p_table_name: String) -> bool`: whether the table has a specific id stored
+* `split_text(text: String) -> PackedStringArray`: split a piece of text first by all `Absolute Separators`, then by one of the appropiate `Chunk Separators`, such that any text chunk is shorter than `Chunk Size` (measured in character), and the overlap is close to but not greater than `Chunk Overlap`. If the algorithm failed to satisfy the contraints, there will be an error message printed out and the returned chunk will be greater than the `Chunk Size`
+* `store_text_by_id(id: String, text: String)`: split the text and store the chunks in the database, be aware that `store_meta` should have been called previously such that the `id` with the corresponding meta is already in the database
+* `run_store_text_by_id(id: String, text: String) -> Error`: run `store_text_by_id` in background
+* `store_text_by_meta(meta_dict: Dictionary, text: String)`: split the text and store the chunks in the database with the metadata defined in `meta_dict`, be aware that the metadata should be valid, every key should be a name stored in the `.meta` property and the corresponding type should be correct 
+* `run_store_text_by_meta(meta_dict: Dictionary, text: String) -> Error` run `store_text_by_meta` in background
+* `retrieve_similar_texts(text: String, where: String, n_results: int) -> PackedStringArray`: retrieve `n_results` most similar text chunks to `text`, `where` should be empty or an sql WHERE clause to filter the chunks by metadata
+* `run_retrieve_similar_texts(text: String, where: String, n_results: int) -> Error`:
+run `retrieve_similar_texts` in background, and emits a `retrieve_similar_texts_finished` signal once it is done
+
+### Signals
+
+* `retrieve_similar_texts_finished(array: PackedStringArray)`: contains an array of `String`, emitted when `run_retrieve_similar_texts` is finished
+
+## LlmDBMetaData
+
+This is a simple resource class that forms the `meta` array properties in LlmDB. It has two properties:
+
+* `data_name`: a `String` that defines the name of this metadata
+* `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties or the function below instead
+
+There are 4 static functions to create LlmDBMetaData
+
+* `create_int(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type int (0)
+* `create_real(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type real (1)
+* `create_text(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type text (2)
+* `create_blob(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type blob (3), note that blob data type support is still a work-in-progress
+
+
+# FAQ
+
+1. Does it support languages other than English?
+
+Yes, the plugin uses utf8 encoding so it has multilingual support naturally. However, a language model may be trained with English data only and it won't be able to generate text other than English, choose the language model based on your need.
+
+2. Observing strange tokens in generated text, such as `<eot_id>` when `Should Output Eos` is off.
+
+You are always welcome to open an issue. However, be aware that the standard of GGUF format can be changed to support new features and models, such that the bug can come from the model side instead of within this plugin. For example, some older llama 3 GGUF model may not be compatible with the latest format, you may try to search for a newer model with fixes such as [this](https://huggingface.co/NikolayKozloff/Meta-Llama-3-8B-Instruct-bf16-correct-pre-tokenizer-and-EOS-token-Q8_0-Q6_k-Q4_K_M-GGUF/tree/main).
 
 # Compile from source
 Install build tools and Vulkan SDK for your operating system, then clone this repository
