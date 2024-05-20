@@ -144,7 +144,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::retrieve_similar_texts);
     ClassDB::bind_method(D_METHOD("run_retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::run_retrieve_similar_texts);
 
-    ADD_SIGNAL(MethodInfo("retrieve_similar_text_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
+    ADD_SIGNAL(MethodInfo("retrieve_similar_texts_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
 }
 
 // A dummy function for instantiating the state of generate_text_thread
@@ -1116,7 +1116,7 @@ Error LlmDB::run_retrieve_similar_texts(String text, String where, int n_results
     retrieve_text_queue.push(
         [this, text, where, n_results](){ 
             PackedStringArray array = retrieve_similar_texts(text, where, n_results); 
-            call_deferred("emit_signal", "retrieve_similar_text_finished", array);
+            call_deferred("emit_signal", "retrieve_similar_texts_finished", array);
         }
     );
 
