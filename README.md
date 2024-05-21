@@ -453,19 +453,19 @@ mkdir build
 cd build
 ```
 
-Currently, vulkan backend is not working for embedding, don't add the `-DLLAMA_VULKAN=1` flag
-
 Run `cmake`.
 
 On Windows:
 ```
-cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF  -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
 ```
 
 On Linux:
 ```
-cmake .. -GNinja -DLLAMA_NATIVE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -GNinja -DLLAMA_NATIVE=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
 ```
+
+Vulkan build works for Windows and Linux, if you want a cpu build, set `-DLLAMA_VULKAN=OFF` instead.
 
 For Android, set `$NDK_PATH` to your android ndk directory, then:
 ```
@@ -480,4 +480,4 @@ ninja -j4
 ninja install
 ```
 
-The folder `../install/addons/godot_llm` can be copy directly to the `addons` folder of your godot project.
+The folder `../install/vulkan/addons/godot_llm` (`cpu` instead of `vulkan` for cpu build) can be copy directly to the `addons` folder of your godot project.
