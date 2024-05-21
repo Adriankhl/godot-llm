@@ -421,7 +421,7 @@ run `retrieve_similar_texts` in background, and emits a `retrieve_similar_texts_
 
 ## LlmDBMetaData
 
-This is a simple resource class that forms the `meta` array properties in LlmDB. It has two properties:
+This is a simple resource class that forms the `meta` array property in LlmDB. It has two properties:
 
 * `data_name`: a `String` that defines the name of this metadata
 * `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties or the function below instead
