@@ -31,6 +31,10 @@ void GDLlava::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDLlava::set_n_threads);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
 
+	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDLlava::get_n_gpu_layer);
+	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlava::set_n_gpu_layer);
+    ClassDB::add_property("GDLlava", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
+
 	ClassDB::bind_method(D_METHOD("get_escape"), &GDLlava::get_escape);
 	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlava::set_escape);
     ClassDB::add_property("GDLlava", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
@@ -154,6 +158,14 @@ int32_t GDLlava::get_n_threads() const {
 
 void GDLlava::set_n_threads(const int32_t p_n_threads) {
     params.n_threads = p_n_threads;
+}
+
+int32_t GDLlava::get_n_gpu_layer() const {
+    return params.n_gpu_layers;
+}
+
+void GDLlava::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
+    params.n_gpu_layers = p_n_gpu_layers;
 }
 
 bool GDLlava::get_escape() const {

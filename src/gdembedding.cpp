@@ -14,6 +14,14 @@ void GDEmbedding::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDEmbedding::set_model_path);
     ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
+    ClassDB::bind_method(D_METHOD("get_n_threads"), &GDEmbedding::get_n_threads);
+    ClassDB::bind_method(D_METHOD("set_n_threads", "p_n_threads"), &GDEmbedding::set_n_threads);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_threads", PROPERTY_HINT_NONE), "set_n_threads", "get_n_threads");
+
+	ClassDB::bind_method(D_METHOD("get_n_gpu_layer"), &GDEmbedding::get_n_gpu_layer);
+	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDEmbedding::set_n_gpu_layer);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
+
    	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDEmbedding::get_n_batch);
 	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDEmbedding::set_n_batch);
     ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
@@ -95,6 +103,23 @@ String GDEmbedding::get_model_path() const {
 void GDEmbedding::set_model_path(const String p_model_path) {
     params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
+
+int32_t GDEmbedding::get_n_threads() const {
+    return params.n_threads;
+}
+
+void GDEmbedding::set_n_threads(const int32_t p_n_threads) {
+    params.n_threads = p_n_threads;
+}
+
+int32_t GDEmbedding::get_n_gpu_layer() const {
+    return params.n_gpu_layers;
+}
+
+void GDEmbedding::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
+    params.n_gpu_layers = p_n_gpu_layers;
+}
+
 
 int32_t GDEmbedding::get_n_batch() const {
     return params.n_batch;

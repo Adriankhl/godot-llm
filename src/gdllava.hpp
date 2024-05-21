@@ -47,6 +47,8 @@ class GDLlava : public Node {
         void set_temperature(const float p_temperature);
         int32_t get_n_threads() const;
         void set_n_threads(const int32_t n_threads);
+        int32_t get_n_gpu_layer() const;
+        void set_n_gpu_layer(const int32_t p_n_gpu_layers);
         bool get_escape() const;
         void set_escape(const bool p_escape);
         int32_t get_n_batch() const;

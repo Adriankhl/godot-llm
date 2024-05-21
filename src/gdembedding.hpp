@@ -36,6 +36,10 @@ class GDEmbedding : public Node {
         void _exit_tree() override;
         String get_model_path() const;
         void set_model_path(const String p_model_path);
+        int32_t get_n_threads() const;
+        void set_n_threads(const int32_t n_threads);
+        int32_t get_n_gpu_layer() const;
+        void set_n_gpu_layer(const int32_t p_n_gpu_layers);
         int32_t get_n_batch() const;
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();
