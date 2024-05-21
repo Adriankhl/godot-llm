@@ -10,8 +10,9 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Multimodal Text Generation: GDLlava node](#multimodal-text-generation-gdllava-node)
     - [Vector Database: LlmDB node](#vector-database-llmdb-node)
     - [Template/Demo](#templatedemo)
-2. [Features](#features)
-3. [Documentation](#documentation)
+2. [Retrieval Augmented Generation (RAG)](#retrieval-augmented-generation-rag)
+3. [Features](#features)
+4. [Documentation](#documentation)
     - [Inspector Properties: GDLlama, GDEmbedding, and GDLlava](#inspector-properties-gdllama-gdembedding-and-gdllava)
     - [GDLlama Functions and Signals](#gdllama-functions-and-signals)
     - [GDEmbedding Functions and Signals](#gdembedding-functions-and-signals)
@@ -19,14 +20,14 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Text generation with Json schema](#text-generation-with-json-schema)
     - [LlmDB Functions and Signals](#llmdb-functions-and-signals)
     - [LlmDBMetaData](#llmdbmetadata)
-4. [FAQ](#faq)
-5. [Compile from Source](#compile-from-source)
+5. [FAQ](#faq)
+6. [Compile from Source](#compile-from-source)
 
 # Quick Start
 
 ## Install
-1. Get `Godot LLM` directly from the asset library, or download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
-2. Now you should be able to see `GdLlama`, `GdEmbedding`, and `GDLlava` nodes in your godot editor.
+1. Get `Godot LLM` directly from the asset library, or download the vulkan or cpu zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
+2. Now you should be able to see `GdLlama`, `GdEmbedding`, `GDLlava`, and `LlmDB` nodes in your godot editor.
 
 ## Text Generation: GDLlama node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
@@ -194,7 +195,7 @@ The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provid
 
 # Retrieval-Augmented Generation (RAG)
 
-This plugin now has all the essentaial components for simple Retrieval-Augmented Generation (RAG). You can store information about your game world or your character into the vector database, retrieve relevant texts to enrich your prompt, then generate text for your game, the generated text can be store back to the vector database to enrich future prompt. RAG complement the shortcoming of LLM - the limited context size force the model to forget earlier information, and with RAG, information can be stored in a database to become long-term memory, and only relevant information are retrieve to enrich the prompt to keep the prompt within the context size.
+This plugin now has all the essentaial components for simple Retrieval-Augmented Generation (RAG). You can store information about your game world or your character into the vector database, retrieve relevant texts to enrich your prompt, then generate text for your game, the generated text can be stored back to the vector database to enrich future prompt. RAG complement the shortcoming of LLM - the limited context size force the model to forget earlier information, and with RAG, information can be stored in a database to become long-term memory, and only relevant information are retrieve to enrich the prompt to keep the prompt within the context size.
 
 To get started, you may try the following format for your prompt input:
 ```
