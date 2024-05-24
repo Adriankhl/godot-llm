@@ -132,9 +132,6 @@ void GDLlama::_bind_methods() {
 
 }
 
-// A dummy function for instantiating the state of generate_text_thread
-void GDLlama::dummy() {}
-
 GDLlama::GDLlama() : params {gpt_params()},
     reverse_prompt {""},
     llama_runner {new LlamaRunner(should_output_prompt)},
@@ -151,7 +148,8 @@ GDLlama::GDLlama() : params {gpt_params()},
 
     glog_verbose("Instantiate GDLlama thread");
     generate_text_thread.instantiate();
-    generate_text_thread->start(callable_mp_static(&GDLlama::dummy));
+    auto f = (void(*)())[](){};
+    generate_text_thread->start(create_custom_callable_static_function_pointer(f));
     generate_text_thread->wait_to_finish();
 
     glog_verbose("Instantiate GDLlama thread -- done");

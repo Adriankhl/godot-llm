@@ -15,7 +15,6 @@ class GDLlava : public Node {
     GDCLASS(GDLlava, Node)
 
     private:
-        static void dummy();
         gpt_params params;
         std::unique_ptr<LlavaRunner> llava_runner;
         Ref<Mutex> generate_text_mutex;

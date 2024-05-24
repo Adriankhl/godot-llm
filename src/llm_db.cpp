@@ -147,9 +147,6 @@ void LlmDB::_bind_methods() {
     ADD_SIGNAL(MethodInfo("retrieve_similar_texts_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
 }
 
-// A dummy function for instantiating the state of generate_text_thread
-void LlmDB::dummy() {}
-
 LlmDB::LlmDB() : db_dir {"."},
     db {nullptr},
     meta {TypedArray<LlmDBMetaData>()},
@@ -172,13 +169,15 @@ LlmDB::LlmDB() : db_dir {"."},
     UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
     store_text_thread.instantiate();
 
-    store_text_thread->start(callable_mp_static(&LlmDB::dummy));
+    auto f = (void(*)())[](){};
+
+    store_text_thread->start(create_custom_callable_static_function_pointer(f));
     store_text_thread->wait_to_finish();
 
     UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
     retrieve_text_thread.instantiate();
 
-    retrieve_text_thread->start(callable_mp_static(&LlmDB::dummy));
+    retrieve_text_thread->start(create_custom_callable_static_function_pointer(f));
     retrieve_text_thread->wait_to_finish();
 
     meta.append(LlmDBMetaData::create_text("id"));

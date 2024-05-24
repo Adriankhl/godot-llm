@@ -19,7 +19,6 @@ class GDLlama : public Node {
     GDCLASS(GDLlama, Node)
 
     private:
-        static void dummy();
         gpt_params params;
         bool should_output_prompt;
         bool should_output_bos;

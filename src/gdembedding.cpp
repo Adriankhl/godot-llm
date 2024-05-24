@@ -1,6 +1,7 @@
 #include "conversion.hpp"
 #include "gdembedding.hpp"
 #include "embedding_runner.hpp"
+#include <godot_cpp/variant/callable_method_pointer.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -37,9 +38,6 @@ void GDEmbedding::_bind_methods() {
     ADD_SIGNAL(MethodInfo("similarity_cos_string_finished", PropertyInfo(Variant::FLOAT, "similarity")));
 }
 
-// A dummy function for instantiating the state of generate_text_thread
-void GDEmbedding::dummy() {}
-
 GDEmbedding::GDEmbedding() : params {gpt_params()},
     embedding_runner {new EmbeddingRunner()},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
@@ -52,7 +50,8 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
 
     glog_verbose("Instantiate GDEmbedding thread");
     compute_embedding_thread.instantiate();
-    compute_embedding_thread->start(callable_mp_static(&GDEmbedding::dummy));
+    auto f = (void(*)())[](){};
+    compute_embedding_thread->start(create_custom_callable_static_function_pointer(f));
     compute_embedding_thread->wait_to_finish();
 
     glog_verbose("Instantiate GDEmbedding thread -- done");

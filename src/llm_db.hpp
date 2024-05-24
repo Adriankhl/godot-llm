@@ -64,7 +64,6 @@ class LlmDB : public GDEmbedding {
         std::queue<std::function<void()>> retrieve_text_queue;
         Ref<Mutex> func_mutex;
 
-        static void dummy();
         void execute_internal(String statement, int (*callback)(void*,int,char**,char**), void* params);
         String type_int_to_string(int meta_data_type);
         Variant::Type type_int_to_variant(int meta_data_type);
