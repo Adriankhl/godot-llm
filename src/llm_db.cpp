@@ -32,10 +32,16 @@ void LlmDBMetaData::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_data_type", "p_data_type"), &LlmDBMetaData::set_data_type);
     ClassDB::add_property("LlmDBMetaData", PropertyInfo(Variant::INT, "data_type", PROPERTY_HINT_ENUM, "INTEGER, REAL, TEXT, BLOB"), "set_data_type", "get_data_type");
 
+    ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create", "data_name", "data_type"), &LlmDBMetaData::create);
     ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_int", "data_name"), &LlmDBMetaData::create_int);
     ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_real", "data_name"), &LlmDBMetaData::create_real);
     ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_text", "data_name"), &LlmDBMetaData::create_text);
     ClassDB::bind_static_method("LlmDBMetaData", D_METHOD("create_blob", "data_name"), &LlmDBMetaData::create_blob);
+
+    BIND_ENUM_CONSTANT(INTEGER);
+    BIND_ENUM_CONSTANT(REAL);
+    BIND_ENUM_CONSTANT(TEXT);
+    BIND_ENUM_CONSTANT(BLOB);
 }
 
 LlmDBMetaData::LlmDBMetaData() : data_name {"default_name"},
@@ -43,6 +49,13 @@ LlmDBMetaData::LlmDBMetaData() : data_name {"default_name"},
 { }
 
 LlmDBMetaData::~LlmDBMetaData() {}
+
+LlmDBMetaData* LlmDBMetaData::create(String data_name, int data_type) {
+    LlmDBMetaData* data = memnew(LlmDBMetaData());
+    data->set_data_name(data_name);
+    data->set_data_type(data_type);
+    return data;
+}
 
 LlmDBMetaData* LlmDBMetaData::create_int(String data_name) {
     LlmDBMetaData* data = memnew(LlmDBMetaData());
@@ -145,6 +158,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("run_retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::run_retrieve_similar_texts);
 
     ADD_SIGNAL(MethodInfo("retrieve_similar_texts_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
+
 }
 
 LlmDB::LlmDB() : db_dir {"."},

@@ -8,9 +8,13 @@
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/memory.hpp>
 #include <godot_cpp/godot.hpp>
+#include <godot_cpp/classes/engine.hpp>
 
 namespace godot {
+
+LlmDBMetaData* llmDBMetaData;
 
 void initialize_llm_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
@@ -22,12 +26,19 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<GDLlava>();
 	ClassDB::register_class<LlmDB>();
 	ClassDB::register_class<LlmDBMetaData>();
+
+	llmDBMetaData = memnew(LlmDBMetaData);
+	Engine::get_singleton()->register_singleton("LlmDBMetaData", llmDBMetaData);
 }
 
 void uninitialize_llm_module(ModuleInitializationLevel p_level) {
+
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+
+	Engine::get_singleton()->unregister_singleton("LlmDBMetaData");
+	memdelete(llmDBMetaData);
 }
 
 extern "C" {

@@ -29,11 +29,12 @@ class LlmDBMetaData : public Resource {
         int data_type; //0: integer, 1: real, 2: text, 3: blob
 
     protected:
-	    static void _bind_methods();
+        static void _bind_methods();
 
     public:
         LlmDBMetaData();
         ~LlmDBMetaData();
+        static LlmDBMetaData* create(String data_name, int data_type);
         static LlmDBMetaData* create_int(String data_name);
         static LlmDBMetaData* create_real(String data_name);
         static LlmDBMetaData* create_text(String data_name);
@@ -80,6 +81,7 @@ class LlmDB : public GDEmbedding {
     public:
         LlmDB();
         ~LlmDB();
+
         void _exit_tree() override;
         TypedArray<LlmDBMetaData> get_meta() const;
         void set_meta(TypedArray<LlmDBMetaData> p_meta);
@@ -121,5 +123,8 @@ class LlmDB : public GDEmbedding {
 };
 
 } // namespace godot
+
+
+VARIANT_ENUM_CAST(LlmDBMetaDataType);
 
 #endif
