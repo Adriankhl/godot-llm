@@ -104,6 +104,14 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDLlama::set_n_gpu_layer);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
 
+    ClassDB::bind_method(D_METHOD("get_main_gpu"), &GDLlama::get_main_gpu);
+    ClassDB::bind_method(D_METHOD("set_main_gpu", "p_main_gpu"), &GDLlama::set_main_gpu);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "main_gpu", PROPERTY_HINT_NONE), "set_main_gpu", "get_main_gpu");
+
+    ClassDB::bind_method(D_METHOD("get_split_mode"), &GDLlama::get_split_mode);
+    ClassDB::bind_method(D_METHOD("set_split_mode", "p_split_mode"), &GDLlama::set_split_mode);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::INT, "split_mode", PROPERTY_HINT_ENUM, "NONE, LAYER, ROW"), "set_split_mode", "get_split_mode");
+
 	ClassDB::bind_method(D_METHOD("get_escape"), &GDLlama::get_escape);
 	ClassDB::bind_method(D_METHOD("set_escape", "p_escape"), &GDLlama::set_escape);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE), "set_escape", "get_escape");
@@ -350,6 +358,22 @@ int32_t GDLlama::get_n_gpu_layer() const {
 void GDLlama::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
     params.n_gpu_layers = p_n_gpu_layers;
 }
+
+int32_t GDLlama::get_main_gpu() const {
+    return params.main_gpu;
+};
+
+void GDLlama::set_main_gpu(const int32_t p_main_gpu) {
+    params.main_gpu = p_main_gpu;
+};
+
+int32_t GDLlama::get_split_mode() {
+    return params.split_mode;
+};
+
+void GDLlama::set_split_mode(const int32_t p_split_mode) {
+    params.split_mode = static_cast<llama_split_mode>(p_split_mode);
+};
 
 bool GDLlama::get_escape() const {
     return params.escape;
