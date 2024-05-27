@@ -14,8 +14,6 @@
 
 namespace godot {
 
-LlmDBMetaData* llmDBMetaData;
-
 void initialize_llm_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
@@ -27,7 +25,7 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<LlmDBMetaData>();
 	ClassDB::register_class<LlmDB>();
 
-	llmDBMetaData = memnew(LlmDBMetaData);
+	auto llmDBMetaData = memnew(LlmDBMetaData);
 	Engine::get_singleton()->register_singleton("LlmDBMetaData", llmDBMetaData);
 }
 
@@ -38,7 +36,6 @@ void uninitialize_llm_module(ModuleInitializationLevel p_level) {
 	}
 
 	Engine::get_singleton()->unregister_singleton("LlmDBMetaData");
-	memdelete(llmDBMetaData);
 }
 
 extern "C" {
