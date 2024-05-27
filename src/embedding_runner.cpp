@@ -83,7 +83,7 @@ std::vector<float> EmbeddingRunner::compute_embedding(
 
     std::mt19937 rng(params.seed);
     if (params.random_prompt) {
-        params.prompt = gpt_random_prompt(rng);
+        params.prompt = string_random_prompt(rng);
     }
 
     llama_backend_init();
@@ -113,7 +113,7 @@ std::vector<float> EmbeddingRunner::compute_embedding(
     // print system information
     {
         fprintf(stderr, "\n");
-        fprintf(stderr, "%s\n", get_system_info(params).c_str());
+        fprintf(stderr, "%s\n", gpt_params_get_system_info(params).c_str());
     }
 
     // split the prompt into lines

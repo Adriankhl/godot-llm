@@ -10,16 +10,12 @@ class LlamaRunner {
         bool should_stop_generation;
         bool is_waiting_input;
         bool should_output_prompt;
-        bool should_output_bos;
-        bool should_output_eos;
         std::string input;
         std::function<void(std::string)> glog;
 
     public:
         LlamaRunner(
             bool should_output_prompt = true,
-            bool should_output_bos = true,
-            bool should_output_eos = true,
             std::function<void(std::string)> glog = [](auto s){}
         );
         ~LlamaRunner();

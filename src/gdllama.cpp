@@ -48,13 +48,9 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_should_output_prompt", "p_should_output_prompt"), &GDLlama::set_should_output_prompt);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_prompt", PROPERTY_HINT_NONE), "set_should_output_prompt", "get_should_output_prompt");
 
-    ClassDB::bind_method(D_METHOD("get_should_output_bos"), &GDLlama::get_should_output_bos);
-	ClassDB::bind_method(D_METHOD("set_should_output_bos", "p_should_output_bos"), &GDLlama::set_should_output_bos);
-    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_bos", PROPERTY_HINT_NONE), "set_should_output_bos", "get_should_output_bos");
-
-    ClassDB::bind_method(D_METHOD("get_should_output_eos"), &GDLlama::get_should_output_eos);
-	ClassDB::bind_method(D_METHOD("set_should_output_eos", "p_should_output_eos"), &GDLlama::set_should_output_eos);
-    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_eos", PROPERTY_HINT_NONE), "set_should_output_eos", "get_should_output_eos");
+    ClassDB::bind_method(D_METHOD("get_should_output_special"), &GDLlama::get_should_output_special);
+	ClassDB::bind_method(D_METHOD("set_should_output_special", "p_should_output_special"), &GDLlama::set_should_output_special);
+    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "should_output_special", PROPERTY_HINT_NONE), "set_should_output_special", "get_should_output_special");
 
    	ClassDB::bind_method(D_METHOD("get_n_ctx"), &GDLlama::get_n_ctx);
 	ClassDB::bind_method(D_METHOD("set_n_ctx", "p_n_ctx"), &GDLlama::set_n_ctx);
@@ -144,8 +140,6 @@ GDLlama::GDLlama() : params {gpt_params()},
     reverse_prompt {""},
     llama_runner {new LlamaRunner(should_output_prompt)},
     should_output_prompt {true},
-    should_output_bos {true},
-    should_output_eos {true},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}},
     generate_text_buffer {""}
@@ -247,21 +241,14 @@ void GDLlama::set_should_output_prompt(const bool p_should_output_prompt) {
     should_output_prompt = p_should_output_prompt;
 };
 
-bool GDLlama::get_should_output_bos() const {
-    return should_output_bos;
+bool GDLlama::get_should_output_special() const {
+    return params.special;
 };
 
-void GDLlama::set_should_output_bos(const bool p_should_output_bos) {
-    should_output_bos = p_should_output_bos;
+void GDLlama::set_should_output_special(const bool p_should_output_special) {
+    params.special = p_should_output_special;
 };
 
-bool GDLlama::get_should_output_eos() const {
-    return should_output_eos;
-};
-
-void GDLlama::set_should_output_eos(const bool p_should_output_eos) {
-    should_output_eos = p_should_output_eos;
-};
 
 int32_t GDLlama::get_n_ctx() const {
     return params.n_ctx;
@@ -403,7 +390,7 @@ String GDLlama::generate_text_common(String prompt) {
     glog_verbose("generate_text_common start");
 
     llama_runner.reset(
-        new LlamaRunner(should_output_prompt, should_output_bos, should_output_eos)
+        new LlamaRunner(should_output_prompt)
     );
 
     // Remove modified antiprompt from the previouss generate_text call (e.g., instruct mode)

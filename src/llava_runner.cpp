@@ -314,7 +314,7 @@ std::string LlavaRunner::llava_generate_text_base64(
 #endif // LOG_DISABLE_LOGS
 
     if (params.mmproj.empty() || (params.image.empty() && !prompt_contains_image(params.prompt))) {
-    //    gpt_print_usage(argc, argv, params);
+    //    gpt_params_print_usage(argc, argv, params);
     //    show_additional_info(argc, argv);
         std::string msg = std::string(__func__) + ": error: no mmproj or image";
         glog(msg);

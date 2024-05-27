@@ -20,15 +20,11 @@
 
 LlamaRunner::LlamaRunner(
     bool should_output_prompt,
-    bool should_output_bos,
-    bool should_output_eos,
     std::function<void(std::string)> glog
 ) : should_stop_generation {false},
     is_waiting_input {false},
     input {""},
     should_output_prompt {should_output_prompt},
-    should_output_bos {should_output_bos},
-    should_output_eos {should_output_eos},
     glog {glog}
 {
     log_set_target("llama.log");
@@ -129,7 +125,7 @@ std::string LlamaRunner::llama_generate_text(
 
     std::mt19937 rng(params.seed);
     if (params.random_prompt) {
-        params.prompt = gpt_random_prompt(rng);
+        params.prompt = string_random_prompt(rng);
     }
 
     LOG("%s: llama backend init\n", __func__);
@@ -168,7 +164,7 @@ std::string LlamaRunner::llama_generate_text(
     // print system information
     {
         LOG("\n");
-        LOG("%s\n", get_system_info(params).c_str());
+        LOG("%s\n", gpt_params_get_system_info(params).c_str());
     }
 
     std::string path_session = params.path_prompt_cache;
@@ -429,12 +425,12 @@ std::string LlamaRunner::llama_generate_text(
     LOG("\n\n");
 
     if (params.interactive) {
-//        const char *control_message;
+//        const char * control_message;
 //        if (params.multiline_input) {
-//            control_message = " - To return control to LLaMa, end your input with '\\'.\n"
+//            control_message = " - To return control to the AI, end your input with '\\'.\n"
 //                              " - To return control without starting a new line, end your input with '/'.\n";
 //        } else {
-//            control_message = " - Press Return to return control to LLaMa.\n"
+//            control_message = " - Press Return to return control to the AI.\n"
 //                              " - To return control without starting a new line, end your input with '/'.\n"
 //                              " - If you want to submit another line, end your input with '\\'.\n";
 //        }
@@ -670,7 +666,7 @@ std::string LlamaRunner::llama_generate_text(
 
             const llama_token id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
 
-            llama_sampling_accept(ctx_sampling, ctx, id, true);
+            llama_sampling_accept(ctx_sampling, ctx, id, /* apply_grammar= */ true);
 
             LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
 
@@ -691,7 +687,7 @@ std::string LlamaRunner::llama_generate_text(
 
                 // push the prompt in the sampling context in order to apply repetition penalties later
                 // for the prompt, we don't apply grammar rules
-                llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
+                llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], /* apply_grammar= */ false);
 
                 ++n_consumed;
                 if ((int) embd.size() >= params.n_batch) {
@@ -703,24 +699,27 @@ std::string LlamaRunner::llama_generate_text(
         // display text
         if (input_echo && display) {
             for (auto id : embd) {
-                const std::string token_str = llama_token_to_piece(ctx, id, !params.conversation);
+                const std::string token_str = llama_token_to_piece(ctx, id, params.special);
 
-                bool is_bos = (id == llama_token_bos(model));
-                bool is_eos = (id == llama_token_eos(model));
-                if ((!is_bos || should_output_bos) && (!is_eos || should_output_eos)) {
-                    generated_text.append(token_str);
-                    on_generate_text_updated(token_str);
-                }
-                printf("%s", token_str.c_str());
+                generated_text.append(token_str);
+                on_generate_text_updated(token_str);
 
+                // Console/Stream Output
+                fprintf(stdout, "%s", token_str.c_str());
+
+                // Record Displayed Tokens To Log
+                // Note: Generated tokens are created one by one hence this check
                 if (embd.size() > 1) {
+                    // Incoming Requested Tokens
                     input_tokens.push_back(id);
                 } else {
+                    // Outgoing Generated Tokens
                     output_tokens.push_back(id);
                     output_ss << token_str;
                 }
+
+                fflush(stdout);
             }
-            fflush(stdout);
         }
         // reset color to default if there is no pending user input
         if (input_echo && (int) embd_inp.size() == n_consumed) {
@@ -857,7 +856,7 @@ std::string LlamaRunner::llama_generate_text(
                         embd_inp.insert(embd_inp.end(), cml_pfx.begin(), cml_pfx.end());
                     }
                     if (params.escape) {
-                        process_escapes(buffer);
+                        string_process_escapes(buffer);
                     }
 
                     const auto line_pfx = ::llama_tokenize(ctx, params.input_prefix, false, true);
