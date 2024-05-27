@@ -103,7 +103,7 @@ void GDLlava::_exit_tree() {
         stop_generate_text();
         glog_verbose("Waiting thread to finish");
         generate_text_thread->wait_to_finish();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     glog_verbose("GDLlava exit tree -- done");

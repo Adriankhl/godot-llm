@@ -84,7 +84,7 @@ void GDEmbedding::_exit_tree() {
     while (compute_embedding_thread->is_started()) {
         glog_verbose("Waiting thread to finish");
         compute_embedding_thread->wait_to_finish();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     glog_verbose("GDEmbedding exit tree -- done");

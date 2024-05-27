@@ -246,13 +246,13 @@ void LlmDB::_exit_tree() {
     while (store_text_thread->is_started()) {
         UtilityFunctions::print_verbose("Waiting thread to finish");
         store_text_thread->wait_to_finish();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     while (retrieve_text_thread->is_started()) {
         UtilityFunctions::print_verbose("Waiting thread to finish");
         retrieve_text_thread->wait_to_finish();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     UtilityFunctions::print_verbose("LlmDB exit tree -- done");
