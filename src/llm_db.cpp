@@ -176,6 +176,26 @@ LlmDB::LlmDB() : db_dir {"."},
 {
     UtilityFunctions::print_verbose("LlmDB constructor");
 
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
+    store_text_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiate GDLlava mutex");
+    func_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
+    store_text_thread.instantiate();
+
+    auto f = (void(*)())[](){};
+
+    store_text_thread->start(create_custom_callable_static_function_pointer(f));
+    store_text_thread->wait_to_finish();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
+    retrieve_text_thread.instantiate();
+
+    retrieve_text_thread->start(create_custom_callable_static_function_pointer(f));
+    retrieve_text_thread->wait_to_finish();
+
     meta.append(LlmDBMetaData::create_text("id"));
 
     absolute_separators.append("\n\n");
@@ -206,6 +226,19 @@ LlmDB::~LlmDB() {
         close_db();
     }
 
+    //is_started instead of is_alive to properly clean up all threads
+    while (store_text_thread->is_started()) {
+        UtilityFunctions::print_verbose("Waiting thread to finish");
+        store_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    while (retrieve_text_thread->is_started()) {
+        UtilityFunctions::print_verbose("Waiting thread to finish");
+        retrieve_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     UtilityFunctions::print_verbose("LlmDB destructor -- done");
 }
 
@@ -213,26 +246,6 @@ void LlmDB::_ready() {
     UtilityFunctions::print_verbose("LlmDB _ready");
 
     GDEmbedding::_ready();
-
-    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
-    store_text_mutex.instantiate();
-
-    UtilityFunctions::print_verbose("Instantiate GDLlava mutex");
-    func_mutex.instantiate();
-
-    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
-    store_text_thread.instantiate();
-
-    auto f = (void(*)())[](){};
-
-    store_text_thread->start(create_custom_callable_static_function_pointer(f));
-    store_text_thread->wait_to_finish();
-
-    UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
-    retrieve_text_thread.instantiate();
-
-    retrieve_text_thread->start(create_custom_callable_static_function_pointer(f));
-    retrieve_text_thread->wait_to_finish();
 
     UtilityFunctions::print_verbose("LlmDB _ready -- done");
 }

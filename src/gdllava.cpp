@@ -69,16 +69,6 @@ GDLlava::GDLlava() : params {gpt_params()},
     generate_text_buffer {""}
 {
     glog_verbose("GDLlava constructor");
-    glog_verbose("GDLlava constructor -- done");
-}
-
-GDLlava::~GDLlava() {
-    glog_verbose("GDLlava destructor");
-    glog_verbose("GDLlava destructor -- done");
-}
-
-void GDLlava::_ready() {
-    glog_verbose("GDLlava _ready");
 
     glog_verbose("Instantiate GDLlava mutex");
     func_mutex.instantiate();
@@ -92,7 +82,26 @@ void GDLlava::_ready() {
 
     glog_verbose("Instantiate GDLlava thread -- done");
 
-    glog_verbose("GDLlava _ready -- done");
+    glog_verbose("GDLlava constructor -- done");
+}
+
+GDLlava::~GDLlava() {
+    glog_verbose("GDLlava destructor");
+
+    //is_started instead of is_alive to properly clean up all threads
+    while (generate_text_thread->is_started()) {
+        stop_generate_text();
+        glog_verbose("Waiting thread to finish");
+        generate_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    glog_verbose("GDLlava destructor -- done");
+}
+
+void GDLlava::_ready() {
+    glog_verbose("GDLlava _ready");
+   glog_verbose("GDLlava _ready -- done");
 }
 
 void GDLlava::_exit_tree() {

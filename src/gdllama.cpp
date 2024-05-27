@@ -145,16 +145,6 @@ GDLlama::GDLlama() : params {gpt_params()},
     generate_text_buffer {""}
 {
     glog_verbose("GDLlama constructor");
-    glog_verbose("GDLlama constructor -- done");
-}
-
-GDLlama::~GDLlama() {
-    glog_verbose("GDLlama destructor");
-    glog_verbose("GDLlama destructor -- done");
-}
-
-void GDLlama::_ready() {
-    glog_verbose("GDLlama _ready");
 
     glog_verbose("Instantiate GDLlama mutex");
     func_mutex.instantiate();
@@ -168,6 +158,25 @@ void GDLlama::_ready() {
 
     glog_verbose("Instantiate GDLlama thread -- done");
 
+    glog_verbose("GDLlama constructor -- done");
+}
+
+GDLlama::~GDLlama() {
+    glog_verbose("GDLlama destructor");
+
+    //is_started instead of is_alive to properly clean up all threads
+    while (generate_text_thread->is_started()) {
+        stop_generate_text();
+        glog_verbose("Waiting thread to finish");
+        generate_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    glog_verbose("GDLlama destructor -- done");
+}
+
+void GDLlama::_ready() {
+    glog_verbose("GDLlama _ready");
     glog_verbose("GDLlama _ready -- done");
 }
 

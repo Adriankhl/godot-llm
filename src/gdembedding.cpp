@@ -52,16 +52,6 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
 {
     glog_verbose("GDEmbedding constructor");
-    glog_verbose("GDEmbedding constructor -- done");
-}
-
-GDEmbedding::~GDEmbedding() {
-    glog_verbose("GDEmbedding destructor");
-    glog_verbose("GDEmbedding destructor -- done");
-}
-
-void GDEmbedding::_ready() {
-    glog_verbose("GDEmbedding _ready");
 
     glog_verbose("Instantiate GDEmbedding mutex");
     func_mutex.instantiate();
@@ -74,6 +64,24 @@ void GDEmbedding::_ready() {
     compute_embedding_thread->wait_to_finish();
     glog_verbose("Instantiate GDEmbedding thread -- done");
 
+    glog_verbose("GDEmbedding constructor -- done");
+}
+
+GDEmbedding::~GDEmbedding() {
+    glog_verbose("GDEmbedding destructor");
+
+    //is_started instead of is_alive to properly clean up all threads
+    while (compute_embedding_thread->is_started()) {
+        glog_verbose("Waiting thread to finish");
+        compute_embedding_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    glog_verbose("GDEmbedding destructor -- done");
+}
+
+void GDEmbedding::_ready() {
+    glog_verbose("GDEmbedding _ready");
     glog_verbose("GDEmbedding _ready -- done");
 }
 
