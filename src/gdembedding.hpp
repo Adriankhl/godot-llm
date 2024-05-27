@@ -40,6 +40,10 @@ class GDEmbedding : public Node {
         void set_n_threads(const int32_t n_threads);
         int32_t get_n_gpu_layer() const;
         void set_n_gpu_layer(const int32_t p_n_gpu_layers);
+        int32_t get_main_gpu() const;
+        void set_main_gpu(const int32_t p_main_gpu);
+        int32_t get_split_mode();
+        void set_split_mode(const int32_t p_split_mode);
         int32_t get_n_batch() const;
         void set_n_batch(const int32_t p_n_batch);
         bool is_running();

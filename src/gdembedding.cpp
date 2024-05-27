@@ -23,6 +23,14 @@ void GDEmbedding::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_n_gpu_layer", "p_n_gpu_layer"), &GDEmbedding::set_n_gpu_layer);
     ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_gpu_layer", PROPERTY_HINT_NONE), "set_n_gpu_layer", "get_n_gpu_layer");
 
+    ClassDB::bind_method(D_METHOD("get_main_gpu"), &GDEmbedding::get_main_gpu);
+    ClassDB::bind_method(D_METHOD("set_main_gpu", "p_main_gpu"), &GDEmbedding::set_main_gpu);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "main_gpu", PROPERTY_HINT_NONE), "set_main_gpu", "get_main_gpu");
+
+    ClassDB::bind_method(D_METHOD("get_split_mode"), &GDEmbedding::get_split_mode);
+    ClassDB::bind_method(D_METHOD("set_split_mode", "p_split_mode"), &GDEmbedding::set_split_mode);
+    ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "split_mode", PROPERTY_HINT_ENUM, "NONE, LAYER, ROW"), "set_split_mode", "get_split_mode");
+
    	ClassDB::bind_method(D_METHOD("get_n_batch"), &GDEmbedding::get_n_batch);
 	ClassDB::bind_method(D_METHOD("set_n_batch", "p_n_batch"), &GDEmbedding::set_n_batch);
     ClassDB::add_property("GDEmbedding", PropertyInfo(Variant::INT, "n_batch", PROPERTY_HINT_NONE), "set_n_batch", "get_n_batch");
@@ -105,6 +113,22 @@ int32_t GDEmbedding::get_n_gpu_layer() const {
 void GDEmbedding::set_n_gpu_layer(const int32_t p_n_gpu_layers) {
     params.n_gpu_layers = p_n_gpu_layers;
 }
+
+int32_t GDEmbedding::get_main_gpu() const {
+    return params.main_gpu;
+};
+
+void GDEmbedding::set_main_gpu(const int32_t p_main_gpu) {
+    params.main_gpu = p_main_gpu;
+};
+
+int32_t GDEmbedding::get_split_mode() {
+    return params.split_mode;
+};
+
+void GDEmbedding::set_split_mode(const int32_t p_split_mode) {
+    params.split_mode = static_cast<llama_split_mode>(p_split_mode);
+};
 
 
 int32_t GDEmbedding::get_n_batch() const {
