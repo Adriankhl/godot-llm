@@ -60,6 +60,18 @@ GDLlava::GDLlava() : params {gpt_params()},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}},
     generate_text_buffer {""}
 {
+    glog_verbose("GDLlava constructor");
+    glog_verbose("GDLlava constructor -- done");
+}
+
+GDLlava::~GDLlava() {
+    glog_verbose("GDLlava destructor");
+    glog_verbose("GDLlava destructor -- done");
+}
+
+void GDLlava::_ready() {
+    glog_verbose("GDLlava _ready");
+
     glog_verbose("Instantiate GDLlava mutex");
     func_mutex.instantiate();
     generate_text_mutex.instantiate();
@@ -71,43 +83,22 @@ GDLlava::GDLlava() : params {gpt_params()},
     generate_text_thread->wait_to_finish();
 
     glog_verbose("Instantiate GDLlava thread -- done");
-}
 
-GDLlava::~GDLlava() {
-    glog_verbose("GDLlava destructor");
-
-    func_mutex->try_lock();
-
-    while (!generate_text_mutex->try_lock()) {
-        stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
-    //is_started instead of is_alive to properly clean up all threads
-    if (generate_text_thread->is_started()) {
-        glog_verbose("GDLlava destructor waiting thread to finish");
-        generate_text_thread->wait_to_finish();
-    }
-    glog_verbose("GDLlava destructor -- done");
+    glog_verbose("GDLlava _ready -- done");
 }
 
 void GDLlava::_exit_tree() {
     glog_verbose("GDLlava exit tree");
 
-    func_mutex->lock();
-
-    glog_verbose("func_mutex locked");
-
-    while (!generate_text_mutex->try_lock()) {
-        stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
     //is_started instead of is_alive to properly clean up all threads
-    if (generate_text_thread->is_started()) {
+    while (generate_text_thread->is_started()) {
+        stop_generate_text();
         glog_verbose("Waiting thread to finish");
         generate_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
+    glog_verbose("GDLlava exit tree -- done");
 }
 
 String GDLlava::get_model_path() const {

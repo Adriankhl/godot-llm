@@ -43,8 +43,19 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
     glog {[](std::string s) {godot::UtilityFunctions::print(s.c_str());}},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}}
 {
-    glog_verbose("Instantiate GDEmbedding mutex");
+    glog_verbose("GDEmbedding constructor");
+    glog_verbose("GDEmbedding constructor -- done");
+}
 
+GDEmbedding::~GDEmbedding() {
+    glog_verbose("GDEmbedding destructor");
+    glog_verbose("GDEmbedding destructor -- done");
+}
+
+void GDEmbedding::_ready() {
+    glog_verbose("GDEmbedding _ready");
+
+    glog_verbose("Instantiate GDEmbedding mutex");
     func_mutex.instantiate();
     compute_embedding_mutex.instantiate();
 
@@ -53,43 +64,19 @@ GDEmbedding::GDEmbedding() : params {gpt_params()},
     auto f = (void(*)())[](){};
     compute_embedding_thread->start(create_custom_callable_static_function_pointer(f));
     compute_embedding_thread->wait_to_finish();
-
     glog_verbose("Instantiate GDEmbedding thread -- done");
-}
 
-GDEmbedding::~GDEmbedding() {
-    glog_verbose("GDEmbedding destructor");
-
-    func_mutex->try_lock();
-
-    while (!compute_embedding_mutex->try_lock()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
-    //is_started instead of is_alive to properly clean up all threads
-    if (compute_embedding_thread->is_started()) {
-        glog_verbose("GDEmbedding destructor waiting thread to finish");
-        compute_embedding_thread->wait_to_finish();
-    }
-    glog_verbose("GDEmbedding destructor -- done");
+    glog_verbose("GDEmbedding _ready -- done");
 }
 
 void GDEmbedding::_exit_tree() {
     glog_verbose("GDEmbedding exit tree");
 
-    func_mutex->lock();
-
-    glog_verbose("func_mutex locked");
-
-    while (!compute_embedding_mutex->try_lock()) {
-        glog_verbose("Waiting for lock");
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
     //is_started instead of is_alive to properly clean up all threads
-    if (compute_embedding_thread->is_started()) {
+    while (compute_embedding_thread->is_started()) {
         glog_verbose("Waiting thread to finish");
         compute_embedding_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     glog_verbose("GDEmbedding exit tree -- done");

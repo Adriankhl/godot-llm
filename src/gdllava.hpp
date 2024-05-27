@@ -33,6 +33,7 @@ class GDLlava : public Node {
     public:
         GDLlava();
         ~GDLlava();
+        void _ready() override;
         void _exit_tree() override;
         String get_model_path() const;
         void set_model_path(const String p_model_path);

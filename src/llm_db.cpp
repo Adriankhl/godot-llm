@@ -174,25 +174,7 @@ LlmDB::LlmDB() : db_dir {"."},
     store_text_queue {std::queue<std::function<void()>>()},
     retrieve_text_queue {std::queue<std::function<void()>>()}
 {
-    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
-    store_text_mutex.instantiate();
-
-    UtilityFunctions::print_verbose("Instantiate GDLlava mutex");
-    func_mutex.instantiate();
-
-    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
-    store_text_thread.instantiate();
-
-    auto f = (void(*)())[](){};
-
-    store_text_thread->start(create_custom_callable_static_function_pointer(f));
-    store_text_thread->wait_to_finish();
-
-    UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
-    retrieve_text_thread.instantiate();
-
-    retrieve_text_thread->start(create_custom_callable_static_function_pointer(f));
-    retrieve_text_thread->wait_to_finish();
+    UtilityFunctions::print_verbose("LlmDB constructor");
 
     meta.append(LlmDBMetaData::create_text("id"));
 
@@ -214,19 +196,45 @@ LlmDB::LlmDB() : db_dir {"."},
     if (rc != SQLITE_OK) {
         UtilityFunctions::printerr("Unable to load sqlite3_vec extension");
     }
+
+    UtilityFunctions::print_verbose("LlmDB constructor -- done");
 }
 
 LlmDB::~LlmDB() {
+    UtilityFunctions::print_verbose("LlmDB destructor");
     if (db != nullptr) {
         close_db();
     }
 
-    func_mutex->try_lock();
+    UtilityFunctions::print_verbose("LlmDB destructor -- done");
+}
 
-    if (store_text_thread->is_started()) {
-        UtilityFunctions::print_verbose("Waiting thread to finish");
-        store_text_thread->wait_to_finish();
-    }
+void LlmDB::_ready() {
+    UtilityFunctions::print_verbose("LlmDB _ready");
+
+    GDEmbedding::_ready();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_mutex");
+    store_text_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiate GDLlava mutex");
+    func_mutex.instantiate();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB store_text_thread");
+    store_text_thread.instantiate();
+
+    auto f = (void(*)())[](){};
+
+    store_text_thread->start(create_custom_callable_static_function_pointer(f));
+    store_text_thread->wait_to_finish();
+
+    UtilityFunctions::print_verbose("Instantiating LlmDB retrieve_text_thread");
+    retrieve_text_thread.instantiate();
+
+    retrieve_text_thread->start(create_custom_callable_static_function_pointer(f));
+    retrieve_text_thread->wait_to_finish();
+
+    UtilityFunctions::print_verbose("LlmDB _ready -- done");
 }
 
 void LlmDB::_exit_tree() {
@@ -234,14 +242,17 @@ void LlmDB::_exit_tree() {
 
     GDEmbedding::_exit_tree();
 
-    func_mutex->lock();
-
-    UtilityFunctions::print_verbose("func_mutex locked");
-
     //is_started instead of is_alive to properly clean up all threads
-    if (store_text_thread->is_started()) {
+    while (store_text_thread->is_started()) {
         UtilityFunctions::print_verbose("Waiting thread to finish");
         store_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
+    while (retrieve_text_thread->is_started()) {
+        UtilityFunctions::print_verbose("Waiting thread to finish");
+        retrieve_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     UtilityFunctions::print_verbose("LlmDB exit tree -- done");

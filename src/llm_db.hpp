@@ -82,6 +82,7 @@ class LlmDB : public GDEmbedding {
         LlmDB();
         ~LlmDB();
 
+        void _ready() override;
         void _exit_tree() override;
         TypedArray<LlmDBMetaData> get_meta() const;
         void set_meta(TypedArray<LlmDBMetaData> p_meta);

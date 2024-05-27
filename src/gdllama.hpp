@@ -43,6 +43,7 @@ class GDLlama : public Node {
         GDLlama();
         ~GDLlama();
 
+        void _ready() override;
         void _exit_tree() override;
 
         String get_model_path() const;

@@ -24,8 +24,8 @@ void initialize_llm_module(ModuleInitializationLevel p_level) {
 	ClassDB::register_class<GDLlama>();
 	ClassDB::register_class<GDEmbedding>();
 	ClassDB::register_class<GDLlava>();
-	ClassDB::register_class<LlmDB>();
 	ClassDB::register_class<LlmDBMetaData>();
+	ClassDB::register_class<LlmDB>();
 
 	llmDBMetaData = memnew(LlmDBMetaData);
 	Engine::get_singleton()->register_singleton("LlmDBMetaData", llmDBMetaData);

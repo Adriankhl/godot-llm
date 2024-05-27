@@ -142,6 +142,18 @@ GDLlama::GDLlama() : params {gpt_params()},
     glog_verbose {[](std::string s) {godot::UtilityFunctions::print_verbose(s.c_str());}},
     generate_text_buffer {""}
 {
+    glog_verbose("GDLlama constructor");
+    glog_verbose("GDLlama constructor -- done");
+}
+
+GDLlama::~GDLlama() {
+    glog_verbose("GDLlama destructor");
+    glog_verbose("GDLlama destructor -- done");
+}
+
+void GDLlama::_ready() {
+    glog_verbose("GDLlama _ready");
+
     glog_verbose("Instantiate GDLlama mutex");
     func_mutex.instantiate();
     generate_text_mutex.instantiate();
@@ -153,43 +165,22 @@ GDLlama::GDLlama() : params {gpt_params()},
     generate_text_thread->wait_to_finish();
 
     glog_verbose("Instantiate GDLlama thread -- done");
-}
 
-GDLlama::~GDLlama() {
-    glog_verbose("GDLlama destructor");
-
-    func_mutex->try_lock();
-
-    while (!generate_text_mutex->try_lock()) {
-        stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
-    //is_started instead of is_alive to properly clean up all threads
-    if (generate_text_thread->is_started()) {
-        glog_verbose("GDLlama destructor waiting thread to finish");
-        generate_text_thread->wait_to_finish();
-    }
-    glog_verbose("GDLlama destructor -- done");
+    glog_verbose("GDLlama _ready -- done");
 }
 
 void GDLlama::_exit_tree() {
     glog_verbose("GDLlama exit tree");
 
-    func_mutex->lock();
-
-    glog_verbose("func_mutex locked");
-
-    while (!generate_text_mutex->try_lock()) {
-        stop_generate_text();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-
     //is_started instead of is_alive to properly clean up all threads
-    if (generate_text_thread->is_started()) {
+    while (generate_text_thread->is_started()) {
+        stop_generate_text();
         glog_verbose("Waiting thread to finish");
         generate_text_thread->wait_to_finish();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
+    glog_verbose("GDLlama exit tree -- done");
 }
 
 String GDLlama::get_model_path() const {
