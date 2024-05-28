@@ -163,9 +163,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
-          ninja -j $(nproc)
+          ${{ '"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release' }}
+          ninja -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Archive library
         uses: actions/upload-artifact@v4
