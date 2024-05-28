@@ -150,8 +150,22 @@ jobs:
         run: |
           git submodule update --init --recursive
       
-      - name: Install scoop
+      - name: Scoop dependencies
         shell: powershell
         run: |
           irm get.scoop.sh | iex
-          scoop install ninja
+          scoop install ninja llvm
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          ninja -j $(nproc)
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_cpu_release.zip
+          path: build/libgodot_llm.windows.release.amd64.dll
