@@ -513,6 +513,39 @@ jobs:
           name: macos_metal_debug
           path: build/libgodot_llm.darwin.debug.universal.dylib
 
+  ios-latest-cmake-cpu-release:
+    runs-on: macos-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          brew update
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
+          codesign -s - libgodot_llm.ios.release.universal.dylib
+          ls -al
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_cpu_release
+          path: build/libgodot_llm.ios.release.universal.dylib
+
   archive-other-files:
     runs-on: ubuntu-latest
     steps:
