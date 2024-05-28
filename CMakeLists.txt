@@ -13,6 +13,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OSX" FORCE)
 endif ()
 
+add_subdirectory(godot-cpp)
+add_subdirectory(llama.cpp EXCLUDE_FROM_ALL)
+
 set(src_files
   "src/sqlite3.c"
   "src/sqlite3.h"
@@ -90,10 +93,6 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-fPIC)
 endif()
-
-
-add_subdirectory(godot-cpp)
-add_subdirectory(llama.cpp)
 
 if (APPLE)
   set(ARCH_NAME "universal")
