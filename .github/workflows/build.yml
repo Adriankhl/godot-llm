@@ -543,5 +543,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
+
       - name: Display structure of downloaded files
         run: ls -R
+
+      - name: Copy to godot_llm_cpu
+        run: |
+          mkdir -p godot_llm_cpu/addons/godot_llm/bin
+          cp ./android_cpu_debug/libgodot_llm.android.debug.aarch64.so ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./android_cpu_release/libgodot_llm.android.release.aarch64.so ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./linux_cpu_debug/libgodot_llm.linux.debug.x86_64.so ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./linux_cpu_release/libgodot_llm.linux.release.x86_64.so ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./macos_cpu_debug/libgodot_llm.darwin.debug.universal.dylib ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./macos_cpu_release/libgodot_llm.windows.release.amd64.dll ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./windows_cpu_debug/libgodot_llm.windows.debug.amd64.dll ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./windows_cpu_release/libgodot_llm.windows.release.amd64.dll ./godot_llm_cpu/addons/godot_llm/bin
+          cp ./godot_llm.gdextension/godot_llm.gdextension ./godot_llm_cpu/addons/godot_llm
+
+      - name: Copy to godot_llm_gpu
+        run: |
+          mkdir -p godot_llm_gpu/addons/godot_llm/bin
+          cp ./android_cpu_debug/libgodot_llm.android.debug.aarch64.so ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./android_cpu_release/libgodot_llm.android.release.aarch64.so ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./linux_vulkan_debug/libgodot_llm.linux.debug.x86_64.so ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./linux_vulkan_release/libgodot_llm.linux.release.x86_64.so ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./macos_metal_debug/libgodot_llm.darwin.debug.universal.dylib ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./macos_metal_release/libgodot_llm.windows.release.amd64.dll ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./windows_vulkan_debug/libgodot_llm.windows.debug.amd64.dll ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./windows_vulkan_release/libgodot_llm.windows.release.amd64.dll ./godot_llm_gpu/addons/godot_llm/bin
+          cp ./godot_llm.gdextension/godot_llm.gdextension ./godot_llm_gpu/addons/godot_llm
+
+      - name: Archive godot_llm_cpu
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot_llm_cpu
+          path: godot_llm_cpu
+
+      - name: Archive godot_llm_gpu
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot_llm_gpu
+          path: godot_llm_gpu
