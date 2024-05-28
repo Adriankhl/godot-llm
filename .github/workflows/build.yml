@@ -535,7 +535,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_SERVER=OFF -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.ios.release.universal.dylib
           ls -al
