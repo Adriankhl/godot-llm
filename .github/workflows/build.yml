@@ -409,7 +409,7 @@ jobs:
           cd build
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
-          codesign -s - build/libgodot_llm.darwin.release.universal.dylib
+          codesign -s - libgodot_llm.darwin.release.universal.dylib
 
       - name: Archive library
         uses: actions/upload-artifact@v4
@@ -441,7 +441,7 @@ jobs:
           cd build
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
-          codesign -s - build/libgodot_llm.darwin.debug.universal.dylib
+          codesign -s - libgodot_llm.darwin.debug.universal.dylib
 
       - name: Archive library
         uses: actions/upload-artifact@v4
@@ -473,7 +473,7 @@ jobs:
           cd build
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
-          codesign -s - build/libgodot_llm.darwin.release.universal.dylib
+          codesign -s - libgodot_llm.darwin.release.universal.dylib
 
       - name: Archive library
         uses: actions/upload-artifact@v4
@@ -505,7 +505,7 @@ jobs:
           cd build
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
-          codesign -s - build/libgodot_llm.darwin.debug.universal.dylib
+          codesign -s - libgodot_llm.darwin.debug.universal.dylib
 
       - name: Archive library
         uses: actions/upload-artifact@v4
