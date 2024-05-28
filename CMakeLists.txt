@@ -101,8 +101,8 @@ target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama llava_static ll
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 
-if (LLAMA_VULKAN)
-  set(LLM_LIB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/vulkan/addons/godot_llm)
+if (LLAMA_VULKAN OR LLAMA_METAL)
+  set(LLM_LIB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/gpu/addons/godot_llm)
 else()
   set(LLM_LIB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/cpu/addons/godot_llm)
 endif()
