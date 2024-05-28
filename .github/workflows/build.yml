@@ -447,7 +447,7 @@ jobs:
           name: macos_cpu_debug.zip
           path: build/libgodot_llm.darwin.debug.arm64.dylib
 
-  macos-latest-cmake-cpu-release:
+  macos-latest-cmake-metal-release:
     runs-on: macos-latest
     steps:
       - name: Clone
@@ -478,7 +478,7 @@ jobs:
           name: macos_metal_release.zip
           path: build/libgodot_llm.darwin.release.arm64.dylib
 
-  macos-latest-cmake-cpu-debug:
+  macos-latest-cmake-metal-debug:
     runs-on: macos-latest
     steps:
       - name: Clone
