@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+if (APPLE)
+    SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OSX" FORCE)
+endif ()
+
 set(src_files
   "src/sqlite3.c"
   "src/sqlite3.h"
@@ -88,7 +92,13 @@ add_subdirectory(godot-cpp)
 add_subdirectory(llama.cpp)
 add_subdirectory(llama.cpp/examples/llava)
 
-set(LIB_NAME libgodot_llm.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${CMAKE_SYSTEM_PROCESSOR})
+if (APPLE)
+  set(ARCH_NAME "universal")
+else()
+  set(ARCH_NAME ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+
+set(LIB_NAME libgodot_llm.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${ARCH_NAME})
 
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
