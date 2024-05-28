@@ -161,19 +161,11 @@ jobs:
       - name: Build
         id: cmake_build
         run: |
-          cd "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-          ls
-          cd VC
-          ls
-          cd Auxiliary
-          ls
-          cd Build
-          ls
-          cmd
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          powershell
           mkdir build
           cd build
+          ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cmd
+          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
