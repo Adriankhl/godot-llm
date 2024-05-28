@@ -8,6 +8,32 @@ on:
 
 
 jobs:
+  ubuntu-22-cmake-cpu:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential ninja-build
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          ninja -j $(nproc)
+
   ubuntu-22-cmake-vulkan:
     runs-on: ubuntu-22.04
     steps:
