@@ -37,6 +37,10 @@ set(src_files
   "src/llm_db.cpp"
   "src/register_types.hpp"
   "src/register_types.cpp"
+  "llama.cpp/examples/llava/llava.cpp"
+  "llama.cpp/examples/llava/llava.h"
+  "llama.cpp/examples/llava/clip.cpp"
+  "llama.cpp/examples/llava/clip.h"
 )
 
 add_definitions(-DSQLITE_CORE)
@@ -90,7 +94,6 @@ endif()
 
 add_subdirectory(godot-cpp)
 add_subdirectory(llama.cpp)
-add_subdirectory(llama.cpp/examples/llava EXCLUDE_FROM_ALL)
 
 if (APPLE)
   set(ARCH_NAME "universal")
@@ -107,7 +110,7 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 add_library(${LIB_NAME} SHARED ${src_files})
 
-target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama llava_static llava)
+target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
 
@@ -137,7 +140,7 @@ set(llama_runnner_test_files
 
 add_executable(llama_runner_test ${llama_runnner_test_files} ${src_files})
 
-target_link_libraries(llama_runner_test PRIVATE godot-cpp common llama llava_static llava)
+target_link_libraries(llama_runner_test PRIVATE godot-cpp common llama)
 
 add_test(
   NAME llama_runner_test
@@ -150,7 +153,7 @@ set(embedding_runnner_test_files
 
 add_executable(embedding_runner_test ${embedding_runnner_test_files} ${src_files})
 
-target_link_libraries(embedding_runner_test PRIVATE godot-cpp common llama llava_static llava)
+target_link_libraries(embedding_runner_test PRIVATE godot-cpp common llama)
 
 add_test(
   NAME embedding_runner_test
@@ -163,7 +166,7 @@ set(llava_runnner_test_files
 
 add_executable(llava_runner_test ${llava_runnner_test_files} ${src_files})
 
-target_link_libraries(llava_runner_test PRIVATE godot-cpp common llama llava_static llava)
+target_link_libraries(llava_runner_test PRIVATE godot-cpp common llama)
 
 add_test(
   NAME llava_runner_test
