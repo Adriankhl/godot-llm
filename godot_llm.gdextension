@@ -17,3 +17,7 @@ linux.release.x86_64 = "bin/libgodot_llm.linux.release.x86_64.so"
 #android.debug.arm64 = "bin/libgodot_llm.android.debug.aarch64.so"
 android.debug.arm64 = "bin/libgodot_llm.android.release.aarch64.so"
 android.release.arm64 = "bin/libgodot_llm.android.release.aarch64.so"
+
+#macos.debug = "bin/libgodot_llm.darwin.debug.universal.dylib"
+macos.debug = "bin/libgodot_llm.darwin.release.universal.dylib"
+macos.release = "bin/libgodot_llm.darwin.release.universal.dylib"

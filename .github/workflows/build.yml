@@ -301,7 +301,7 @@ jobs:
         with:
           name: windows_vulkan_debug
           path: build/libgodot_llm.windows.debug.amd64.dll
-  
+
   android-cmake-cpu-release:
     runs-on: ubuntu-22.04
 
@@ -508,3 +508,40 @@ jobs:
         with:
           name: macos_metal_debug
           path: build/libgodot_llm.darwin.debug.universal.dylib
+
+  archive-other-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Archive files
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot_llm.gdextension
+          path: godot_llm.gdextension
+    
+  package-addon:
+    needs:
+      [
+        ubuntu-22-cmake-cpu-release,
+        ubuntu-22-cmake-cpu-debug,
+        ubuntu-22-cmake-vulkan-release,
+        ubuntu-22-cmake-vulkan-debug,
+        windows-latest-cmake-cpu-release,
+        windows-latest-cmake-cpu-debug,
+        windows-latest-cmake-vulkan-release,
+        windows-latest-cmake-vulkan-debug,
+        android-cmake-cpu-release,
+        android-cmake-cpu-debug,
+        macos-latest-cmake-cpu-release,
+        macos-latest-cmake-cpu-debug,
+        macos-latest-cmake-metal-release,
+        macos-latest-cmake-metal-debug
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Display structure of downloaded files
+        run: ls -R
