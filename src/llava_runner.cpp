@@ -1,7 +1,5 @@
 #include "llava_runner.hpp"
 #include <llama.h>
-#include <llava.h>
-#include <clip.h>
 #include <log.h>
 #include <sampling.h>
 #include <base64.hpp>

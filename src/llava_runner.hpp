@@ -3,7 +3,8 @@
 
 #include "common.h"
 #include "llama.h"
-#include "llava.h"
+#include "../llama.cpp/examples/llava/llava.h"
+#include "../llama.cpp/examples/llava/clip.h"
 #include <functional>
 #include <string>
 #include <vector>
