@@ -36,6 +36,12 @@ jobs:
           cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
           ninja -j $(nproc)
 
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libgodot_llm.linux.release.x86_64.so
+          path: build/libgodot_llm.linux.release.x86_64.so
+
   ubuntu-22-cmake-cpu-debug:
     runs-on: ubuntu-22.04
     steps:
