@@ -385,8 +385,7 @@ jobs:
           name: android_cpu_debug.zip
           path: build/libgodot_llm.android.debug.aarch64.so
   
-
-  mac-cmake-cpu-release:
+  macos-latest-cmake-cpu-release:
     runs-on: macos-latest
     steps:
       - name: Clone
@@ -408,12 +407,104 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
-          ls .
 
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: mac_cpu_release.zip
-          path: build/libgodot_llm.macos.release.arm64.dylib
+          name: macos_cpu_release.zip
+          path: build/libgodot_llm.darwin.release.arm64.dylib
+
+  macos-latest-cmake-cpu-debug:
+    runs-on: macos-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          brew update
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Debug
+          cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_cpu_debug.zip
+          path: build/libgodot_llm.darwin.debug.arm64.dylib
+
+  macos-latest-cmake-cpu-release:
+    runs-on: macos-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          brew update
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_metal_release.zip
+          path: build/libgodot_llm.darwin.release.arm64.dylib
+
+  macos-latest-cmake-cpu-debug:
+    runs-on: macos-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          brew update
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_metal_release.zip
+          path: build/libgodot_llm.darwin.debug.arm64.dylib
