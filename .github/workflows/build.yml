@@ -39,7 +39,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: linux_cpu_release.zip
+          name: linux_cpu_release
           path: build/libgodot_llm.linux.release.x86_64.so
 
   ubuntu-22-cmake-cpu-debug:
@@ -71,7 +71,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: linux_cpu_debug.zip
+          name: linux_cpu_debug
           path: build/libgodot_llm.linux.debug.x86_64.so
 
   ubuntu-22-cmake-vulkan-release:
@@ -103,7 +103,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: linux_vulkan_release.zip
+          name: linux_vulkan_release
           path: build/libgodot_llm.linux.release.x86_64.so
 
   ubuntu-22-cmake-vulkan-debug:
@@ -135,7 +135,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: linux_vulkan_debug.zip
+          name: linux_vulkan_debug
           path: build/libgodot_llm.linux.debug.x86_64.so
   
   windows-latest-cmake-cpu-release:
@@ -170,7 +170,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: windows_cpu_release.zip
+          name: windows_cpu_release
           path: build/libgodot_llm.windows.release.amd64.dll
 
   windows-latest-cmake-cpu-debug:
@@ -205,7 +205,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: windows_cpu_debug.zip
+          name: windows_cpu_debug
           path: build/libgodot_llm.windows.debug.amd64.dll
 
   windows-latest-cmake-vulkan-release:
@@ -252,7 +252,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: windows_vulkan_release.zip
+          name: windows_vulkan_release
           path: build/libgodot_llm.windows.release.amd64.dll
 
   windows-latest-cmake-vulkan-debug:
@@ -299,7 +299,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: windows_vulkan_debug.zip
+          name: windows_vulkan_debug
           path: build/libgodot_llm.windows.debug.amd64.dll
   
   android-cmake-cpu-release:
@@ -340,7 +340,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: android_cpu_release.zip
+          name: android_cpu_release
           path: build/libgodot_llm.android.release.aarch64.so
 
 
@@ -382,7 +382,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: android_cpu_debug.zip
+          name: android_cpu_debug
           path: build/libgodot_llm.android.debug.aarch64.so
   
   macos-latest-cmake-cpu-release:
@@ -413,7 +413,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: macos_cpu_release.zip
+          name: macos_cpu_release
           path: build/libgodot_llm.darwin.release.arm64.dylib
 
   macos-latest-cmake-cpu-debug:
@@ -444,7 +444,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: macos_cpu_debug.zip
+          name: macos_cpu_debug
           path: build/libgodot_llm.darwin.debug.arm64.dylib
 
   macos-latest-cmake-metal-release:
@@ -475,7 +475,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: macos_metal_release.zip
+          name: macos_metal_release
           path: build/libgodot_llm.darwin.release.arm64.dylib
 
   macos-latest-cmake-metal-debug:
@@ -506,5 +506,5 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: macos_metal_debug.zip
+          name: macos_metal_debug
           path: build/libgodot_llm.darwin.debug.arm64.dylib
