@@ -538,7 +538,8 @@ jobs:
         macos-latest-cmake-cpu-release,
         macos-latest-cmake-cpu-debug,
         macos-latest-cmake-metal-release,
-        macos-latest-cmake-metal-debug
+        macos-latest-cmake-metal-debug,
+        archive-other-files
       ]
     runs-on: ubuntu-latest
     steps:
