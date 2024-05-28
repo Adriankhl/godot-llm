@@ -307,6 +307,7 @@ jobs:
 
     steps:
       - uses: nttld/setup-ndk@v1
+        id: setup-ndk 
         with:
          ndk-version: r23c
          link-to-sdk: true
