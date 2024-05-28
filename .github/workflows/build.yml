@@ -39,7 +39,7 @@ jobs:
       - name: Archive library
         uses: actions/upload-artifact@v4
         with:
-          name: libgodot_llm.linux.release.x86_64.so
+          name: linux_cpu_release.zip
           path: build/libgodot_llm.linux.release.x86_64.so
 
   ubuntu-22-cmake-cpu-debug:
@@ -68,6 +68,12 @@ jobs:
           cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Debug
           ninja -j $(nproc)
 
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_cpu_debug.zip
+          path: build/libgodot_llm.linux.debug.x86_64.so
+
   ubuntu-22-cmake-vulkan-release:
     runs-on: ubuntu-22.04
     steps:
@@ -94,6 +100,12 @@ jobs:
           cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
           ninja -j $(nproc)
 
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_vulkan_release.zip
+          path: build/libgodot_llm.linux.release.x86_64.so
+
   ubuntu-22-cmake-vulkan-debug:
     runs-on: ubuntu-22.04
     steps:
@@ -119,3 +131,9 @@ jobs:
           cd build
           cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Debug
           ninja -j $(nproc)
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_vulkan_debug.zip
+          path: build/libgodot_llm.linux.debug.x86_64.so
