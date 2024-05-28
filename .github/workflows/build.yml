@@ -522,7 +522,7 @@ jobs:
           name: godot_llm.gdextension
           path: godot_llm.gdextension
     
-  package-addon:
+  package-addons:
     needs:
       [
         ubuntu-22-cmake-cpu-release,
