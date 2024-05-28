@@ -155,6 +155,8 @@ jobs:
         run: |
           irm get.scoop.sh | iex
           scoop install ninja llvm
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\apps\llvm\current\bin"
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\shims"
 
       - name: Build
         id: cmake_build
