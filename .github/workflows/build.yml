@@ -137,3 +137,21 @@ jobs:
         with:
           name: linux_vulkan_debug.zip
           path: build/libgodot_llm.linux.debug.x86_64.so
+  
+  windows-latest-cmake-cpu-release:
+    runs-on: windows-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+      
+      - name: Install scoop
+        shell: powershell
+        run: |
+          irm get.scoop.sh | iex
+          scoop install ninja
