@@ -141,6 +141,8 @@ jobs:
   windows-latest-cmake-cpu-release:
     runs-on: windows-latest
     steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+
       - name: Clone
         id: checkout
         uses: actions/checkout@v4
@@ -151,7 +153,6 @@ jobs:
           git submodule update --init --recursive
       
       - name: Scoop dependencies
-        shell: powershell
         run: |
           irm get.scoop.sh | iex
           scoop install ninja llvm
@@ -160,7 +161,6 @@ jobs:
 
       - name: Build
         id: cmake_build
-        uses: ilammy/msvc-dev-cmd@v1
         run: |
           mkdir build
           cd build
