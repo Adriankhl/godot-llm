@@ -172,3 +172,124 @@ jobs:
         with:
           name: windows_cpu_release.zip
           path: build/libgodot_llm.windows.release.amd64.dll
+
+  windows-latest-cmake-cpu-debug:
+    runs-on: windows-latest
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+      
+      - name: Scoop dependencies
+        run: |
+          irm get.scoop.sh | iex
+          scoop install ninja llvm
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\apps\llvm\current\bin"
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\shims"
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Debug
+          ninja -j ${env:NUMBER_OF_PROCESSORS}
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_cpu_debug.zip
+          path: build/libgodot_llm.windows.debug.amd64.dll
+
+  windows-latest-cmake-vulkan-release:
+    runs-on: windows-latest
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+      
+      - name: Scoop dependencies
+        run: |
+          irm get.scoop.sh | iex
+          scoop install ninja llvm
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\apps\llvm\current\bin"
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\shims"
+      
+      - name: Install Vulkan SDK
+        id: get_vulkan
+        run: |
+          curl.exe -o $env:RUNNER_TEMP/VulkanSDK-Installer.exe -L "https://sdk.lunarg.com/sdk/download/${1.3.283}/windows/VulkanSDK-${1.3.283}-Installer.exe"
+          & "$env:RUNNER_TEMP\VulkanSDK-Installer.exe" --accept-licenses --default-answer --confirm-command install
+          Add-Content $env:GITHUB_ENV "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VERSION}"
+          Add-Content $env:GITHUB_PATH "C:\VulkanSDK\${env:VULKAN_VERSION}\bin"
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
+          ninja -j ${env:NUMBER_OF_PROCESSORS}
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_vulkan_release.zip
+          path: build/libgodot_llm.windows.release.amd64.dll
+
+  windows-latest-cmake-vulkan-debug:
+    runs-on: windows-latest
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+      
+      - name: Scoop dependencies
+        run: |
+          irm get.scoop.sh | iex
+          scoop install ninja llvm
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\apps\llvm\current\bin"
+          Add-Content $env:GITHUB_PATH "$HOME\scoop\shims"
+      
+      - name: Install Vulkan SDK
+        id: get_vulkan
+        run: |
+          curl.exe -o $env:RUNNER_TEMP/VulkanSDK-Installer.exe -L "https://sdk.lunarg.com/sdk/download/${1.3.283}/windows/VulkanSDK-${1.3.283}-Installer.exe"
+          & "$env:RUNNER_TEMP\VulkanSDK-Installer.exe" --accept-licenses --default-answer --confirm-command install
+          Add-Content $env:GITHUB_ENV "VULKAN_SDK=C:\VulkanSDK\${env:VULKAN_VERSION}"
+          Add-Content $env:GITHUB_PATH "C:\VulkanSDK\${env:VULKAN_VERSION}\bin"
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Debug
+          ninja -j ${env:NUMBER_OF_PROCESSORS}
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_vulkan_debug.zip
+          path: build/libgodot_llm.windows.debug.amd64.dll
