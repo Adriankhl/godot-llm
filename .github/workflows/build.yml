@@ -384,3 +384,36 @@ jobs:
         with:
           name: android_cpu_debug.zip
           path: build/libgodot_llm.android.debug.aarch64.so
+  
+
+  mac-cmake-cpu-release:
+    runs-on: macos-latest
+    steps:
+      - name: Clone
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Clone submodule
+        id: clone_submodule
+        run: |
+          git submodule update --init --recursive
+
+      - name: Dependencies
+        id: depends
+        run: |
+          brew update
+
+      - name: Build
+        id: cmake_build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
+          ls .
+
+      - name: Archive library
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac_cpu_release.zip
+          path: build/libgodot_llm.macos.release.arm64.dylib
