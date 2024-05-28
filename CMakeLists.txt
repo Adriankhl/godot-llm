@@ -90,7 +90,7 @@ endif()
 
 add_subdirectory(godot-cpp)
 add_subdirectory(llama.cpp)
-add_subdirectory(llama.cpp/examples/llava)
+add_subdirectory(llama.cpp/examples/llava EXCLUDE_FROM_ALL)
 
 if (APPLE)
   set(ARCH_NAME "universal")
