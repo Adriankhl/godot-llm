@@ -13,41 +13,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OSX" FORCE)
 endif ()
 
-add_subdirectory(godot-cpp)
-add_subdirectory(llama.cpp EXCLUDE_FROM_ALL)
-
-set(src_files
-  "src/sqlite3.c"
-  "src/sqlite3.h"
-  "src/sqlite3ext.h"
-  "src/sqlite-vec.c"
-  "src/sqlite-vec.h"
-  "src/conversion.hpp"
-  "src/conversion.cpp"
-  "src/gdembedding.hpp"
-  "src/gdembedding.cpp"
-  "src/gdllama.hpp"
-  "src/gdllama.cpp"
-  "src/gdllava.hpp"
-  "src/gdllava.cpp"
-  "src/embedding_runner.hpp"
-  "src/embedding_runner.cpp"
-  "src/llama_runner.hpp"
-  "src/llama_runner.cpp"
-  "src/llava_runner.hpp"
-  "src/llava_runner.cpp"
-  "src/llm_db.hpp"
-  "src/llm_db.cpp"
-  "src/register_types.hpp"
-  "src/register_types.cpp"
-  "llama.cpp/examples/llava/llava.cpp"
-  "llama.cpp/examples/llava/llava.h"
-  "llama.cpp/examples/llava/clip.cpp"
-  "llama.cpp/examples/llava/clip.h"
-)
-
 add_definitions(-DSQLITE_CORE)
-
 
 if (MSVC)
   # Disable MSVC fopen warning
@@ -93,6 +59,39 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-fPIC)
 endif()
+
+add_subdirectory(godot-cpp)
+add_subdirectory(llama.cpp EXCLUDE_FROM_ALL)
+
+set(src_files
+  "src/sqlite3.c"
+  "src/sqlite3.h"
+  "src/sqlite3ext.h"
+  "src/sqlite-vec.c"
+  "src/sqlite-vec.h"
+  "src/conversion.hpp"
+  "src/conversion.cpp"
+  "src/gdembedding.hpp"
+  "src/gdembedding.cpp"
+  "src/gdllama.hpp"
+  "src/gdllama.cpp"
+  "src/gdllava.hpp"
+  "src/gdllava.cpp"
+  "src/embedding_runner.hpp"
+  "src/embedding_runner.cpp"
+  "src/llama_runner.hpp"
+  "src/llama_runner.cpp"
+  "src/llava_runner.hpp"
+  "src/llava_runner.cpp"
+  "src/llm_db.hpp"
+  "src/llm_db.cpp"
+  "src/register_types.hpp"
+  "src/register_types.cpp"
+  "llama.cpp/examples/llava/llava.cpp"
+  "llama.cpp/examples/llava/llava.h"
+  "llama.cpp/examples/llava/clip.cpp"
+  "llama.cpp/examples/llava/clip.h"
+)
 
 if (APPLE)
   set(ARCH_NAME "universal")
