@@ -158,7 +158,7 @@ void LlmDB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("run_retrieve_similar_texts", "text", "where", "n_results"), &LlmDB::run_retrieve_similar_texts);
 
     ADD_SIGNAL(MethodInfo("retrieve_similar_texts_finished", PropertyInfo(Variant::PACKED_STRING_ARRAY, "array")));
-
+    ADD_SIGNAL(MethodInfo("store_text_finished"));
 }
 
 LlmDB::LlmDB() : db_dir {"."},
@@ -948,6 +948,8 @@ void LlmDB::store_text_process() {
         store_text_queue.pop();
     }
     UtilityFunctions::print_verbose("store_text_process -- done");
+
+    call_deferred("emit_signal", "store_text_finished");
 }
 
 Error LlmDB::run_store_text_by_id(String id, String text) {
