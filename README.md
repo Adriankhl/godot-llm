@@ -2,6 +2,8 @@
 Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU.
 I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
 
+&#9888; While LLM is less controversial than image generation models, there can be legal issues when LLM is integrated in games, I have created another [document](./LLM_LEGAL.md) to document some relevant information
+
 # Table of Contents
 1. [Quick start](#quick-start)
     - [Install](#install)
@@ -27,7 +29,7 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
 
 ## Install
 1. Get `Godot LLM` directly from the asset library, or download the vulkan or cpu zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
-2. Now you should be able to see `GdLlama`, `GdEmbedding`, `GDLlava`, and `LlmDB` nodes in your godot editor.
+2. Now you should be able to see `GdLlama`, `GdEmbedding`, `GDLlava`, and `LlmDB` nodes in your godot editor. You can add them to a scene in Godot editor, or initialize themm directly by `.new()`.
 
 ## Text Generation: GDLlama node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
@@ -210,7 +212,8 @@ Question:
 
 # Features
 ## Already working
-* Platform (backend): windows (cpu, vulkan), Linux (cpu, vulkan), Android (cpu)
+* Platform (backend): windows (cpu, vulkan), macOS(cpu, metal), Linux (cpu, vulkan), Android (cpu)
+    - macOS support is on best effort basis since I don't have a mac myself
 * [llama.cpp](https://github.com/ggerganov/llama.cpp)-based features
     - Text generation
     - Embedding
@@ -222,8 +225,9 @@ Question:
     - Retrieve text by embedding similarity and sql constraints on metadata
 
 ## TODO
+* iOS: build should be trivial, but an apple developer ID is needed to run thhe build
 * Add in-editor documentation, waiting for proper support in Godot 4.3
-* Mac and ios
+* Download models directly from huggingface
 * Automatically generate json schema from data classes in GDSCript
 * More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
 * [mlc-llm](https://github.com/mlc-ai/mlc-llm) integration
@@ -437,7 +441,7 @@ There are 4 static functions to create LlmDBMetaData
 
 # FAQ
 
-1. You have an issue, how to get more debug message?
+1. How to get more debug message?
 
 Turn on `Verbose stdout` in `Project Settings`, consider running Godot from a terminal to get additional logging messages.
 
@@ -445,13 +449,13 @@ Turn on `Verbose stdout` in `Project Settings`, consider running Godot from a te
 
 Yes, the plugin uses utf8 encoding so it has multilingual support naturally. However, a language model may be trained with English data only and it won't be able to generate text other than English, choose the language model based on your need.
 
-3. Observing strange tokens in generated text, such as `<eot_id>` when `Should Output Special` is off.
+3. Strange tokens in generated text, such as `<eot_id>` when `Should Output Special` is off.
 
 You are always welcome to open an issue. However, be aware that the standard of GGUF format can be changed to support new features and models, such that the bug can come from the model side instead of within this plugin. For example, some older llama 3 GGUF model may not be compatible with the latest format, you may try to search for a newer model with fixes such as [this](https://huggingface.co/NikolayKozloff/Meta-Llama-3-8B-Instruct-bf16-correct-pre-tokenizer-and-EOS-token-Q8_0-Q6_k-Q4_K_M-GGUF/tree/main).
 
-4. You are runningg Arch linux (or its derivatives such as Manjaro) and your Godot Editor crash.
+4. You are running Arch linux (or its derivatives such as Manjaro) and your Godot Editor crash.
 
-The Arch build of Godot is bugged, download Godot from the official website instead.
+The Arch build of Godot is bugged when working with GDExtension, download Godot from the official website instead.
 
 5. You have a discrete GPU and you see `unable to load model` error, you have make sure that the model parameters are correctly set.
 
@@ -494,4 +498,4 @@ ninja -j4
 ninja install
 ```
 
-The folder `../install/vulkan/addons/godot_llm` (`cpu` instead of `vulkan` for cpu build) can be copy directly to the `addons` folder of your godot project.
+The folder `../install/gpu/addons/godot_llm` (`cpu` instead of `vulkan` for cpu build) can be copy directly to the `addons` folder of your godot project.
