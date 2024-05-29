@@ -304,7 +304,7 @@ Error GDLlava::run_generate_text_base64(String prompt, String image_base64) {
 }
 
 
-String GDLlava::generate_text_image_internal(String prompt, Image* image) {
+String GDLlava::generate_text_image_internal(String prompt, Ref<Image> image) {
     glog_verbose("generate_text_image_internal");
 
     String image_base64 = Marshalls::get_singleton()->raw_to_base64(image->save_jpg_to_buffer());
@@ -319,7 +319,7 @@ String GDLlava::generate_text_image_internal(String prompt, Image* image) {
     return full_generated_text;
 }
 
-String GDLlava::generate_text_image(String prompt, Image* image) {
+String GDLlava::generate_text_image(String prompt, Ref<Image> image) {
     glog_verbose("generate_text_image");
 
     func_mutex->lock();
@@ -341,7 +341,7 @@ String GDLlava::generate_text_image(String prompt, Image* image) {
     return full_generated_text;
 }
 
-Error GDLlava::run_generate_text_image(String prompt, Image* image) {
+Error GDLlava::run_generate_text_image(String prompt, Ref<Image> image) {
     glog_verbose("run_generate_text_image");
     func_mutex->lock();
 

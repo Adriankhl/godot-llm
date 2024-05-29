@@ -2,6 +2,7 @@
 #include "gdembedding.hpp"
 #include "sqlite3.h"
 #include "sqlite-vec.h"
+#include <algorithm>
 #include <cstring>
 #include <gdextension_interface.h>
 #include <godot_cpp/classes/global_constants.hpp>
@@ -20,6 +21,7 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <queue>
+#include <vector>
 
 namespace godot {
 
@@ -50,36 +52,36 @@ LlmDBMetaData::LlmDBMetaData() : data_name {"default_name"},
 
 LlmDBMetaData::~LlmDBMetaData() {}
 
-LlmDBMetaData* LlmDBMetaData::create(String data_name, int data_type) {
-    LlmDBMetaData* data = memnew(LlmDBMetaData());
+Ref<LlmDBMetaData> LlmDBMetaData::create(String data_name, int data_type) {
+    Ref<LlmDBMetaData> data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(data_type);
     return data;
 }
 
-LlmDBMetaData* LlmDBMetaData::create_int(String data_name) {
-    LlmDBMetaData* data = memnew(LlmDBMetaData());
+Ref<LlmDBMetaData> LlmDBMetaData::create_int(String data_name) {
+    Ref<LlmDBMetaData> data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(0);
     return data;
 }
 
-LlmDBMetaData* LlmDBMetaData::create_real(String data_name) {
-    LlmDBMetaData* data = memnew(LlmDBMetaData());
+Ref<LlmDBMetaData> LlmDBMetaData::create_real(String data_name) {
+    Ref<LlmDBMetaData> data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(1);
     return data;
 }
 
-LlmDBMetaData* LlmDBMetaData::create_text(String data_name) {
-    LlmDBMetaData* data = memnew(LlmDBMetaData());
+Ref<LlmDBMetaData> LlmDBMetaData::create_text(String data_name) {
+    Ref<LlmDBMetaData> data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(2);
     return data;
 }
 
-LlmDBMetaData* LlmDBMetaData::create_blob(String data_name) {
-    LlmDBMetaData* data = memnew(LlmDBMetaData());
+Ref<LlmDBMetaData> LlmDBMetaData::create_blob(String data_name) {
+    Ref<LlmDBMetaData> data = memnew(LlmDBMetaData());
     data->set_data_name(data_name);
     data->set_data_type(2);
     return data;
@@ -277,7 +279,7 @@ TypedArray<LlmDBMetaData> LlmDB::get_meta() const {
 
 void LlmDB::set_meta(TypedArray<LlmDBMetaData> p_meta) {
     bool is_id_valid = true;
-    int col_to_remove = -1;
+    std::vector<int> cols_to_remove {};
 
 
     if (p_meta.size() != 0) {
@@ -286,27 +288,31 @@ void LlmDB::set_meta(TypedArray<LlmDBMetaData> p_meta) {
             UtilityFunctions::print_verbose("Checking meta data " + String::num_int64(i));
             if (p_meta[i].get_type() != Variant::NIL) {
                 UtilityFunctions::print_verbose("Correct resource type");
-                LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(p_meta[i]);
+                Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(p_meta[i]);
                 if (sd->get_data_name() == "id") {
                     UtilityFunctions::printerr("Column " + String::num_int64(i) + " error: Id column must be the first column (0)");
-                    col_to_remove = i;
+                    cols_to_remove.push_back(i);
                 }
             }
         }
-        if (col_to_remove != -1) {
-            UtilityFunctions::printerr("Removing column " + String::num(col_to_remove));
-            p_meta.remove_at(col_to_remove);
+
+        // Remove from the end to make sure the indexes are correct
+        std::reverse(cols_to_remove.begin(), cols_to_remove.end());
+
+        for (int i : cols_to_remove) {
+            UtilityFunctions::printerr("Removing column " + String::num(i));
+            p_meta.remove_at(i);
         }
 
-        LlmDBMetaData* sd0 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
+        Ref<LlmDBMetaData> sd0 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
         if (sd0->get_data_name() == "id" && sd0->get_data_type() != LlmDBMetaDataType::TEXT) {
             UtilityFunctions::printerr("Id column should be TEXT type, removing");
             p_meta.remove_at(0);
         }
 
         // Get again since it might get removed
-        sd0 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
-        if (sd0->get_data_name() != "id") {
+        Ref<LlmDBMetaData> sd0_1 = Object::cast_to<LlmDBMetaData>(p_meta[0]);
+        if (sd0_1->get_data_name() != "id") {
             UtilityFunctions::printerr("First column is not id");
             is_id_valid = false;
         }
@@ -485,7 +491,7 @@ void LlmDB::create_llm_tables() {
     UtilityFunctions::print_verbose("create_llm_tables: " + table_name);
     String statement = "CREATE TABLE IF NOT EXISTS " + table_name + " (";
     for (int i = 0; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += "'" + sd->get_data_name() + "' ";
         statement += type_int_to_string(sd->get_data_type());
         statement += ", ";
@@ -507,7 +513,7 @@ void LlmDB::create_llm_tables() {
 
     String statement_meta = "CREATE TABLE IF NOT EXISTS " + meta_table_name + " (";
     for (int i = 0; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement_meta += " '" + sd->get_data_name() + "' ";
         statement_meta += type_int_to_string(sd->get_data_type());
         if (i == 0) {
@@ -632,7 +638,7 @@ bool LlmDB::is_table_valid(String p_table_name) {
         String name = String::utf8((char *) sqlite3_column_text(stmt, 1));
         String type = String::utf8((char *) sqlite3_column_text(stmt, 2));
 
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
 
         if (name != sd->get_data_name()) {
             UtilityFunctions::printerr("Column name wrong, table : " + name + ", meta: " + sd->get_data_name());
@@ -668,7 +674,7 @@ void LlmDB::store_meta(Dictionary meta_dict) {
     Dictionary p_meta_dict = meta_dict.duplicate(false);
     PackedStringArray array_bind {PackedStringArray()};
     for (int i = 0; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         if(p_meta_dict.has(sd->get_data_name())) {
             Variant v = p_meta_dict.get(sd->get_data_name(), nullptr);
             if (v.get_type() != type_int_to_variant(sd->get_data_type())) {
@@ -875,14 +881,14 @@ void LlmDB::insert_text_by_id(String id, String text) {
     String statement = "INSERT INTO " + table_name + " (";
 
     for (int i = 0; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += sd->get_data_name() + ", ";
     }
 
     statement += "llm_text, embedding) VALUES (?, ";
     
     for (int i = 1; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         statement += "(SELECT " + sd->get_data_name() + " FROM " + table_name + "_meta" + " WHERE id=?), ";
     }
     
@@ -985,7 +991,7 @@ void LlmDB::insert_text_by_meta(Dictionary meta_dict, String text) {
     Dictionary p_meta_dict = meta_dict.duplicate(false);
     PackedStringArray array_bind {PackedStringArray()};
     for (int i = 0; i < meta.size(); i++) {
-        LlmDBMetaData* sd = Object::cast_to<LlmDBMetaData>(meta[i]);
+        Ref<LlmDBMetaData> sd = Object::cast_to<LlmDBMetaData>(meta[i]);
         if(p_meta_dict.has(sd->get_data_name())) {
             Variant v = p_meta_dict.get(sd->get_data_name(), nullptr);
             if (v.get_type() != type_int_to_variant(sd->get_data_type())) {

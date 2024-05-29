@@ -34,11 +34,11 @@ class LlmDBMetaData : public Resource {
     public:
         LlmDBMetaData();
         ~LlmDBMetaData();
-        static LlmDBMetaData* create(String data_name, int data_type);
-        static LlmDBMetaData* create_int(String data_name);
-        static LlmDBMetaData* create_real(String data_name);
-        static LlmDBMetaData* create_text(String data_name);
-        static LlmDBMetaData* create_blob(String data_name);
+        static Ref<LlmDBMetaData> create(String data_name, int data_type);
+        static Ref<LlmDBMetaData> create_int(String data_name);
+        static Ref<LlmDBMetaData> create_real(String data_name);
+        static Ref<LlmDBMetaData> create_text(String data_name);
+        static Ref<LlmDBMetaData> create_blob(String data_name);
         String get_data_name() const;
         void set_data_name(const String p_data_name);
         int get_data_type() const;

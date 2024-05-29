@@ -22,7 +22,7 @@ class GDLlava : public Node {
         Ref<Thread> generate_text_thread;
         String generate_text_common(String prompt, String image_base64);
         String generate_text_base64_internal(String prompt, String image_base64);
-        String generate_text_image_internal(String prompt, Image* image);
+        String generate_text_image_internal(String prompt, Ref<Image> image);
         std::function<void(std::string)> glog;
         std::function<void(std::string)> glog_verbose;
         std::string generate_text_buffer;
@@ -60,8 +60,8 @@ class GDLlava : public Node {
         bool is_running();
         String generate_text_base64(String prompt, String image_base64);
         Error run_generate_text_base64(String prompt, String image_base64);
-        String generate_text_image(String prompt, Image* image);
-        Error run_generate_text_image(String prompt, Image* image);
+        String generate_text_image(String prompt, Ref<Image> image);
+        Error run_generate_text_image(String prompt, Ref<Image> image);
         void stop_generate_text();
 };
 
