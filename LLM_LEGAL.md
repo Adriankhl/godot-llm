@@ -54,9 +54,9 @@ If a company put sufficient efforts into filtering, cleaning, and synthesizing t
 * [Our responsible approach to Meta AI and Meta Llama 3](https://ai.meta.com/blog/meta-llama-3-meta-ai-responsibility/)
 
 
-#### Considering using a safeguard
+#### Consider using a safeguard
 
-There are many ways to safeguard LLM-genrated contents, such as constraining the format and words filtering. Meta even published a [Llama Guard 2](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-guard-2/) model to identify issues in user input and generated output, and yes it has a [GGUF version](https://huggingface.co/neopolita/meta-llama-guard-2-8b-gguf/tree/main) that can be used in inference.
+There are many ways to safeguard LLM-genrated contents, such as constraining the format and setting up text filter. Meta even published a [Llama Guard 2](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-guard-2/) model to identify issues (e.g., privacy, intellectual property) in user input and generated output, and yes it has a [GGUF version](https://huggingface.co/neopolita/meta-llama-guard-2-8b-gguf/tree/main) that can be used in inference.
 
 
 
