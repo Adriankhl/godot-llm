@@ -1,6 +1,7 @@
 # Godot LLM
-Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU.
-I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
+Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU. I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
+
+&#9888; While LLM is less controversial than image generation models, there can still be legal issues when LLM contents are integrated in games, I have created another [page](./LLM_LEGAL.md) to document some relevant information
 
 # Table of Contents
 1. [Quick start](#quick-start)
@@ -10,8 +11,9 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Multimodal Text Generation: GDLlava node](#multimodal-text-generation-gdllava-node)
     - [Vector Database: LlmDB node](#vector-database-llmdb-node)
     - [Template/Demo](#templatedemo)
-2. [Features](#features)
-3. [Documentation](#documentation)
+2. [Retrieval Augmented Generation (RAG)](#retrieval-augmented-generation-rag)
+3. [Roadmap](#roadmap)
+4. [Documentation](#documentation)
     - [Inspector Properties: GDLlama, GDEmbedding, and GDLlava](#inspector-properties-gdllama-gdembedding-and-gdllava)
     - [GDLlama Functions and Signals](#gdllama-functions-and-signals)
     - [GDEmbedding Functions and Signals](#gdembedding-functions-and-signals)
@@ -19,14 +21,14 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Text generation with Json schema](#text-generation-with-json-schema)
     - [LlmDB Functions and Signals](#llmdb-functions-and-signals)
     - [LlmDBMetaData](#llmdbmetadata)
-4. [FAQ](#faq)
-5. [Compile from Source](#compile-from-source)
+5. [FAQ](#faq)
+6. [Compile from Source](#compile-from-source)
 
 # Quick Start
 
 ## Install
-1. Get `Godot LLM` directly from the asset library, or download the zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
-2. Now you should be able to see `GdLlama`, `GdEmbedding`, and `GDLlava` nodes in your godot editor.
+1. Get `Godot LLM` directly from the asset library, or download the vulkan or cpu zip file from the [release page](https://github.com/Adriankhl/godot-llm/releases), and unzip it to place it in the `addons` folder in your godot project
+2. Now you should be able to see `GdLlama`, `GdEmbedding`, `GDLlava`, and `LlmDB` nodes in your godot editor. You can add them to a scene in Godot editor, or initialize themm directly by `.new()`.
 
 ## Text Generation: GDLlama node
 1. Download a [supported](https://github.com/ggerganov/llama.cpp?tab=readme-ov-file#description) LLM model in GGUF format (recommendation: [Meta-Llama-3-8B-Instruct-Q5_K_M.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF/tree/main)), move the file to somewhere in your godot project
@@ -40,7 +42,7 @@ func _ready():
 3. Generate text starting from "Hello"
 ```
     var generated_text = gdllama.generate_text_simple("Hello")
-    print(hello)
+    print(generated_text)
 ```
 4. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in background, then handle the `generate_text_updated` or `generate_text_finished` signals
 
@@ -194,7 +196,7 @@ The [godot-llm-template](https://github.com/Adriankhl/godot-llm-template) provid
 
 # Retrieval-Augmented Generation (RAG)
 
-This plugin now has all the essentaial components for simple Retrieval-Augmented Generation (RAG). You can store information about your game world or your character into the vector database, retrieve relevant texts to enrich your prompt, then generate text for your game, the generated text can be store back to the vector database to enrich future prompt. RAG complement the shortcoming of LLM - the limited context size force the model to forget earlier information, and with RAG, information can be stored in a database to become long-term memory, and only relevant information are retrieve to enrich the prompt to keep the prompt within the context size.
+This plugin now has all the essentaial components for simple Retrieval-Augmented Generation (RAG). You can store information about your game world or your character into the vector database, retrieve relevant texts to enrich your prompt, then generate text for your game, the generated text can be stored back to the vector database to enrich future prompt. RAG complement the shortcoming of LLM - the limited context size force the model to forget earlier information, and with RAG, information can be stored in a database to become long-term memory, and only relevant information are retrieve to enrich the prompt to keep the prompt within the context size.
 
 To get started, you may try the following format for your prompt input:
 ```
@@ -207,9 +209,11 @@ Question:
 
 ![](https://upload.wikimedia.org/wikipedia/commons/3/37/RAG_schema.svg)
 
-# Features
-## Already working
-* Platform (backend): windows (cpu, vulkan), Linux (cpu, vulkan), Android (cpu)
+# Roadmap
+
+## Features
+* Platform (backend): windows (cpu, vulkan), macOS(cpu, metal), Linux (cpu, vulkan), Android (cpu)
+    - macOS support is on best effort basis since I don't have a mac myself
 * [llama.cpp](https://github.com/ggerganov/llama.cpp)-based features
     - Text generation
     - Embedding
@@ -221,8 +225,10 @@ Question:
     - Retrieve text by embedding similarity and sql constraints on metadata
 
 ## TODO
+* iOS: build should be trivial, but an apple developer ID is needed to run thhe build
 * Add in-editor documentation, waiting for proper support in Godot 4.3
-* Mac and ios
+* Add utility functions to generate useful prompts, such as llama guard 2
+* Download models directly from huggingface
 * Automatically generate json schema from data classes in GDSCript
 * More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
 * [mlc-llm](https://github.com/mlc-ai/mlc-llm) integration
@@ -243,8 +249,7 @@ Each type of node owns a set of properties which affect the computational perfor
 * `Input Prefix`: append before every user input
 * `Input Suffix`: append after every user input
 * `Should Output prompt`: whether the input prompt should be included in the output
-* `Should Output Bos`: whether the special bos (beginning of sequence) token should be included in the output
-* `Should Output Eos`: whether the special eos (ending of sequence) token should be included in the output
+* `Should Output Special`: whether the special (e.g., beginning of sequence and ending of sequence) token should be included in the output
 * `Context Size`: number of tokens the model can process at a time
 * `N Predict`: number of new tokens to generate, generate infinite sequence if -1
 * `N Keep`: when the model run out of `context size`, it starts to forget about earlier context, set this variable to force the model to keep a number of the earliest tokens to keep the conversation relevant
@@ -257,6 +262,8 @@ Each type of node owns a set of properties which affect the computational perfor
 * `Min P`: only sample from tokens with at least this probability, disabledd if 0.0
 * `N Thread`: number of cpu threads to use
 * `N GPU Layer`: number of layer offloaded to GPU
+* `Main GPU`: the main GPU for computation
+* `Split Mode`: how the computation will be distributed if there are multiple GPU in your systemm (0: None, 1: Layer, 2: Row)
 * `Escape`: process escape character in input prompt
 * `N Batch`: maximum number of tokens per iteration during continuous batching
 * `N Ubatch`: maximum batch size for computation
@@ -314,11 +321,10 @@ Suppose you want to generate a character with:
   * `weapon`: either "sword", "bow", or "wand
   * `description`: a text with minimum 10 character
 
-You should first create a GDLlama node, and turn `Should Output prompt`, `Should Output Bos`, and `Should Output Eos` off either by inspector or by script:
+You should first create a GDLlama node, and turn `Should Output prompt` and `Should Output Special` off either by inspector or by script:
 ```
 should_output_prompt = false
-should_output_bos = false
-should_output_eos = false
+should_output_special = false
 ```
 
 
@@ -407,23 +413,29 @@ Besides the functions and signals from GDEmbedding, LlmDB has a few more functio
 * `has_id(id: String, p_table_name: String) -> bool`: whether the table has a specific id stored
 * `split_text(text: String) -> PackedStringArray`: split a piece of text first by all `Absolute Separators`, then by one of the appropiate `Chunk Separators`, such that any text chunk is shorter than `Chunk Size` (measured in character), and the overlap is close to but not greater than `Chunk Overlap`. If the algorithm failed to satisfy the contraints, there will be an error message printed out and the returned chunk will be greater than the `Chunk Size`
 * `store_text_by_id(id: String, text: String)`: split the text and store the chunks in the database, be aware that `store_meta` should have been called previously such that the `id` with the corresponding meta is already in the database
-* `run_store_text_by_id(id: String, text: String) -> Error`: run `store_text_by_id` in background
+* `run_store_text_by_id(id: String, text: String) -> Error`: run `store_text_by_id` in background, emits `store_text_finished` signal when finished
 * `store_text_by_meta(meta_dict: Dictionary, text: String)`: split the text and store the chunks in the database with the metadata defined in `meta_dict`, be aware that the metadata should be valid, every key should be a name stored in the `.meta` property and the corresponding type should be correct 
-* `run_store_text_by_meta(meta_dict: Dictionary, text: String) -> Error` run `store_text_by_meta` in background
+* `run_store_text_by_meta(meta_dict: Dictionary, text: String) -> Error` run `store_text_by_meta` in background, emits `store_text_finished` signal when finished
 * `retrieve_similar_texts(text: String, where: String, n_results: int) -> PackedStringArray`: retrieve `n_results` most similar text chunks to `text`, `where` should be empty or an sql WHERE clause to filter the chunks by metadata
 * `run_retrieve_similar_texts(text: String, where: String, n_results: int) -> Error`:
 run `retrieve_similar_texts` in background, and emits a `retrieve_similar_texts_finished` signal once it is done
 
 ### Signals
 
+* `store_text_finished`: emitted when `run_store_text_by_id` or `run_store_text_by_meta` is finished
 * `retrieve_similar_texts_finished(array: PackedStringArray)`: contains an array of `String`, emitted when `run_retrieve_similar_texts` is finished
 
 ## LlmDBMetaData
 
-This is a simple resource class that forms the `meta` array properties in LlmDB. It has two properties:
+This is a simple resource class that forms the `meta` array property in LlmDB. It has two properties:
 
 * `data_name`: a `String` that defines the name of this metadata
-* `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties or the function below instead
+* `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties, the LlmDBMetaData enum or the function below instead
+* `LlmDBMetaDataType` enum:
+    - `LlmDBMetaData.INTEGER = 0`
+    - `LlmDBMetaData.REAL = 1`
+    - `LlmDBMetaData.TEXT = 2`
+    - `LlmDBMetaData.BLOB = 3`
 
 There are 4 static functions to create LlmDBMetaData
 
@@ -432,16 +444,30 @@ There are 4 static functions to create LlmDBMetaData
 * `create_text(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type text (2)
 * `create_blob(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type blob (3), note that blob data type support is still a work-in-progress
 
+Alternatively, you can use this static function to create LlmDBMetaData
+* `create(data_name: String, data_type: int) -> LlmDBMetaData`: create a corresponding LlmDBMetaData by `data_name` and `data_type`, it is recommended to use the enum instead of `int` for `data_type`
 
 # FAQ
 
-1. Does it support languages other than English?
+1. How to get more debug message?
+
+Turn on `Verbose stdout` in `Project Settings`, consider running Godot from a terminal to get additional logging messages.
+
+2. Does it support languages other than English?
 
 Yes, the plugin uses utf8 encoding so it has multilingual support naturally. However, a language model may be trained with English data only and it won't be able to generate text other than English, choose the language model based on your need.
 
-2. Observing strange tokens in generated text, such as `<eot_id>` when `Should Output Eos` is off.
+3. Strange tokens in generated text, such as `<eot_id>` when `Should Output Special` is off.
 
 You are always welcome to open an issue. However, be aware that the standard of GGUF format can be changed to support new features and models, such that the bug can come from the model side instead of within this plugin. For example, some older llama 3 GGUF model may not be compatible with the latest format, you may try to search for a newer model with fixes such as [this](https://huggingface.co/NikolayKozloff/Meta-Llama-3-8B-Instruct-bf16-correct-pre-tokenizer-and-EOS-token-Q8_0-Q6_k-Q4_K_M-GGUF/tree/main).
+
+4. You are running Arch linux (or its derivatives such as Manjaro) and your Godot Editor crash.
+
+The Arch build of Godot is bugged when working with GDExtension, download Godot from the official website instead.
+
+5. You have a discrete GPU and you see `unable to load model` error, you have make sure that the model parameters are correctly set.
+
+There is currently a bug on vulkan backend if you have multiple drivers installed for the same GPU, try to turn `Split Mode` to `NONE` (0) and set your `Main GPU` manually (starting from 0) to see if it works.
 
 # Compile from source
 Install build tools and Vulkan SDK for your operating system, then clone this repository
@@ -480,4 +506,4 @@ ninja -j4
 ninja install
 ```
 
-The folder `../install/vulkan/addons/godot_llm` (`cpu` instead of `vulkan` for cpu build) can be copy directly to the `addons` folder of your godot project.
+The folder `../install/gpu/addons/godot_llm` (`cpu` instead of `gpu` for cpu build) can be copy directly to the `addons` folder of your godot project.
