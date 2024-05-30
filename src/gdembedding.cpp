@@ -282,7 +282,7 @@ float GDEmbedding::similarity_cos_string(String s1, String s2) {
 
     func_mutex->unlock();
 
-    float similarity = similarity_cos_string(s1, s2);
+    float similarity = similarity_cos_string_internal(s1, s2);
 
     glog_verbose("similarity_cos_string -- done");
 

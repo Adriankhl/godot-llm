@@ -42,7 +42,7 @@ func _ready():
 3. Generate text starting from "Hello"
 ```
     var generated_text = gdllama.generate_text_simple("Hello")
-    print(hello)
+    print(generated_text)
 ```
 4. Text generation is slow, you may want to call `gdllama.run_generate_text("Hello", "", "")` to run the generation in background, then handle the `generate_text_updated` or `generate_text_finished` signals
 
