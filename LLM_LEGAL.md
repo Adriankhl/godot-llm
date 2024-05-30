@@ -38,7 +38,7 @@ you can have your game generate LMM content at runtime. There are two caveats:
 
 * Even without all these legal issues, just relying on LLM-generated contents won't make your game stand out. Like many other video game technologies, LLM can be useful, but making a successful game is much more than being able to utilize a specific technology.
 * If you use pre-generated contents, double check your contents to make sure they are legal, e.g., search them on Google to see if it is too similar to other copyrighted materials
-* Live-generated contents are in general harder to control, but you can still pick an appropriate model, contrain the input prompt, or apply filters to generateds text to guard the generated contents
+* Live-generated contents are in general harder to control, but you can still pick an appropriate model, contrain the input prompt, or apply filters to generated texts to safeguard the generated contents
 
 ### Selecting LLM models
 
@@ -53,12 +53,9 @@ If a company put sufficient efforts into filtering, cleaning, and synthesizing t
 * [Microsoft Responsible AI Standard](https://www.microsoft.com/en-us/ai/principles-and-approach/) and see "Safety-first model design" in [Introducing Phi-3: Redefining what’s possible with SLMs](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/)
 * [Our responsible approach to Meta AI and Meta Llama 3](https://ai.meta.com/blog/meta-llama-3-meta-ai-responsibility/)
 
-
 #### Consider using a safeguard
 
 There are many ways to safeguard LLM-genrated contents, such as constraining the format and setting up text filter. Meta even published a [Llama Guard 2](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-guard-2/) model to identify issues (e.g., privacy, intellectual property) in user input and generated output, and yes it has a [GGUF version](https://huggingface.co/neopolita/meta-llama-guard-2-8b-gguf/tree/main) that can be used in inference.
-
-
 
 ## Articles
 
