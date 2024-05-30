@@ -430,7 +430,12 @@ run `retrieve_similar_texts` in background, and emits a `retrieve_similar_texts_
 This is a simple resource class that forms the `meta` array property in LlmDB. It has two properties:
 
 * `data_name`: a `String` that defines the name of this metadata
-* `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties or the function below instead
+* `data_type`: an `int` that defines the data type of this metadata (0=integer, 1=real, 2=text, 3=blob), note that inputing an integer here is not recommended since it can be confusing, use the inspector properties, the LlmDBMetaData enum or the function below instead
+* `LlmDBMetaDataType` enum:
+    - `LlmDBMetaData.INTEGER = 0`
+    - `LlmDBMetaData.REAL = 1`
+    - `LlmDBMetaData.TEXT = 2`
+    - `LlmDBMetaData.BLOB = 3`
 
 There are 4 static functions to create LlmDBMetaData
 
@@ -439,6 +444,8 @@ There are 4 static functions to create LlmDBMetaData
 * `create_text(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type text (2)
 * `create_blob(data_name: String) -> LlmDBMetaData`: create a LlmDBMetaData with type blob (3), note that blob data type support is still a work-in-progress
 
+Alternatively, you can use this static function to create LlmDBMetaData
+* `create(data_name: String, data_type: int) -> LlmDBMetaData`: create a corresponding LlmDBMetaData by `data_name` and `data_type`, it is recommended to use the enum instead of `int` for `data_type`
 
 # FAQ
 
