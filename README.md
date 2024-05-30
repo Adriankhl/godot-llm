@@ -1,8 +1,7 @@
 # Godot LLM
-Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU.
-I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
+Isn't it cool to utilize large language model (LLM) to generate contents for your game? LLM has great potential in NPC models, game mechanics and design assisting. Thanks for technology like [llama.cpp](https://github.com/ggerganov/llama.cpp), "small" LLM, such as [llama-3-8B](https://huggingface.co/meta-llama/Meta-Llama-3-8B), run reasonably well locally on lower-end machine without a good GPU. I want to experiment LLM in Godot but I couldn't find any good library, so I decided to create one here.
 
-&#9888; While LLM is less controversial than image generation models, there can be legal issues when LLM is integrated in games, I have created another [document](./LLM_LEGAL.md) to document some relevant information
+&#9888; While LLM is less controversial than image generation models, there can still be legal issues when LLM contents are integrated in games, I have created another [page](./LLM_LEGAL.md) to document some relevant information
 
 # Table of Contents
 1. [Quick start](#quick-start)
@@ -13,7 +12,7 @@ I want to experiment LLM in Godot but I couldn't find any good library, so I dec
     - [Vector Database: LlmDB node](#vector-database-llmdb-node)
     - [Template/Demo](#templatedemo)
 2. [Retrieval Augmented Generation (RAG)](#retrieval-augmented-generation-rag)
-3. [Features](#features)
+3. [Roadmap](#roadmap)
 4. [Documentation](#documentation)
     - [Inspector Properties: GDLlama, GDEmbedding, and GDLlava](#inspector-properties-gdllama-gdembedding-and-gdllava)
     - [GDLlama Functions and Signals](#gdllama-functions-and-signals)
@@ -210,8 +209,9 @@ Question:
 
 ![](https://upload.wikimedia.org/wikipedia/commons/3/37/RAG_schema.svg)
 
-# Features
-## Already working
+# Roadmap
+
+## Features
 * Platform (backend): windows (cpu, vulkan), macOS(cpu, metal), Linux (cpu, vulkan), Android (cpu)
     - macOS support is on best effort basis since I don't have a mac myself
 * [llama.cpp](https://github.com/ggerganov/llama.cpp)-based features
@@ -227,6 +227,7 @@ Question:
 ## TODO
 * iOS: build should be trivial, but an apple developer ID is needed to run thhe build
 * Add in-editor documentation, waiting for proper support in Godot 4.3
+* Add utility functions to generate useful prompts, such as llama guard 2
 * Download models directly from huggingface
 * Automatically generate json schema from data classes in GDSCript
 * More [llama.cpp](https://github.com/ggerganov/llama.cpp) features
