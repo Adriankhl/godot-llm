@@ -507,3 +507,7 @@ ninja install
 ```
 
 The folder `../install/gpu/addons/godot_llm` (`cpu` instead of `gpu` for cpu build) can be copy directly to the `addons` folder of your godot project.
+
+# Contributing
+
+* PRs are welcome
