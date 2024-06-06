@@ -117,7 +117,6 @@
     },
     {
       "name": "macos-metal-debug",
-      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
@@ -128,7 +127,6 @@
     },
     {
       "name": "macos-metal-release",
-      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
@@ -139,7 +137,6 @@
     },
     {
       "name": "macos-cpu-debug",
-      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
@@ -149,7 +146,6 @@
     },
     {
       "name": "macos-cpu-release",
-      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
