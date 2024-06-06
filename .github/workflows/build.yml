@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake .. --preset linux-cpu-release
           ninja -j $(nproc)
 
       - name: Archive library
@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset linux-cpu-debug
           ninja -j $(nproc)
 
       - name: Archive library
@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
+          cmake .. --preset linux-vulkan-release
           ninja -j $(nproc)
 
       - name: Archive library
@@ -129,7 +129,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset linux-vulkan-debug
           ninja -j $(nproc)
 
       - name: Archive library
@@ -164,7 +164,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake .. --preset windows-cpu-release
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Archive library
@@ -199,7 +199,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=OFF -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset windows-cpu-debug
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Archive library
@@ -246,6 +246,7 @@ jobs:
         run: |
           mkdir build
           cd build
+          cmake .. --preset windows-vulkan-release
           cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
@@ -293,7 +294,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset windows-vulkan-debug
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Archive library
@@ -332,7 +333,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 -DCMAKE_C_FLAGS="-mcpu=generic" -DCMAKE_CXX_FLAGS="-mcpu=generic" -DCMAKE_BUILD_TYPE=Release
+          cmake .. --preset android-cpu-release
           ninja -j $(nproc)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -374,7 +375,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -GNinja -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 -DCMAKE_C_FLAGS="-mcpu=generic" -DCMAKE_CXX_FLAGS="-mcpu=generic" -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset android-cpu-debug
           ninja -j $(nproc)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -407,7 +408,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake .. --preset macos-cpu-release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.release.universal.dylib
 
@@ -439,7 +440,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=OFF -DCMAKE_BUILD_TYPE=Debug
+          cmake .. --preset macos-cpu-debug
           cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.debug.universal.dylib
 
@@ -471,6 +472,7 @@ jobs:
         run: |
           mkdir build
           cd build
+          cmake .. --preset macos-metal-release
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.release.universal.dylib
@@ -503,6 +505,7 @@ jobs:
         run: |
           mkdir build
           cd build
+          cmake .. --preset macos-metal-debug
           cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.debug.universal.dylib

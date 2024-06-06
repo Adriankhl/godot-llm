@@ -122,6 +122,7 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
         "LLAMA_METAL": "ON",
+        "LLAMA_METAL_EMBED_LIBRARY": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -132,6 +133,7 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "LLAMA_NATIVE": "OFF",
         "LLAMA_METAL": "ON",
+        "LLAMA_METAL_EMBED_LIBRARY": "ON",
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
