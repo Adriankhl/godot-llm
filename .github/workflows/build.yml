@@ -247,7 +247,6 @@ jobs:
           mkdir build
           cd build
           cmake .. --preset windows-vulkan-release
-          cmake .. -GNinja -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DLLAMA_NATIVE=OFF -DLLAMA_VULKAN=ON -DCMAKE_BUILD_TYPE=Release
           ninja -j ${env:NUMBER_OF_PROCESSORS}
 
       - name: Archive library
@@ -473,7 +472,6 @@ jobs:
           mkdir build
           cd build
           cmake .. --preset macos-metal-release
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.release.universal.dylib
 
@@ -506,7 +504,6 @@ jobs:
           mkdir build
           cd build
           cmake .. --preset macos-metal-debug
-          cmake .. -DLLAMA_NATIVE=OFF -DLLAMA_METAL=ON -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --config Debug -j $(sysctl -n hw.logicalcpu)
           codesign -s - libgodot_llm.darwin.debug.universal.dylib
 
