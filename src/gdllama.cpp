@@ -24,10 +24,6 @@ void GDLlama::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_model_path", "p_model_path"), &GDLlama::set_model_path);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
-	ClassDB::bind_method(D_METHOD("get_instruct"), &GDLlama::get_instruct);
-	ClassDB::bind_method(D_METHOD("set_instruct", "p_instruct"), &GDLlama::set_instruct);
-    ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "instruct", PROPERTY_HINT_NONE), "set_instruct", "get_instruct");
-
 	ClassDB::bind_method(D_METHOD("get_interactive"), &GDLlama::get_interactive);
 	ClassDB::bind_method(D_METHOD("set_interactive", "p_interactive"), &GDLlama::set_interactive);
     ClassDB::add_property("GDLlama", PropertyInfo(Variant::BOOL, "interactive", PROPERTY_HINT_NONE), "set_interactive", "get_interactive");

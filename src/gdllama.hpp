@@ -45,8 +45,6 @@ class GDLlama : public Node {
         void _exit_tree() override;
         String get_model_path() const;
         void set_model_path(const String p_model_path);
-        bool get_instruct() const;
-        void set_instruct(const bool p_instruct);
         bool get_interactive() const;
         void set_interactive(const bool p_interactive);
         String get_reverse_prompt() const;
