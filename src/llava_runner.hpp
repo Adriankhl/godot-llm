@@ -29,7 +29,6 @@ class LlavaRunner {
         static bool prompt_contains_image(const std::string& prompt);
         static llava_image_embed * llava_image_embed_make_with_prompt_base64(struct clip_ctx * ctx_clip, int n_threads, const std::string& prompt);
         static std::string remove_image_from_prompt(const std::string& prompt, const char * replacement = "");
-        static void show_additional_info(int /*argc*/, char ** argv);
         static struct llava_image_embed * load_image(llava_context * ctx_llava, gpt_params * params, const std::string & fname);
         std::string process_prompt(
             struct llava_context * ctx_llava,

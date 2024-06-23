@@ -113,11 +113,6 @@ std::string LlavaRunner::remove_image_from_prompt(const std::string& prompt, con
 }
 
 
-void LlavaRunner::show_additional_info(int /*argc*/, char ** argv) {
-    LOG_TEE("\n example usage: %s -m <llava-v1.5-7b/ggml-model-q5_k.gguf> --mmproj <llava-v1.5-7b/mmproj-model-f16.gguf> --image <path/to/an/image.jpg> --image <path/to/another/image.jpg> [--temp 0.1] [-p \"describe the image in detail.\"]\n", argv[0]);
-    LOG_TEE("  note: a lower temperature value like 0.1 is recommended for better quality.\n");
-}
-
 struct llava_image_embed * LlavaRunner::load_image(llava_context * ctx_llava, gpt_params * params, const std::string & fname) {
 
     // load and preprocess the image

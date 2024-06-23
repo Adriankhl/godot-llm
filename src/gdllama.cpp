@@ -202,13 +202,6 @@ void GDLlama::set_model_path(const String p_model_path) {
     params.model = string_gd_to_std(p_model_path.trim_prefix(String("res://")));
 }
 
-bool GDLlama::get_instruct() const {
-    return params.instruct;
-}
-
-void GDLlama::set_instruct(const bool p_instruct) {
-    params.instruct = p_instruct;
-}
 
 bool GDLlama::get_interactive() const {
     return params.interactive;
@@ -411,9 +404,9 @@ String GDLlama::generate_text_common(String prompt) {
     }
 
     std::string s_prompt;
-    if (!params.instruct && !params.interactive) {
+    if (!params.interactive) {
         // Llama only append prefix and suffix when it is interactive
-        // Append the prefix and suffix her for simple text generation
+        // Append the prefix and suffix here for simple text generation
         s_prompt = params.input_prefix + string_gd_to_std(prompt) + params.input_suffix;
     } else {
         s_prompt = string_gd_to_std(prompt);
